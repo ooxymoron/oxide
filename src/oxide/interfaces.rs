@@ -11,7 +11,23 @@ use libc::{c_void, dlsym};
 use crate::{
     cfn,
     sdk::{
-        base_client::{BaseClient, VMTBaseClient}, base_engine::{BaseEngine, VMTBaseEngine}, client_mode::{ClientMode, VMTClientMode}, cvar::{CVar, VMTCVar}, engine_trace::{EngineTrace, VMTEngineTrace}, engine_vgui::{EngineVgui, VMTEngineVgui}, entity_list::{EntityList, VMTEntityList}, game_movement::{GameMovement, VMTGameMovement}, input::{Input, VMTInput}, mat_surface::{Surface, VMTMatSurface}, material_system::{MaterialSystem, VMTMaterialSystem}, model_info::{ModelInfo, VMTModelInfo}, model_render::{ModelRender, VMTModelRender}, panel::{Panel, VMTPanel}, predictions::{Prediction, VMTPrediction}, render_view::{RenderView, VMTRenderView}, HasVmt
+        base_client::{BaseClient, VMTBaseClient},
+        base_engine::{BaseEngine, VMTBaseEngine},
+        client_mode::{ClientMode, VMTClientMode},
+        cvar::{CVar, VMTCVar},
+        engine_trace::{EngineTrace, VMTEngineTrace},
+        engine_vgui::{EngineVgui, VMTEngineVgui},
+        entity_list::{EntityList, VMTEntityList},
+        game_movement::{GameMovement, VMTGameMovement},
+        input::{Input, VMTInput},
+        mat_surface::{Surface, VMTMatSurface},
+        material_system::{MaterialSystem, VMTMaterialSystem},
+        model_info::{ModelInfo, VMTModelInfo},
+        model_render::{ModelRender, VMTModelRender},
+        panel::{Panel, VMTPanel},
+        predictions::{Prediction, VMTPrediction},
+        render_view::{RenderView, VMTRenderView},
+        HasVmt,
     },
     util::{get_handle, sigscanner::find_sig, vmt_size},
 };
@@ -22,33 +38,37 @@ pub struct Interface<T: HasVmt<V> + 'static, V: 'static> {
     pub old_vmt: *mut V,
 }
 impl<T: HasVmt<V>, V> Interface<T, V> {
-    pub unsafe fn new(interface_ref: &'static mut T) -> Interface<T, V> {
-        let old = (*interface_ref).get_vmt();
-        let size = vmt_size(transmute(old));
+    pub fn new(interface_ref: &'static mut T) -> Interface<T, V> {
+        unsafe {
+            let old = (*interface_ref).get_vmt();
+            let size = vmt_size(transmute(old));
 
-        let layout = Layout::from_size_align(size, 8).unwrap();
-        let new: &'static mut V = transmute(alloc(layout));
+            let layout = Layout::from_size_align(size, 8).unwrap();
+            let new: &'static mut V = transmute(alloc(layout));
 
-        libc::memcpy(transmute(&mut *new), transmute(old), size);
-        (*interface_ref).set_vmt(new);
+            libc::memcpy(transmute(&mut *new), transmute(old), size);
+            (*interface_ref).set_vmt(new);
 
-        Interface {
-            interface_ref,
-            old_vmt: (old as *const _ as *mut V),
+            Interface {
+                interface_ref,
+                old_vmt: (old as *const _ as *mut V),
+            }
         }
     }
-    unsafe fn create(
+    fn create(
         handle: *mut c_void,
         name: &str,
     ) -> Result<Interface<T, V>, std::boxed::Box<dyn Error>> {
-        let create_interface_fn: cfn!(*const c_void, *const i8, *const isize) =
-            std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
+        unsafe {
+            let create_interface_fn: cfn!(*const c_void, *const i8, *const isize) =
+                std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
 
-        let name = CString::new(name).unwrap();
-        let interface_ref: &'static mut T =
-            transmute(create_interface_fn(name.as_ptr(), std::ptr::null()));
+            let name = CString::new(name).unwrap();
+            let interface_ref: &'static mut T =
+                transmute(create_interface_fn(name.as_ptr(), std::ptr::null()));
 
-        Ok(Interface::new(interface_ref))
+            Ok(Interface::new(interface_ref))
+        }
     }
 }
 
@@ -86,7 +106,7 @@ pub struct Interfaces {
     pub input: Interface<Input, VMTInput>,
 }
 impl Interfaces {
-    pub unsafe fn init() -> Result<Interfaces, std::boxed::Box<dyn Error>> {
+    pub fn init() -> Result<Interfaces, std::boxed::Box<dyn Error>> {
         let client_handle = get_handle("./tf/bin/client.so")?;
         let engine_handle = get_handle("./bin/engine.so")?;
         let matsurface_handle = get_handle("./bin/vguimatsurface.so")?;
@@ -103,7 +123,7 @@ impl Interfaces {
             "A1 ? ? ? ? C6 05 ? ? ? ? ? 8B 10 89 04 24 FF 92 ? ? ? ? A1",
         ) as usize
             + 1;
-        let input = transmute(**(input as *const *const *const Input)); 
+        let input = unsafe { transmute(**(input as *const *const *const Input)) };
         Ok(Interfaces {
             base_client,
             base_engine: Interface::create(engine_handle, "VEngineClient014")?,
@@ -120,14 +140,16 @@ impl Interfaces {
             game_movement: Interface::create(client_handle, "GameMovement001")?,
             prediction: Interface::create(client_handle, "VClientPrediction001")?,
             client_mode: Interface::new(client_mode),
-            input: Interface::new(input)
+            input: Interface::new(input),
         })
     }
 
-    unsafe fn get_client_mode(base_client: &BaseClient) -> &'static mut ClientMode {
-        **transmute::<usize, &'static mut &'static mut &'static mut ClientMode>(
-            (*base_client.vmt).hud_process_input as usize + 1,
-        )
+    fn get_client_mode(base_client: &BaseClient) -> &'static mut ClientMode {
+        unsafe {
+            **transmute::<usize, &'static mut &'static mut &'static mut ClientMode>(
+                (*base_client.vmt).hud_process_input as usize + 1,
+            )
+        }
     }
     pub fn restore(&mut self) {
         self.base_client.restore();

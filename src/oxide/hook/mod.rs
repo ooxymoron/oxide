@@ -8,6 +8,7 @@ pub mod paint;
 pub mod paint_traverse;
 pub mod poll_event;
 pub mod swap_window;
+pub mod run_command;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);

@@ -1,6 +1,12 @@
-use crate::{cfn, math::{angles::Angles, vector::Vector3}};
+use crate::{
+    cfn,
+    math::{angles::Angles, vector::Vector3},
+};
 
-use super::{entity::Entity, CBaseHandle, WithVmt};
+use super::{
+    entity::player::Player,
+    CBaseHandle, WithVmt,
+};
 
 pub type GameMovement = WithVmt<VMTGameMovement>;
 
@@ -40,13 +46,7 @@ pub struct CMoveData {
 #[derive(Debug, Clone)]
 pub struct VMTGameMovement {
     _pad1: [u32; 2],
-    pub process_movement: cfn!(
-        (),
-        &'static mut GameMovement,
-        &'static mut Entity,
-        &'static mut CMoveData
-    ),
-    pub start_prediction: cfn!((), &'static GameMovement, &Entity),
-    pub finish_prediction:
-        cfn!((), &'static mut GameMovement, &Entity),
+    pub process_movement: cfn!((), &GameMovement, &Player, &CMoveData),
+    pub start_prediction: cfn!((), &GameMovement, &Player),
+    pub finish_prediction: cfn!((), &GameMovement, &Player),
 }

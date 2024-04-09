@@ -1,8 +1,14 @@
-use std::{collections::HashMap, mem::{transmute, ManuallyDrop}};
+use std::{
+    collections::HashMap,
+    mem::{transmute, ManuallyDrop},
+};
 
 use libc::c_void;
 
-use crate::{oxide::interfaces::Interfaces, util::get_handle};
+use crate::{
+    oxide::{hook::run_command::RunCommandHook, interfaces::Interfaces},
+    util::get_handle,
+};
 
 use super::{
     create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook,
@@ -23,30 +29,59 @@ macro_rules! InitHook {
             $HookClass::name(),
             Box::new($HookClass::init($val)) as Box<dyn Hook>,
         );
-        
     };
 }
 
 impl Hooks {
-    pub unsafe fn init(interfaces: &Interfaces) -> Hooks {
+    pub fn init(interfaces: &Interfaces) -> Hooks {
         let mut hooks = HashMap::new();
 
-        InitHook!(hooks,OverrideViewHook,&(*interfaces.client_mode.get_vmt()).override_view);
-        InitHook!(hooks,FrameStageNotifyHook,&(*interfaces.base_client.get_vmt()).frame_stage_notify);
-        InitHook!(hooks,PaintTraverseHook,&(*interfaces.panel.get_vmt()).paint_traverse);
-        InitHook!(hooks,PaintHook,&(*interfaces.engine_vgui.get_vmt()).paint);
-        InitHook!(hooks,CreateMoveHook,&(*interfaces.client_mode.get_vmt()).create_move);
+        InitHook!(
+            hooks,
+            OverrideViewHook,
+            &(*interfaces.client_mode.get_vmt()).override_view
+        );
+        InitHook!(
+            hooks,
+            FrameStageNotifyHook,
+            &(*interfaces.base_client.get_vmt()).frame_stage_notify
+        );
+        InitHook!(
+            hooks,
+            PaintTraverseHook,
+            &(*interfaces.panel.get_vmt()).paint_traverse
+        );
+        InitHook!(hooks, PaintHook, &(*interfaces.engine_vgui.get_vmt()).paint);
+        InitHook!(
+            hooks,
+            CreateMoveHook,
+            &(*interfaces.client_mode.get_vmt()).create_move
+        );
+        InitHook!(
+            hooks,
+            RunCommandHook,
+            &(*interfaces.prediction.get_vmt()).run_command
+        );
 
         let sdl_handle = get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _
             as *const *const *const c_void;
 
-        InitHook!(hooks,SwapWindowHook,transmute((*sdl_handle) as usize + SWAPWINDOW_OFFSET));
-        InitHook!(hooks,PollEventHook,transmute((*sdl_handle) as usize + POLLEVENT_OFFSET));
-
+        unsafe {
+            InitHook!(
+                hooks,
+                SwapWindowHook,
+                transmute((*sdl_handle) as usize + SWAPWINDOW_OFFSET)
+            );
+            InitHook!(
+                hooks,
+                PollEventHook,
+                transmute((*sdl_handle) as usize + POLLEVENT_OFFSET)
+            );
+        }
 
         Hooks(hooks)
     }
-    pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>>{
+    pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>> {
         unsafe { ManuallyDrop::new(transmute(self.0.get_mut(&name).unwrap())) }
     }
     pub fn restore(&mut self) {
