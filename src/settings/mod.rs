@@ -70,6 +70,7 @@ pub struct AimbotSettings {
     pub target_disguised: Arcm<bool>,
     pub ambasador_wait_for_hs: Arcm<bool>,
     pub baim_if_lethal: Arcm<bool>,
+    pub engine_prediction: Arcm<bool>
 }
 
 impl AimbotSettings {
@@ -89,6 +90,7 @@ impl AimbotSettings {
             target_stickies: Arcm::new(false),
             ambasador_wait_for_hs: Arcm::new(false),
             baim_if_lethal: Arcm::new(false),
+            engine_prediction: Arcm::new(true)
         }
     }
 }

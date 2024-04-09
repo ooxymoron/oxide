@@ -97,6 +97,12 @@ impl AimbotWindow {
             10,
             y
         ));
+        a!(Checkbox::new(
+            "engine prediction",
+            s!().aimbot.engine_prediction.clone(),
+            10,
+            y
+        ));
 
         let window = Window::new("AIMBOT".to_owned(), visible, components);
         AimbotWindow { window }

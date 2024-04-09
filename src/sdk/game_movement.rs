@@ -46,7 +46,7 @@ pub struct CMoveData {
 #[derive(Debug, Clone)]
 pub struct VMTGameMovement {
     _pad1: [u32; 2],
-    pub process_movement: cfn!((), &GameMovement, &Player, &CMoveData),
-    pub start_prediction: cfn!((), &GameMovement, &Player),
+    pub process_movement: cfn!((), &GameMovement, &mut Player, &mut CMoveData),
+    pub start_prediction: cfn!((), &GameMovement, &mut Player),
     pub finish_prediction: cfn!((), &GameMovement, &Player),
 }

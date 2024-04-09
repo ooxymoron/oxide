@@ -30,24 +30,24 @@ pub struct VMTPrediction {
         &MoveHelper,
         &mut CMoveData
     ),
-    pub finish_move: cfn!((), &Prediction, &Player, &UserCmd),
+    pub finish_move: cfn!((), &Prediction, &Player, &UserCmd, &mut CMoveData),
 }
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Prediction {
     pub vmt: *const VMTPrediction,
-    last_ground: isize,
-    in_prediction: bool,
-    first_time_predicted: bool,
-    old_cl_predict_value: bool,
-    engine_paused: bool,
-    previous_start_frame: isize,
-    commands_predicted: isize,
-    server_commands_acknowledged: isize,
-    previous_ack_had_errors: isize,
-    incoming_packet_number: isize,
-    ideal_pitch: f32,
+    pub last_ground: isize,
+    pub in_prediction: bool,
+    pub first_time_predicted: bool,
+    pub old_cl_predict_value: bool,
+    pub engine_paused: bool,
+    pub previous_start_frame: isize,
+    pub commands_predicted: isize,
+    pub server_commands_acknowledged: isize,
+    pub previous_ack_had_errors: isize,
+    pub incoming_packet_number: isize,
+    pub ideal_pitch: f32,
 }
 unsafe impl Send for Prediction {}
 
