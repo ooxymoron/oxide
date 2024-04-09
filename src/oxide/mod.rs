@@ -34,7 +34,7 @@ pub mod paint;
 pub struct Oxide {
     pub interfaces: Interfaces,
     pub hooks: Hooks,
-    pub global_vars: &'static GlobalVars,
+    pub global_vars: &'static mut GlobalVars,
     pub cheats: Cheats,
     pub fov: Option<f32>,
     pub get_bone_position_fn: GetBonePositionFn,
@@ -113,7 +113,7 @@ impl Oxide {
             }
         }
     }
-    pub fn self_unload() {
+    pub fn self_unload() {      
         let lib_path = CString::new("/tmp/liboxide.so").unwrap();
         unsafe {
             let handle = dlopen(lib_path.as_ptr(), 6);
@@ -130,7 +130,7 @@ impl Oxide {
         self.global_vars
     }
 
-    pub fn global_vars_mut(&mut self) -> &mut &'static GlobalVars {
+    pub fn global_vars_mut(&mut self) -> &mut GlobalVars {
         &mut self.global_vars
     }
 }
