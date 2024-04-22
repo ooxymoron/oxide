@@ -65,7 +65,7 @@ impl Paint {
         }
         Ok(())
     }
-    pub fn get_text_size(&mut self, text: &str) -> (isize, isize) {
+    pub fn get_text_size(&mut self, text: &str) -> (i32, i32) {
         let mut text = text.to_owned();
         if text.bytes().last() != Some(0) {
             text += "\0";
@@ -90,8 +90,8 @@ impl Paint {
     pub fn paint_text(
         &mut self,
         text: &str,
-        mut x: isize,
-        mut y: isize,
+        mut x: i32,
+        mut y: i32,
         color: usize,
         center: bool,
     ) {
@@ -116,8 +116,8 @@ impl Paint {
                 &mut w,
                 &mut h
             );
-            x -= w / 2;
-            y -= h / 2;
+            x -= w  / 2;
+            y -= h  / 2;
         }
 
         vmt_call!(interface!(surface), set_text_font, o!().paint.normal.id);
@@ -128,7 +128,7 @@ impl Paint {
             interface!(surface),
             print_text,
             char_text.as_ptr(),
-            char_text.len(),
+            char_text.len() as u32,
             FontDrawType::Default
         );
     }

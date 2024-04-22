@@ -9,7 +9,7 @@ use crate::{
 
 use super::Entity;
 
-const PAD:isize = 5;
+const PAD:i32 = 5;
 
 impl Entity {
     pub fn paint(&self, r#box: bool, draw_hp: bool, text_top: Option<&str>, text_right: Vec<String>) {
@@ -57,18 +57,18 @@ impl Entity {
             vmt_call!(
                 interface!(surface),
                 set_color,
-                r as isize,
-                g as isize,
-                b as isize,
-                50 as isize
+                r as i32,
+                g as i32,
+                b as i32,
+                50 as i32
             );
             vmt_call!(
                 interface!(surface),
                 draw_rect,
-                minx as isize,
-                miny as isize,
-                maxx as isize,
-                maxy as isize
+                minx as i32,
+                miny as i32,
+                maxx as i32,
+                maxy as i32
             );
         }
 
@@ -77,64 +77,64 @@ impl Entity {
             vmt_call!(
                 interface!(surface),
                 set_color,
-                r as isize,
-                g as isize,
-                b as isize,
-                50 as isize
+                r as i32,
+                g as i32,
+                b as i32,
+                50 as i32
             );
             let health = vmt_call!(self, get_health);
             let max_health = vmt_call!(self, get_max_health);
             vmt_call!(
                 interface!(surface),
                 draw_filled_rect,
-                minx as isize - 2*PAD,
-                miny as isize
+                minx as i32 - 2*PAD,
+                miny as i32
                     + ((1.0 - (health.min(max_health) as f32 / max_health as f32))
-                        * (maxy as f32 - miny as f32)) as isize,
-                minx as isize - PAD,
-                maxy as isize
+                        * (maxy as f32 - miny as f32)) as i32,
+                minx as i32 - PAD,
+                maxy as i32
             );
             if health > max_health {
                 let (r, g, b) = hex_to_rgb!(BLUE);
                 vmt_call!(
                     interface!(surface),
                     set_color,
-                    r as isize,
-                    g as isize,
-                    b as isize,
-                    50 as isize
+                    r as i32,
+                    g as i32,
+                    b as i32,
+                    50 as i32
                 );
                 vmt_call!(
                     interface!(surface),
                     draw_filled_rect,
-                    minx as isize - 2*PAD,
-                    miny as isize
+                    minx as i32 - 2*PAD,
+                    miny as i32
                         + ((1.0 - ((health - max_health) as f32 / max_health as f32))
-                            * (maxy as f32 - miny as f32)) as isize,
-                    minx as isize - PAD,
-                    maxy as isize
+                            * (maxy as f32 - miny as f32)) as i32,
+                    minx as i32 - PAD,
+                    maxy as i32
                 );
             }
         }
         if let Some(text) = text_top {
             o!().paint.paint_text(
                 &text,
-                ((minx + maxx) / 2.0) as isize,
-                (miny - PAD as f32) as isize,
+                ((minx + maxx) / 2.0) as i32,
+                (miny - PAD as f32) as i32,
                 FOREGROUND,
                 true,
             );
         }
-        let mut y = miny as isize;
+        let mut y = miny as i32;
         for text in text_right {
             o!().paint.paint_text(
                 &text,
-                (maxx + PAD as f32) as isize,
+                (maxx + PAD as f32) as i32,
                 y,
                 CURSOR,
                 false,
             );
-            y += o!().paint.get_text_size(&text).1
+            y += o!().paint.get_text_size(&text).1;
         }
     }
 }

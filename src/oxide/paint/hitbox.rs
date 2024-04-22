@@ -118,19 +118,19 @@ impl Paint {
             vmt_call!(
                 interface!(surface),
                 set_color,
-                r as isize,
-                g as isize,
-                b as isize,
-                alpha as isize
+                r as i32,
+                g as i32,
+                b as i32,
+                alpha as i32
             );
 
             vmt_call!(
                 interface!(surface),
                 draw_line,
-                pos1.x as isize,
-                pos1.y as isize,
-                pos2.x as isize,
-                pos2.y as isize
+                pos1.x as i32,
+                pos1.y as i32,
+                pos2.x as i32,
+                pos2.y as i32
             );
         }
         Ok(())

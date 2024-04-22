@@ -1,9 +1,10 @@
 use std::{
     collections::HashMap,
+    ffi::CString,
     mem::{transmute, ManuallyDrop},
 };
 
-use libc::c_void;
+use libc::{c_void, dlsym};
 
 use crate::{
     oxide::{
@@ -86,17 +87,31 @@ impl Hooks {
         //);
 
         unsafe {
-            let sdl_handle = (get_handle("/usr/lib/libSDL2-2.0.so.0").unwrap() as *const usize).read();
+            let handle = get_handle("/usr/lib/libSDL2-2.0.so.0").unwrap();
+            let exprted_fn: *const u8 = transmute(dlsym(
+                handle,
+                CString::new("SDL_GL_SwapWindow").unwrap().as_ptr(),
+            ));
+            let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
+            let swap_window_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
+            
 
             InitVmtHook!(
                 ptr_hooks,
                 SwapWindowHook,
-                transmute((sdl_handle + SWAPWINDOW_OFFSET) as *const *const u8)
+                transmute(swap_window_ptr)
             );
+
+            let exprted_fn: *const u8 = transmute(dlsym(
+                handle,
+                CString::new("SDL_PollEvent").unwrap().as_ptr(),
+            ));
+            let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
+            let poll_event_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
             InitVmtHook!(
                 ptr_hooks,
                 PollEventHook,
-                transmute((sdl_handle + POLLEVENT_OFFSET) as *const *const u8)
+                transmute(poll_event_ptr)
             );
         }
 

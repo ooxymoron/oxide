@@ -126,7 +126,6 @@ impl Aimbot {
                     prio,
                 };
                 best_target = Some(target);
-                //dbg!(&best_target);
             }
         }
         Ok(best_target)
