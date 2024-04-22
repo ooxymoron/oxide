@@ -26,7 +26,11 @@ fn subhooks(hook: &mut CreateMoveHook) {
         let mut movement = o!().cheats.get::<Movement>(Movement::name());
         movement.create_move(cmd)?;
 
+
         if o!().engine_prediction.move_helper.is_some() {
+            if o!().engine_prediction.data.is_some() {
+                o!().engine_prediction.finish()?;
+            }
             o!().engine_prediction.init(p_local, cmd)?;
             o!().engine_prediction.step()?;
         }

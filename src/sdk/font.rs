@@ -26,8 +26,8 @@ pub enum FontDrawType{
 #[repr(C)]
 pub struct Font {
     pub name: *const i8,
-    pub tall: i64,
-    pub weight: i64,
-    pub flags: i64,
+    pub tall: i32,
+    pub weight: i32,
+    pub flags: i32,
     pub id: HFont, 
 }

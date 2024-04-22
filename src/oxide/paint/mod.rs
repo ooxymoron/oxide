@@ -38,7 +38,7 @@ impl Paint {
             name: name.as_ptr(),
             tall: 16,
             weight: 700,
-            flags: FontFlags::OUTLINE as i64,
+            flags: FontFlags::OUTLINE as i32,
             id,
         };
 
@@ -73,7 +73,7 @@ impl Paint {
         let char_text = text
             .chars()
             .into_iter()
-            .map(|x| x as u64)
+            .map(|x| x as u32)
             .collect::<Vec<_>>();
         let mut w = 0;
         let mut h = 0;
@@ -102,7 +102,7 @@ impl Paint {
         let char_text = text
             .chars()
             .into_iter()
-            .map(|x| x as u64)
+            .map(|x| x as u32)
             .collect::<Vec<_>>();
 
         if center {

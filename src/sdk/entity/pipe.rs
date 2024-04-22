@@ -28,7 +28,7 @@ pub struct PipeBomb {
 
 impl HasNetvars for PipeBomb {
     fn get_class_name() -> String {
-        "CTFProjectile_Pipebomb".to_string()
+        "CTFGrenadePipebombProjectile".to_string()
     }
 }
 impl PipeBomb {

@@ -12,7 +12,7 @@ use crate::{
     vmt_call,
 };
 #[derive(Debug)]
-struct PredictionData {
+pub struct PredictionData {
     old_curtime: f32,
     old_frametime: f32,
     old_tick_count: i32,
@@ -54,7 +54,7 @@ impl PredictionData {
 #[derive(Debug)]
 pub struct EnginePredicion {
     pub move_helper: Option<&'static MoveHelper>,
-    data: Option<PredictionData>,
+    pub data: Option<PredictionData>,
 }
 
 impl EnginePredicion {
