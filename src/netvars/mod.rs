@@ -53,25 +53,22 @@ pub struct Netvar {
 
 pub trait HasNetvars {
     fn get_class_name() -> String;
-    fn get_netvar<T, const L: usize>(&self, path: [&str; L]) -> OxideResult<&mut T> {
+    fn get_netvar<const L: usize>(&self, path: [&str; L]) -> OxideResult<Netvar> {
         macro_rules! err {
             () => {
                 OxideError::new("netvar not found")
             };
         }
         let netvars = o!().netvars.get(&Self::get_class_name()).unwrap();
-        let mut netvar = netvars.get(path[0]).ok_or(err!())?;
         let mut path = path.into_iter();
-        path.next();
-        if path.len() > 1 {
-            for name in path {
-                let NetvarType::OBJECT(netvars) = &netvar.netvar_type else {
-                    return Err(err!())
-                };
-                netvar = netvars.get(name).ok_or(err!())?;
-            }
+        let mut netvar = netvars.get(path.next().unwrap()).ok_or(err!())?;
+        for name in path {
+            let NetvarType::OBJECT(netvars) = &netvar.netvar_type else {
+                return Err(err!())
+            };
+            netvar = netvars.get(name).ok_or(err!())?;
         }
-        Ok(unsafe { transmute((self as *const _ as *const u8).byte_add(netvar.offset)) })
+        Ok(netvar.clone())
     }
 }
 
@@ -80,8 +77,9 @@ pub trait HasNetvars {
 macro_rules! define_netvar {
     ($name: ident, $path: expr, $type: ty) => {
         pub fn $name(&self) -> &mut $type {
-            self.get_netvar($path).unwrap()
+            use std::mem::transmute;
+            let netvar = self.get_netvar($path).unwrap();
+            unsafe { transmute((self as *const _ as *const u8).byte_add(netvar.offset)) }
         }
-        
     };
 }

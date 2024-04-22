@@ -1,10 +1,10 @@
+
 #[derive(Debug, Clone, Copy)]
 pub struct Condition {
-    _1: u32,
-    _2: u32,
-    _3: u32,
-    _4: u32,
-    _5: u32,
+    pub _1: u32,
+    pub _2: u32,
+    pub _3: u32,
+    pub _4: u32,
 }
 impl Condition {
     pub fn get(&self, flag: ConditionFlags) -> bool {
@@ -12,17 +12,17 @@ impl Condition {
         let shifted = 1 << flag - (flag / 32 * 32);
         self._1 & shifted == shifted
     }
-    pub fn set(&mut self, flag: ConditionFlags, val: bool) {
+    pub fn set(&mut self, flag: ConditionFlags, val:bool)  {
         let flag = flag as u8;
         let shifted = 1 << flag - (flag / 32 * 32);
         if val {
-            self._1 |= shifted
+            self._1 |=  shifted 
         } else {
-            self._1 &= !shifted
+            self._1 &= !shifted 
         }
     }
 }
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone,Copy)]
 pub enum ConditionFlags {
     Aiming,
     Zoomed,
@@ -30,7 +30,7 @@ pub enum ConditionFlags {
     Disguised,
     Cloaked,
     Ubercharged,
-    TeleportedGlow,
+    TeleprtedGlow,
     Taunting,
     UberchargeFading,
     CloakFlicker,

@@ -6,11 +6,19 @@ use std::{
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, vector::Vector3}, netvars::HasNetvars, o, sdk::CBaseHandle, vmt_call
+    define_netvar, define_offset,
+    error::{OxideError, OxideResult},
+    interface,
+    math::{angles::Angles, vector::Vector3},
+    netvars::HasNetvars,
+    o,
+    sdk::CBaseHandle,
+    vmt_call,
 };
 
 use super::{
-    base_engine::PlayerInfo, condition::Condition, flags::Flags, networkable::ClassId, player_class::PlayerClass, user_cmd::UserCmd, Entity, WaterLevel
+    base_engine::PlayerInfo, condition::Condition, flags::Flags, networkable::ClassId,
+    player_class::PlayerClass, user_cmd::UserCmd, Entity, WaterLevel,
 };
 
 pub const MAX_WEAPONS: usize = 48;
@@ -59,7 +67,7 @@ impl Player {
         ["baseclass", "baseclass", "bcc_localdata", "m_flNextAttack"],
         f32
     );
-    define_netvar!(get_condition, ["m_Shared", "m_nPlayerCond"], Condition);
+    define_netvar!(get_condition,  ["m_Shared", "m_nPlayerCond"], Condition);
     define_netvar!(
         get_punch_angle,
         ["baseclass", "localdata", "m_Local", "m_vecPunchAngle"],
@@ -85,9 +93,9 @@ impl Player {
 
 impl Player {
     //"CPrediction::FinishCommand"
-    define_offset!(get_current_command, 0x1620,&UserCmd);
+    define_offset!(get_current_command, 0x1620, &UserCmd);
     //"C_BasePlayer::PhysicsSimulate"
-    define_offset!(get_flags, 0x460,Flags);
+    define_offset!(get_flags, 0x460, Flags);
 }
 
 //CTFPlayer{

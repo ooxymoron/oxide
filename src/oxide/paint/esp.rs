@@ -1,9 +1,5 @@
 use crate::{
-    error::OxideResult,
-    interface,
-    oxide::entity_cache::EntityCache,
-    sdk::{condition::ConditionFlags, entity::Entity, networkable::ClassId},
-    setting, vmt_call,
+    error::OxideResult, interface, netvars::HasNetvars, oxide::entity_cache::EntityCache, sdk::{condition::ConditionFlags, entity::Entity, networkable::ClassId}, setting, util::debug::print_module_addres_offset, vmt_call
 };
 
 use super::Paint;
@@ -52,7 +48,6 @@ impl Paint {
             }
 
             let player = ent.as_player()?;
-            dbg!(player.get_condition());
             let conditions = conditions
                 .iter()
                 .filter_map(|&cond| {

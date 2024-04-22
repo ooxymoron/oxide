@@ -1,9 +1,15 @@
-use std::{f32::consts::PI, mem::transmute};
+use std::f32::consts::PI;
 
 use crate::{
-    error::OxideResult, math::{angles::Angles, dtr}, sdk::{
-        cvar::get_cvar, entity::{flags::Flag, Entity, WaterLevel}, player_class::PlayerClass, user_cmd::{ButtonFlags, UserCmd}
-    }, setting
+    error::OxideResult,
+    math::{angles::Angles, dtr},
+    sdk::{
+        cvar::get_cvar,
+        entity::{flags::Flag, Entity, WaterLevel},
+        player_class::PlayerClass,
+        user_cmd::{ButtonFlags, UserCmd},
+    },
+    setting,
 };
 
 use super::Cheat;
@@ -44,20 +50,15 @@ impl Movement {
             && !self.jumped_last_cmd
         {
             self.double_jumped = true;
-        }
-        else {
+        } else {
             self.bhop(cmd)?;
             self.auto_strafe(cmd)?;
         }
         self.jumped_last_cmd = jumping;
 
-
-
         Ok(())
     }
-    pub fn correct_movement(
-        &mut self, cmd: &mut UserCmd,org_cmd: &UserCmd
-    )  {
+    pub fn correct_movement(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) {
         if org_cmd.viewangles.yaw != cmd.viewangles.yaw {
             let (corrected_forward, correct_side) = self.calculate_correct_movement(
                 org_cmd.viewangles,
@@ -68,13 +69,13 @@ impl Movement {
             cmd.forwardmove = corrected_forward;
             cmd.sidemove = correct_side;
         }
-}
+    }
     pub fn bhop(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
         let p_local = Entity::get_local()?;
         let on_ground = p_local.get_flags().get(Flag::ONGROUND);
         let jumping = cmd.buttons.get(ButtonFlags::InJump);
 
-        if !setting!(movement,bhop) {
+        if !setting!(movement, bhop) {
             return Ok(());
         }
 
@@ -83,8 +84,7 @@ impl Movement {
     }
     pub fn auto_strafe(&self, cmd: &mut UserCmd) -> OxideResult<()> {
         let p_local = Entity::get_local()?;
-        if p_local.get_flags().get(Flag::ONGROUND) || !setting!(movement,autostrafe)
-        {
+        if p_local.get_flags().get(Flag::ONGROUND) || !setting!(movement, autostrafe) {
             return Ok(());
         }
         let velocity = p_local.get_velocity();

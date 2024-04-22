@@ -1,5 +1,4 @@
-use std::{mem::transmute, usize};
-
+use std::mem::transmute;
 
 use libc::c_void;
 
@@ -27,7 +26,7 @@ pub struct UserCmd {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
-pub struct Buttons(usize);
+pub struct Buttons(u32);
 
 impl Buttons {
     pub fn get(&self, flag: ButtonFlags) -> bool {
@@ -38,7 +37,7 @@ impl Buttons {
     }
     pub fn set(&mut self, flag: ButtonFlags, val: bool) {
         let flag = flag as u8;
-        let mut b: usize = *unsafe { transmute::<&mut Self,&usize>(self) };
+        let mut b: u32 = *unsafe { transmute::<&mut Self, &u32>(self) };
         if val {
             b |= 1 << flag;
         } else {
