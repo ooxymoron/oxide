@@ -1,0 +1,93 @@
+<<<<<<< HEAD
+
+use crate::{cfn, impl_has_vmt, math::angles::Angles};
+
+use super::{entity::player::Player, game_movement::CMoveData, user_cmd::UserCmd};
+
+#[allow(unused)]
+<<<<<<< HEAD
+pub struct VMTMoveHelper(&'static mut c_void);
+=======
+use crate::{cfn, impl_has_vmt, math::angles::Angles};
+
+use super::{entity::player::Player, game_movement::MoveData, user_cmd::UserCmd};
+
+#[allow(unused)]
+#[derive(Debug, Clone)]
+pub struct VMTMoveHelper {}
+>>>>>>> da2b86b (.)
+=======
+#[derive(Debug, Clone)]
+pub struct VMTMoveHelper{
+}
+>>>>>>> a7ee50f (.)
+
+#[allow(unused)]
+#[derive(Debug, Clone)]
+pub struct MoveHelper {
+    vmt: *mut VMTMoveHelper,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct VMTPrediction {
+    _pad1: [u32; 13],
+    pub get_local_view_angles: cfn!((), &mut Prediction, &mut Angles),
+    pub set_local_view_angles: cfn!((), &Prediction, &Angles),
+    _pad2: [u32; 3],
+    pub run_command: cfn!((), &Prediction, &Player, &UserCmd, &MoveHelper),
+    pub setup_move: cfn!(
+        (),
+<<<<<<< HEAD
+<<<<<<< HEAD
+        &'static mut Prediction,
+        &'static mut Entity,
+        &'static mut UserCmd,
+        &'static mut MoveHelper,
+        &'static mut CMoveData
+    ),
+    pub finish_move: cfn!(
+        (),
+        &'static mut Prediction,
+        &'static mut Entity,
+        &'static mut UserCmd
+    ),
+=======
+        &Prediction,
+        &Player,
+        &UserCmd,
+        &MoveHelper,
+        &mut MoveData
+    ),
+    pub finish_move: cfn!((), &Prediction, &Player, &UserCmd, &MoveData),
+>>>>>>> da2b86b (.)
+=======
+        &Prediction,
+        &Player,
+        &UserCmd,
+        &MoveHelper,
+        &mut CMoveData
+    ),
+    pub finish_move: cfn!((), &Prediction, &Player, &UserCmd),
+>>>>>>> a7ee50f (.)
+}
+
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct Prediction {
+    pub vmt: *const VMTPrediction,
+    pub last_ground: isize,
+    pub in_prediction: bool,
+    pub first_time_predicted: bool,
+    pub old_cl_predict_value: bool,
+    pub engine_paused: bool,
+    pub previous_start_frame: isize,
+    pub commands_predicted: isize,
+    pub server_commands_acknowledged: isize,
+    pub previous_ack_had_errors: isize,
+    pub incoming_packet_number: isize,
+    pub ideal_pitch: f32,
+}
+unsafe impl Send for Prediction {}
+
+impl_has_vmt!(Prediction, VMTPrediction);

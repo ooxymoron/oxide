@@ -1,0 +1,26 @@
+[package]
+name = "oxide"
+authors = ["SNIAPA"]
+version = "0.8.9"
+edition = "2021"
+repository = "https://github.com/SNIAPA/oxide"
+
+[lib]
+crate-type = ["dylib"]
+
+[[bin]]
+path = "src/bin.rs"
+name = "oxide"
+
+[features]
+default = ["visuals"]
+visuals = []
+
+[dependencies]
+derivative = "2.2.0"
+elf = "0.7.4"
+freetype-sys = "0.20.0"
+libc = "0.2.153"
+sdl2-sys = "0.36.0"
+serde = {version="1.0.197",features=["derive"]}
+toml = "0.8.12"
