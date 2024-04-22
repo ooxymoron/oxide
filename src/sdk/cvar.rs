@@ -32,7 +32,7 @@ pub struct VMTCVar {
     _pad1: [usize; 7],
 
     //pub unsafe fn vfprintf(stream: *mut FILE, format: *const c_char, ap: VaList) -> c_int;
-    pub color_console_print: cfn!((),&'static CVar, &Color, *const c_char, VaList),
+    pub color_console_print: unsafe extern "C-unwind" fn(&'static CVar, &Color, *const c_char, ...)
 }
 pub type DispalyFunctionType = cfn!((), *const *const u8, &Color, *const i8);
 impl CVar {

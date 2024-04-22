@@ -20,11 +20,7 @@ use super::{
     poll_event::PollEventHook, swap_window::SwapWindowHook, Hook,
 };
 
-static SWAPWINDOW_OFFSET: usize = 0x001d8ab0;
-static POLLEVENT_OFFSET: usize = 0x001d7ce8;
-
 #[derive(Debug)]
-
 pub struct Hooks {
     ptr_hooks: HashMap<String, Box<dyn Hook + 'static>>,
     pub detour_hooks: HashMap<String, DetourHook>,
@@ -94,13 +90,8 @@ impl Hooks {
             ));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let swap_window_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
-            
 
-            InitVmtHook!(
-                ptr_hooks,
-                SwapWindowHook,
-                transmute(swap_window_ptr)
-            );
+            InitVmtHook!(ptr_hooks, SwapWindowHook, transmute(swap_window_ptr));
 
             let exprted_fn: *const u8 = transmute(dlsym(
                 handle,
@@ -108,11 +99,7 @@ impl Hooks {
             ));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let poll_event_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
-            InitVmtHook!(
-                ptr_hooks,
-                PollEventHook,
-                transmute(poll_event_ptr)
-            );
+            InitVmtHook!(ptr_hooks, PollEventHook, transmute(poll_event_ptr));
         }
 
         Hooks {

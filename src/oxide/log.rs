@@ -17,7 +17,7 @@ impl Logger {
             a: 255,
         };
         dbg!(&text);
-        //vmt_call!(interface!(cvar),color_console_print,&color,text.as_ptr(),0);
+        vmt_call!(interface!(cvar),color_console_print,&color,text.as_ptr(),"ss");
         //interface!(cvar).console_print(&color, text.as_ptr());
     }
 }
