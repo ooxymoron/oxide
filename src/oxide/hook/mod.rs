@@ -1,16 +1,16 @@
 pub mod hooks;
 
+pub mod base_interpolate_part1;
 pub mod create_move;
+pub mod detour;
 pub mod frame_stage_notify;
 pub mod level_shutdown;
 pub mod override_view;
 pub mod paint;
 pub mod paint_traverse;
 pub mod poll_event;
-pub mod swap_window;
 pub mod run_command;
-pub mod base_interpolate_part1;
-pub mod detour;
+pub mod swap_window;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -25,8 +25,8 @@ macro_rules! define_hook{
         use libc::{PROT_EXEC, PROT_READ, PROT_WRITE};
 
         type RawHookFn = cfn!($return,$($argType),*);
-        type BeforeHookFn =  fn ($($argType),*) -> OxideResult<Option<$return>>;
-        type AfterHookFn = fn ($($argType),*,&mut $return) -> OxideResult<()>;
+        type BeforeHookFn =  fn ($($argType),*) -> Option<$return>;
+        type AfterHookFn = fn ($($argType),*,&mut $return);
 
 
         #[derive(Debug)]
@@ -68,29 +68,26 @@ macro_rules! define_hook{
             }
             #[allow(unused)]
             unsafe extern "C-unwind" fn hook_fn($($argName:$argType),*) -> $return{
+
                 if OXIDE.is_none() {
                     return $default;
                 }
-                //dbg!("b",$stringName);
 
                 let mut hook = o!().hooks.get::<Self>(Self::name());
+                //dbg!($stringName);
+                //return (hook.org)($($argName),*);
 
-                let mut custom_return_value = None;
 
-                if let Some(fun) = &hook.before {
+                let mut custom_return_value = if let Some(fun) = &hook.before {
                     match catch_unwind( AssertUnwindSafe(||(fun)($($argName),*))) {
-                        Ok(Ok(res)) => custom_return_value = res,
-                        Ok(Err(e)) => {
-                            eprintln!("error in {} bofere hook: {}",$stringName,e);
-                            return $default
-                        }
+                        Ok(res) => res,
                         Err(e) => {
                             eprintln!("unhandled error in {} bofere hook: {:?}",$stringName,e);
-                            return $default
+                            None
                         }
                     }
 
-                }
+                } else { None };
 
 
                 let mut return_value = if let Some(return_val) = custom_return_value {
@@ -101,10 +98,6 @@ macro_rules! define_hook{
 
                 if let Some(fun) = hook.after {
                     match catch_unwind( AssertUnwindSafe(||(fun)($($argName),*,&mut return_value))) {
-                        Ok(Err(e)) => {
-                            eprintln!("error in {} bofere hook: {}",$stringName,e);
-                            return $default;
-                        }
                         Err(e) => {
                             eprintln!("unhandled error in {} bofere hook: {:?}",$stringName,e);
                             return $default;

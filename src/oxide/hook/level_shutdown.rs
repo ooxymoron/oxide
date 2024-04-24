@@ -3,9 +3,8 @@ use crate::{define_hook, sdk::client_mode::ClientMode};
 fn subhooks(hook: &mut LevelShutdownHook) {
     hook.before = Some(|_| {
         o!().last_entity_cache = None;
-        Ok(None)
+        None
     });
-    hook.after = Some(|_, _| Ok(()));
 }
 
 define_hook!(

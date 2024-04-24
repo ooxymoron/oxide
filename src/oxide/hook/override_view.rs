@@ -9,9 +9,8 @@ fn subhooks(hook: &mut OverrideViewHook) {
         let mut visuals = o!().cheats.get::<Visuals>(Visuals::name());
         visuals.override_view(view_setup);
         o!().fov = view_setup.fov;
-        Ok(None)
+        None
     });
-    hook.after = Some(|_, _, _| Ok(()));
 }
 
 define_hook!(

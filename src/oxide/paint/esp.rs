@@ -55,10 +55,11 @@ impl Paint {
             }
 
             let player = ent.as_player()?;
+            let player_cond = player.get_condition();
             let conditions = conditions
                 .iter()
                 .filter_map(|&cond| {
-                    if !player.get_condition().get(cond) {
+                    if !player_cond.get(cond) {
                         return None;
                     }
                     return Some(format!("{:?}", cond));

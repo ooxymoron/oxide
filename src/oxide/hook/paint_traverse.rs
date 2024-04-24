@@ -9,7 +9,7 @@ use crate::{
 fn subhooks(hook: &mut PaintTraverseHook) {
     hook.before = Some(|panel, vpanel, _, _| {
         let panel_name = unsafe { CStr::from_ptr(vmt_call!(panel, get_name, vpanel)) };
-        Ok(match panel_name.to_str() {
+        match panel_name.to_str() {
             Ok("HudScope") => {
                 if setting!(visual, remove_scope) {
                     Some(())
@@ -18,9 +18,8 @@ fn subhooks(hook: &mut PaintTraverseHook) {
                 }
             }
             _ => None,
-        })
+        }
     });
-    hook.after = Some(|_, _, _, _, _| Ok(()));
 }
 
 define_hook!(

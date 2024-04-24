@@ -10,12 +10,11 @@ use crate::{d, define_hook, draw::Draw, init_global, DRAW};
 fn subhooks(hook: &mut SwapWindowHook) {
     hook.before = Some(|window| unsafe {
         if DRAW.is_none() {
-            init_global!(DRAW,Draw::init(window)?,Draw);
+            init_global!(DRAW,Draw::init(window).unwrap(),Draw);
         }
         d!().run(window);
-        Ok(None)
+        None
     });
-    hook.after = Some(|_, _| Ok(()));
 }
 
 define_hook!(

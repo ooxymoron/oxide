@@ -12,9 +12,8 @@ fn subhooks(hook: &mut RunCommandHook) {
         if o!().engine_prediction.move_helper.is_none() {
             o!().engine_prediction.move_helper = Some(move_helper);
         }
-        Ok(None)
+        None
     });
-    hook.after = Some(|_, _, _, _, _| Ok(()));
 }
 
 define_hook!(

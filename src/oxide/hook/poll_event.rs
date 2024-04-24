@@ -4,11 +4,7 @@ use crate::define_hook;
 fn subhooks(hook:&mut PollEventHook) {
     hook.before = Some(|e|{
         o!().handle_event(e);
-        Ok(None)
-    });
-    hook.after = Some(|_,_|{
-        Ok(())
-
+        None
     });
 }
 

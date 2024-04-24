@@ -10,42 +10,40 @@ use crate::{
 };
 
 fn subhooks(hook: &mut CreateMoveHook) {
-    hook.before = Some(|_, _, _| Ok(None));
     hook.after = Some(|_, _, cmd, res| {
         if cmd.command_number == 0 {
-            return Ok(());
+            return;
         }
-        let p_local = Entity::get_local()?;
+        let p_local = Entity::get_local().unwrap();
 
         if !vmt_call!(p_local.as_ent(), is_alive) {
-            return Ok(());
+            return;
         }
 
         let org_cmd = cmd.clone();
 
         let mut movement = o!().cheats.get::<Movement>(Movement::name());
-        movement.create_move(cmd)?;
+        movement.create_move(cmd).unwrap();
 
 
         if o!().engine_prediction.move_helper.is_some() {
             if o!().engine_prediction.data.is_some() {
-                o!().engine_prediction.finish()?;
+                o!().engine_prediction.finish().unwrap();
             }
-            o!().engine_prediction.init(p_local, cmd)?;
-            o!().engine_prediction.step()?;
+            o!().engine_prediction.init(p_local, cmd).unwrap();
+            o!().engine_prediction.step().unwrap();
         }
 
         let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
-        aimbot.create_move(cmd)?;
+        aimbot.create_move(cmd).unwrap();
 
         if o!().engine_prediction.move_helper.is_some() {
-            o!().engine_prediction.finish()?;
+            o!().engine_prediction.finish().unwrap();
         }
 
         movement.correct_movement(cmd, &org_cmd);
         remove_punch(p_local);
         *res = !setting!(aimbot, silent);
-        Ok(())
     });
 }
 

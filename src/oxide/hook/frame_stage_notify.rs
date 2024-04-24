@@ -13,20 +13,18 @@ fn subhooks(hook: &mut FrameStageNotifyHook) {
                     Ok(cache) => {
                         o!().last_entity_cache = Some(cache);
                     }
-                    Err(e) => {
+                    Err(_) => {
                         o!().last_entity_cache = None;
-                        return Err(e);
                     }
                 };
                 let mut visuals = o!().cheats.get::<Visuals>(Visuals::name());
-                visuals.net_update_end()?;
+                visuals.net_update_end().unwrap();
                 
             }
             _ => {}
         }
-        Ok(None)
+        None
     });
-    hook.after = Some(|_, _, _| Ok(()));
 }
 
 define_hook!(
