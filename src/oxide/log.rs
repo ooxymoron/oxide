@@ -1,4 +1,8 @@
-use std::{ffi::{CString, VaList}, intrinsics::{breakpoint, transmute_unchecked}, mem::transmute};
+use std::{
+    ffi::{CString, VaList},
+    intrinsics::{breakpoint, transmute_unchecked},
+    mem::transmute,
+};
 
 use sdl2_sys::va_list;
 
@@ -16,8 +20,14 @@ impl Logger {
             b: 0,
             a: 255,
         };
-        dbg!(&text);
-        vmt_call!(interface!(cvar),color_console_print,&color,text.as_ptr(),"ss");
+        //dbg!(&text);
+        vmt_call!(
+            interface!(cvar),
+            color_console_print,
+            &color,
+            text.as_ptr(),
+            "ss"
+        );
         //interface!(cvar).console_print(&color, text.as_ptr());
     }
 }

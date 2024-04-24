@@ -35,11 +35,9 @@ impl Entity {
             if if let Some(val) = minx { val > x } else { true } {
                 minx = Some(x)
             }
-
             if if let Some(val) = maxx { val < x } else { true } {
                 maxx = Some(x)
             }
-
             if if let Some(val) = miny { val > y } else { true } {
                 miny = Some(y)
             }

@@ -1,5 +1,12 @@
 use crate::{
-    error::OxideResult, interface, netvars::HasNetvars, oxide::entity_cache::EntityCache, sdk::{condition::ConditionFlags, entity::Entity, networkable::ClassId}, setting, util::debug::print_module_addres_offset, vmt_call
+    error::OxideResult,
+    interface,
+    netvars::HasNetvars,
+    oxide::entity_cache::EntityCache,
+    sdk::{condition::ConditionFlags, entity::Entity, networkable::ClassId},
+    setting,
+    util::debug::print_module_addres_offset,
+    vmt_call,
 };
 
 use super::Paint;

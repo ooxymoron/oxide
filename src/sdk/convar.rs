@@ -5,31 +5,30 @@ use libc::c_void;
 
 use crate::cfn;
 
-
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTConVar {
     _pad: [i64; 14],
-    pub internal_set_value: cfn!((), &'static ConVar , &CStr),
-    pub internal_set_float_value: cfn!((), &'static ConVar,f32 , bool),
-    pub internal_set_int_value: cfn!((), &'static ConVar, isize),
+    pub internal_set_value: cfn!((), &'static ConVar, &CStr),
+    pub internal_set_float_value: cfn!((), &'static ConVar, f32, bool),
+    pub internal_set_int_value: cfn!((), &'static ConVar, i32),
 }
 
 #[repr(C)]
-#[derive(Derivative,Clone)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct ConVar {
-    #[derivative(Debug="ignore")]
+    #[derivative(Debug = "ignore")]
     pub vmt: &'static VMTConVar,
-    #[derivative(Debug="ignore")]
-    _pad: [u8; 0x18],
-    #[derivative(Debug="ignore")]
+    #[derivative(Debug = "ignore")]
+    _pad: [u8; 0x2c],
+    #[derivative(Debug = "ignore")]
     pub parent: &'static ConVar,
     pub default_value: *const i8,
     pub string: *const i8,
-    pub string_length: isize,
+    pub string_length: i32,
     pub float_value: f32,
-    pub int_value: isize,
+    pub int_value: i32,
     pub has_min: bool,
     pub min_val: f32,
     pub has_max: bool,
