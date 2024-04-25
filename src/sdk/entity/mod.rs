@@ -3,23 +3,28 @@ use std::mem::transmute;
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, draw::colors::{BLUE, RED}, error::{OxideError, OxideResult}, interface, math::{angles::Angles, vector::Vector3}, netvars::HasNetvars, o, vmt_call
+    define_netvar,
+    draw::colors::{BLUE, RED},
+    error::{OxideError, OxideResult},
+    interface,
+    math::{angles::Angles, vector::Vector3},
+    netvars::HasNetvars,
+    o, vmt_call,
 };
 
 use self::{
-    model_info::{Hitbox, HitboxId, ModelInfo, StudioHdr},
-    model_render::Matrix3x4,
+    model_info::{Hitbox, HitboxId, HitboxSet, HitboxWrapper, ModelInfo, StudioHdr},
+    model_render::BoneMatrix,
     networkable::ClassId,
     object::Object,
     pipe::PipeBomb,
-    player::Player, weapon::Weapon,
+    player::Player,
+    weapon::Weapon,
 };
 
 use super::*;
 
-use super::{
-    collideable::Collideable, model_render::Renderable, networkable::Networkable, 
-};
+use super::{collideable::Collideable, model_render::Renderable, networkable::Networkable};
 
 pub mod flags;
 pub mod object;
@@ -29,7 +34,7 @@ pub mod player;
 pub mod weapon;
 
 pub const MAX_STUDIO_BONES: usize = 128;
-pub type Bones = [Matrix3x4; MAX_STUDIO_BONES];
+pub type Bones = [BoneMatrix; MAX_STUDIO_BONES];
 pub const HITBOX_SET: i32 = 0;
 
 #[repr(C)]
@@ -141,7 +146,7 @@ pub enum WaterLevel {
 }
 
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative)]
 #[derivative(Debug)]
 pub struct Entity {
     pub vmt: *mut VMTEntity,
@@ -157,20 +162,42 @@ impl Entity {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
 
-    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<Hitbox> {
+    pub fn get_hitboxes(&self, hitbox_ids: Vec<HitboxId>) -> OxideResult<Vec<HitboxWrapper>> {
         unsafe {
             let rend = self.as_renderable();
 
+            if !(rend as *const _ as *const u8).is_aligned_to(8) {
+                return Err(OxideError::new("unaligned ptr"));
+            }
             let model = vmt_call!(rend, get_model);
-            let studio_model = transmute::<_,&StudioHdr>(vmt_call!(interface!(model_info), get_studio_model, model));
+            let studio_model = transmute::<_, &StudioHdr>(vmt_call!(
+                interface!(model_info),
+                get_studio_model,
+                model
+            ));
 
-            let Some(hitbox_set) = studio_model.get_hitbox_set(HITBOX_SET) else {
-                return None;
-            };
-            let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
-                return None;
-            };
-            Some(hitbox)
+            let bones = o!()
+                .last_entity_cache
+                .as_mut()
+                .unwrap()
+                .get_bones(vmt_call!(self, get_index))?
+                .clone();
+
+            let hitbox_set = studio_model
+                .get_hitbox_set(HITBOX_SET)
+                .ok_or(OxideError::new("could not get hitboxes"))?;
+            hitbox_ids.into_iter().map(|id| {
+                let hitbox = hitbox_set.get_hitbox(id)?;
+                Ok(HitboxWrapper {
+                    id,
+                    bone: bones[hitbox.bone as usize].clone(),
+                    group: hitbox.group,
+                    min: hitbox.min,
+                    max: hitbox.max,
+                    nameindex: hitbox.nameindex,
+                    owner: transmute(self)
+                })
+            }).collect()
         }
     }
 }
@@ -251,8 +278,7 @@ impl Entity {
     define_netvar!(get_angles, ["m_angRotation"], Angles);
     define_netvar!(get_origin, ["m_vecOrigin"], Vector3);
 }
-impl Entity {
-}
+impl Entity {}
 
 //CBaseEntity{
 //CBaseEntity m_ubInterpolationFrame

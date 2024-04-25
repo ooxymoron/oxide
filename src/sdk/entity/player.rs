@@ -78,7 +78,7 @@ impl Player {
         ["baseclass", "localdata", "m_nTickBase"],
         i32
     );
-    define_netvar!(get_player_class, ["m_PlayerClass"], PlayerClass);
+    define_netvar!(get_player_class, ["m_PlayerClass","m_iClass"], PlayerClass);
     define_netvar!(
         get_velocity,
         ["baseclass", "localdata", "m_vecVelocity[0]"],

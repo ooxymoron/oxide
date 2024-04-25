@@ -4,7 +4,7 @@ use crate::{
     sdk::{
         condition::ConditionFlags,
         entity::{player::Player, weapon::ids::{ItemDefiniitonIndex, WeaponType}, Entity},
-        model_info::HitboxId,
+        model_info::{Hitbox, HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
     setting, vmt_call,
@@ -13,7 +13,7 @@ use crate::{
 use super::{priority::Priority, Aimbot, Target};
 
 impl Aimbot {
-    pub fn hitbox_order(&self, ent: &Entity) -> Vec<(isize, HitboxId)> {
+    pub fn hitbox_order(&self, ent: &Entity) -> Vec<(isize, HitboxWrapper)> {
         let p_local = &*Entity::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let id = vmt_call!(weapon, get_weapon_id);
@@ -35,19 +35,23 @@ impl Aimbot {
             }
             return true;
         })();
+
+
+
+        let hitboxes = ent.get_hitboxes(vec![HitboxId::Pelvis,HitboxId::Head,HitboxId::LeftFoot,HitboxId::RightFoot]).unwrap();
         if baim {
             vec![
-                (2, HitboxId::Pelvis),
-                (0, HitboxId::Head),
-                (0, HitboxId::LeftFoot),
-                (0, HitboxId::RightFoot),
+                (2, hitboxes[0]),
+                (0, hitboxes[1]),
+                (0, hitboxes[2]),
+                (0, hitboxes[3]),
             ]
         } else {
             vec![
-                (2, HitboxId::Head),
-                (1, HitboxId::Pelvis),
-                (0, HitboxId::LeftFoot),
-                (0, HitboxId::RightFoot),
+                (2, hitboxes[1]),
+                (1, hitboxes[0]),
+                (0, hitboxes[2]),
+                (0, hitboxes[3]),
             ]
         }
     }
@@ -84,7 +88,7 @@ impl Aimbot {
             .get_ent(ClassId::CTFPlayer)
         {
             let Some(player) = Entity::get_ent(id) else {continue};
-            if vmt_call!(player.as_networkable(), is_dormant) {
+            if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive){
                 continue;
             }
 
@@ -97,15 +101,14 @@ impl Aimbot {
                 }
             }
 
-            for (hitbox_prio, hitbox_id) in self.hitbox_order(player) {
+            for (hitbox_prio, hitbox) in self.hitbox_order(player) {
                 if let Some(target) = &best_target {
-                    if target.prio.hitbox > ent_prio {
+                    if target.prio.hitbox > hitbox_prio {
                         break;
                     }
                 }
-                let hitbox = player.get_hitbox(hitbox_id).unwrap();
 
-                let Some((point,point_prio)) = self.point_scan(player, hitbox_id, &hitbox)? else {
+                let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                     continue;
                 };
 
@@ -122,7 +125,7 @@ impl Aimbot {
                 let target = Target {
                     point,
                     ent: player,
-                    hitbox_id,
+                    hitbox_id: hitbox.id,
                     prio,
                 };
                 best_target = Some(target);

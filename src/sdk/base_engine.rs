@@ -41,11 +41,12 @@ pub struct PlayerInfo {
 impl From<PlayerInfoUnparsed> for PlayerInfo {
     fn from(value: PlayerInfoUnparsed) -> Self {
         let str_from_arr = |arr: Vec<u8>| -> String {
-            String::from_utf8(arr)
-                .unwrap()
-                .chars()
-                .filter(|char| *char != '\0')
-                .collect()
+            unsafe {
+                String::from_utf8_unchecked(arr)
+                    .chars()
+                    .filter(|char| *char != '\0')
+                    .collect()
+            }
         };
         PlayerInfo {
             name: str_from_arr(value.name.to_vec()),

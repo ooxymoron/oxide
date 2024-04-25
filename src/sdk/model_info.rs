@@ -1,3 +1,4 @@
+use std::{mem::MaybeUninit, time::Instant};
 pub use std::{
     ffi::{c_char, CStr},
     mem::{size_of, transmute},
@@ -17,7 +18,7 @@ use crate::{
 
 use super::{
     entity::{Entity, MAX_STUDIO_BONES},
-    model_render::Matrix3x4,
+    model_render::BoneMatrix,
     WithVmt,
 };
 
@@ -32,14 +33,14 @@ pub struct HitboxSet {
 }
 
 impl HitboxSet {
-    pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<Hitbox> {
+    pub fn get_hitbox(&self, id: HitboxId) -> OxideResult<&Hitbox> {
         let ptr = (self as *const _ as i64
             + self.hitboxindex as i64
             + size_of::<Hitbox>() as i64 * id as i64) as *const Hitbox;
         if ptr.is_null() {
-            return None;
+            return Err(OxideError::new("could not get hitbox"));
         }
-        Some(ptr.read_unaligned())
+        return Ok(unsafe{transmute(ptr)});
     }
 }
 
@@ -50,41 +51,42 @@ pub struct Hitbox {
     pub group: i32,
     pub min: Vector3,
     pub max: Vector3,
-    pub hitboxnameindex: i32,
+    pub nameindex: i32,
     unused: [i32; 8],
 }
 
-impl Hitbox {
-    pub fn center(&self, ent: &Entity) -> OxideResult<Vector3> {
-        let corners = self.corners(ent)?;
+#[derive(Debug, Clone, Copy)]
+pub struct HitboxWrapper{
+    pub bone: BoneMatrix,
+    pub id: HitboxId,
+    pub group: i32,
+    pub min: Vector3,
+    pub max: Vector3,
+    pub nameindex: i32,
+    pub owner: &'static Entity
+}
+
+impl HitboxWrapper {
+    pub fn center(&self) -> OxideResult<Vector3> {
+        let corners = self.corners()?;
         Ok((corners[0] + corners[7]) / 2.0)
     }
-    pub fn get_bone_pos(&self, ent: &Entity) -> OxideResult<(Vector3, [Vector3; 3])> {
-        if self.bone as usize >= MAX_STUDIO_BONES {
-            return Err(OxideError::new("invalid bone index"));
-        };
+    pub fn get_pos(&self) -> OxideResult<(Vector3, [Vector3; 3])> {
 
-        let bones = o!()
-            .last_entity_cache
-            .clone()
-            .unwrap()
-            .get_bones(vmt_call!(ent, get_index))?;
-
-        let bone = bones[self.bone as usize].clone();
-        let pos = Vector3::new(bone[0][3], bone[1][3], bone[2][3]);
+        let pos = Vector3::new(self.bone[0][3], self.bone[1][3], self.bone[2][3]);
         let angle = [
-            Vector3::new(bone[0][0], bone[0][1], bone[0][2]),
-            Vector3::new(bone[1][0], bone[1][1], bone[1][2]),
-            Vector3::new(bone[2][0], bone[2][1], bone[2][2]),
+            Vector3::new(self.bone[0][0], self.bone[0][1], self.bone[0][2]),
+            Vector3::new(self.bone[1][0], self.bone[1][1], self.bone[1][2]),
+            Vector3::new(self.bone[2][0], self.bone[2][1], self.bone[2][2]),
         ];
 
         Ok((pos, angle))
     }
-    pub fn corners(&self, ent: &Entity) -> OxideResult<[Vector3; 8]> {
-        let (pos, rotation) = self.get_bone_pos(ent)?;
+    pub fn corners(&self) -> OxideResult<[Vector3; 8]> {
+        let (pos, rotation) = self.get_pos()?;
         Ok(get_corners(&pos, &rotation, &self.min, &self.max))
     }
-    pub fn scaled(&self, scale: f32) -> Hitbox {
+    pub fn scaled(&self, scale: f32) -> HitboxWrapper {
         let mut hitbox = self.clone();
         hitbox.min *= scale;
         hitbox.max *= scale;
@@ -174,7 +176,7 @@ pub struct Bone {
     rot: Vector3,
     posscale: Vector3,
     rotscale: Vector3,
-    pose_to_bone: Matrix3x4,
+    pose_to_bone: BoneMatrix,
     alignment: Vector4,
     flags: i32,
     proctype: i32,
@@ -199,8 +201,9 @@ impl StudioHdr {
         }
 
         Some(
-            &*((self as *const _ as i64 + self.hitboxsetindex as i64 + i as i64 * size_of::<HitboxSet>() as i64) 
-                as *const HitboxSet),
+            &*((self as *const _ as i64
+                + self.hitboxsetindex as i64
+                + i as i64 * size_of::<HitboxSet>() as i64) as *const HitboxSet),
         )
     }
 }

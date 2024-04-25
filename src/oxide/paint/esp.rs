@@ -48,8 +48,8 @@ impl Paint {
             if ent as *const _ == p_local.as_ent() as *const _ || !vmt_call!(ent, is_alive) {
                 continue;
             }
-            if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
-                && !setting!(visual, esp_friendlies)
+            if !setting!(visual, esp_friendlies)
+                && vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
             {
                 continue;
             }

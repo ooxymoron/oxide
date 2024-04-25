@@ -1,15 +1,19 @@
+use std::time::Instant;
+
 use crate::{
-    vmt_call,
     error::OxideResult,
     hex_to_rgb, interface, o,
     oxide::entity_cache::EntityCache,
-    rgb_to_hex, setting,
+    rgb_to_hex,
     sdk::{
         entity::Entity,
-        model_info::{Hitbox, HitboxId},
+        model_info::{Hitbox, HitboxId, HitboxWrapper},
+        model_render::BoneMatrix,
         networkable::ClassId,
     },
+    setting,
     util::world_to_screen,
+    vmt_call,
 };
 
 use super::Paint;
@@ -18,29 +22,25 @@ const COLOR_SCALE: f32 = 1.0 / 2.0;
 
 impl Paint {
     pub fn draw_hitboxes(&mut self, cache: &EntityCache) -> OxideResult<()> {
-        if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual,hitboxes) {
+        if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual, hitboxes) {
             return Ok(());
         }
-        //let hitbox_scale = setting!(aimbot,hitbox_scale);
         let p_local = Entity::get_local()?;
         for id in cache.get_ent(ClassId::CTFPlayer) {
             let Some(player) = Entity::get_ent(id ) else {continue};
-            if vmt_call!(player.as_networkable(), is_dormant) {
-                continue;
-            }
-            if player as *const _ == p_local.as_ent() as *const _ || !vmt_call!(player, is_alive) {
+            if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {
                 continue;
             }
             let team = vmt_call!(player, get_team_number);
-            for hitbox_id in HitboxId::all() {
-                let (r, g, b) = hex_to_rgb!(team.color());
-                let color = rgb_to_hex!(
-                    r as f32 * COLOR_SCALE,
-                    g as f32 * COLOR_SCALE,
-                    b as f32 * COLOR_SCALE
-                );
-                let hitbox = player.get_hitbox(hitbox_id).unwrap();
-                self.draw_hitbox(&player, hitbox, color, 30)?;
+            let (r, g, b) = hex_to_rgb!(team.color());
+            let color = rgb_to_hex!(
+                r as f32 * COLOR_SCALE,
+                g as f32 * COLOR_SCALE,
+                b as f32 * COLOR_SCALE
+            );
+            let hitboxes = player.get_hitboxes(HitboxId::all())?;
+            for hitbox in hitboxes {
+                self.draw_hitbox(hitbox, color, 30)?;
             }
         }
         for id in cache.get_ent(ClassId::CObjectSentrygun) {
@@ -53,15 +53,16 @@ impl Paint {
             }
             let team = vmt_call!(sentry, get_team_number);
 
-            for hitbox_id in sentry.as_object().unwrap().as_sentry().unwrap().get_hitbox_ids() {
-                let (r, g, b) = hex_to_rgb!(team.color());
-                let color = rgb_to_hex!(
-                    r as f32 * COLOR_SCALE,
-                    g as f32 * COLOR_SCALE,
-                    b as f32 * COLOR_SCALE
-                );
-                let hitbox = sentry.get_hitbox(hitbox_id).unwrap();
-                self.draw_hitbox(&sentry, hitbox, color, 50)?;
+            let (r, g, b) = hex_to_rgb!(team.color());
+            let color = rgb_to_hex!(
+                r as f32 * COLOR_SCALE,
+                g as f32 * COLOR_SCALE,
+                b as f32 * COLOR_SCALE
+            );
+            let hitboxes = sentry.as_object()?.as_sentry()?.get_hitbox_ids();
+            let hitboxes = sentry.get_hitboxes(hitboxes)?;
+            for hitbox in hitboxes {
+                self.draw_hitbox(hitbox, color, 50)?;
             }
         }
         for id in cache.get_ent(ClassId::CTFGrenadePipebombProjectile) {
@@ -74,23 +75,22 @@ impl Paint {
             }
             let team = vmt_call!(pipe, get_team_number);
 
-            let hitbox = pipe
-                .get_hitbox(HitboxId::Head)
-                .unwrap();
-                //.scaled(HITBOX_SCALE);
-            self.draw_hitbox(&pipe, hitbox, team.color(), 10)?;
+            let hitbox = pipe.get_hitboxes(vec![HitboxId::Head])?[0];
+            self.draw_hitbox(hitbox, team.color(), 10)?;
         }
         Ok(())
     }
     pub fn draw_hitbox(
         &mut self,
-        ent: &Entity,
-        hitbox: Hitbox,
+        hitbox: HitboxWrapper,
         color: usize,
         alpha: u8,
     ) -> OxideResult<()> {
-        let corners = hitbox.corners(ent)?;
-        let corners = corners.iter().map(|x|world_to_screen(x)).collect::<Vec<_>>();
+        let corners = hitbox.corners()?;
+        let corners = corners
+            .iter()
+            .map(|x| world_to_screen(x))
+            .collect::<Vec<_>>();
 
         let pairs = [
             (corners[0].clone(), corners[1].clone()),

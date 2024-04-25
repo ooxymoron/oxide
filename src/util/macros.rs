@@ -76,7 +76,7 @@ macro_rules! vmt_call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
         #[allow(unused_unsafe)]
         unsafe{
-            ((*$i.vmt).$f)($i,$($args),*)
+            (($i.vmt.read_unaligned()).$f)($i,$($args),*)
         }
     };
 }

@@ -6,7 +6,7 @@ use crate::{
     interface, o,
     sdk::{
         entity::{BoneMask, Bones, Entity, MAX_STUDIO_BONES},
-        model_render::Matrix3x4,
+        model_render::BoneMatrix,
         networkable::ClassId,
     },
 };
@@ -14,7 +14,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct EntityCache {
     pub entities: HashMap<ClassId, Vec<u32>>,
-    bones: HashMap<u32, [Matrix3x4; MAX_STUDIO_BONES]>,
+    bones: HashMap<u32, [BoneMatrix; MAX_STUDIO_BONES]>,
 }
 
 impl EntityCache {
@@ -44,7 +44,7 @@ impl EntityCache {
         }
         
         let Some(ent) = Entity::get_ent(id) else {
-            return Err(OxideError::new("none ent"));
+            return Err(OxideError::new("null ent"));
         };
         let renderable = ent.as_renderable();
 
@@ -53,12 +53,12 @@ impl EntityCache {
             renderable,
             setup_bones,
             &bones,
-            MAX_STUDIO_BONES,
+            MAX_STUDIO_BONES as u32,
             BoneMask::Hitbox,
             o!().global_vars.curtime
         );
         self.bones.insert(id, bones.clone());
-        Ok(bones.clone())
+        Ok(bones)
     }
     pub fn get_ent(&self, id: ClassId) -> Vec<u32> {
         self.entities.get(&id).cloned().unwrap_or(vec![])

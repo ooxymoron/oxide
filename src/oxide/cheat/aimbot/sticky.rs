@@ -38,10 +38,9 @@ impl Aimbot {
                     continue;
                 }
             }
-            let hitbox_id = HitboxId::Head;
-            let hitbox = pipe.get_hitbox(hitbox_id).unwrap();
+            let hitbox = pipe.get_hitboxes(vec![HitboxId::Head])?[0].clone();
 
-            let Some((point,point_prio)) = self.point_scan(pipe, HitboxId::Head, &hitbox)? else {
+            let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                 continue;
             };
 
@@ -51,7 +50,7 @@ impl Aimbot {
                 }
             }
             let prio = Priority{ ent: ent_prio, hitbox: 0, point: point_prio };
-            let target = Target{ point, ent: pipe, hitbox_id, prio };
+            let target = Target{ point, ent: pipe, hitbox_id:hitbox.id, prio };
             best_target = Some(target);
         }
         Ok(best_target)
@@ -62,7 +61,7 @@ impl Aimbot {
             return Ok(None);
         }
         if matches!(
-            *ent.as_pipe()?.get_type(),
+            ent.as_pipe()?.get_type(),
             PipeType::RemoteDetonate | PipeType::RemoteDetonatePractice
         ) {
             return Ok(Some(0));

@@ -6,8 +6,11 @@ use crate::{
     sdk::{
         condition::ConditionFlags,
         engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-        entity::{weapon::ids::{ItemDefiniitonIndex, WeaponType}, Entity},
-        model_info::{Hitbox, HitboxId},
+        entity::{
+            weapon::ids::{ItemDefiniitonIndex, WeaponType},
+            Entity,
+        },
+        model_info::{Hitbox, HitboxId, HitboxWrapper},
         networkable::ClassId,
         user_cmd::{ButtonFlags, UserCmd},
     },
@@ -45,20 +48,15 @@ impl Aimbot {
         }
     }
 
-    pub fn point_scan(
-        &self,
-        ent: &Entity,
-        hitboxid: HitboxId,
-        hitbox: &Hitbox,
-    ) -> OxideResult<Option<(Vector3, isize)>> {
+    pub fn point_scan(&self, hitbox: &HitboxWrapper) -> OxideResult<Option<(Vector3, isize)>> {
         let p_local = &*Entity::get_local().unwrap();
         let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
 
         let scaled_hitbox = hitbox.scaled(setting!(aimbot, hitbox_scale));
 
-        let mut points = vec![scaled_hitbox.center(&ent)?];
+        let mut points = vec![scaled_hitbox.center()?];
         if setting!(aimbot, multipoint) {
-            let mut corners = scaled_hitbox.corners(&ent)?.to_vec();
+            let mut corners = scaled_hitbox.corners()?.to_vec();
 
             corners.sort_by(|corner1, corner2| {
                 let diff1 = corner1.clone() - my_eyes.clone();
@@ -77,8 +75,9 @@ impl Aimbot {
                 continue;
             };
             let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
-            if trace.entity as *const _ != ent
-                || (trace.hitbox != hitboxid as HitboxId && hitboxid == HitboxId::Head)
+
+            if trace.entity as *const _ != hitbox.owner
+                || (hitbox.id != HitboxId::Head && trace.hitbox != hitbox.id)
             {
                 continue;
             }
@@ -185,7 +184,8 @@ impl Aimbot {
                     && vmt_call!(weapon.as_gun(), get_projectile_damage)
                         >= (vmt_call!(found.ent, get_health)) as f32);
                 let classic = matches!(id, WeaponType::SniperrifleClassic);
-                if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !baim_lethal {
+                if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !baim_lethal
+                {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;
                 }

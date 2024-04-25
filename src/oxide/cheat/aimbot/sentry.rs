@@ -1,8 +1,8 @@
 use crate::{
-    vmt_call,
     error::OxideResult,
     o,
     sdk::{entity::Entity, networkable::ClassId},
+    vmt_call,
 };
 
 use super::{priority::Priority, Aimbot, Target};
@@ -29,26 +29,33 @@ impl Aimbot {
                 }
             }
 
-            for hitbox_id in sentry
+            let hitboxes = sentry
                 .as_object()
                 .unwrap()
                 .as_sentry()
                 .unwrap()
-                .get_hitbox_ids()
-            {
-                let hitbox = sentry.get_hitbox(hitbox_id).unwrap();
-
-                let Some((point,point_prio)) = self.point_scan(sentry, hitbox_id, &hitbox)? else {
+                .get_hitbox_ids();
+            for hitbox in sentry.get_hitboxes(hitboxes)? {
+                let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                     continue;
                 };
 
                 if let Some(best_target) = &best_target {
-                    if best_target.prio.point > point_prio{
+                    if best_target.prio.point > point_prio {
                         continue;
                     }
                 }
-                let prio = Priority{ ent: ent_prio, hitbox: 0, point: point_prio };
-                let target = Target{ point, ent: sentry, hitbox_id, prio };
+                let prio = Priority {
+                    ent: ent_prio,
+                    hitbox: 0,
+                    point: point_prio,
+                };
+                let target = Target {
+                    point,
+                    ent: sentry,
+                    hitbox_id: hitbox.id,
+                    prio,
+                };
                 best_target = Some(target);
             }
         }

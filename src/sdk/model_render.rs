@@ -10,10 +10,10 @@ use self::{entity::{BoneMask, MAX_STUDIO_BONES}, material_system::IMaterial, mod
 pub type ModelRender = WithVmt<VMTModelRender>;
 
 #[repr(C)]
-#[derive(Debug, Clone)]
-pub struct Matrix3x4([[f32; 4]; 3]);
+#[derive(Debug, Clone, Copy)]
+pub struct BoneMatrix([[f32; 4]; 3]);
 
-impl Matrix3x4 {
+impl BoneMatrix {
     pub fn transform(&self, vec: &Vector3) -> Vector3 {
         let matrix = self.0;
         let vec1 = Vector3::new(matrix[0][0], matrix[0][1], matrix[0][2]);
@@ -25,18 +25,18 @@ impl Matrix3x4 {
             z: vec.dot(&vec3) + matrix[2][3],
         }
     }
-    pub fn zeroed() -> Matrix3x4 {
-        Matrix3x4([[0f32; 4]; 3])
+    pub fn zeroed() -> BoneMatrix {
+        BoneMatrix([[0f32; 4]; 3])
     }
 }
-impl std::ops::Index<usize> for Matrix3x4 {
+impl std::ops::Index<usize> for BoneMatrix {
     type Output = [f32; 4];
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index]
     }
 }
-impl std::ops::IndexMut<usize> for Matrix3x4 {
+impl std::ops::IndexMut<usize> for BoneMatrix {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.0[index]
     }
@@ -54,14 +54,14 @@ pub struct VMTRenderable {
     pub setup_bones: cfn!(
         bool,
         *const Renderable,
-        &[Matrix3x4; MAX_STUDIO_BONES],
-        usize,
+        &[BoneMatrix; MAX_STUDIO_BONES],
+        u32,
         BoneMask,
         f32
     ),
     #[derivative(Debug = "ignore")]
     _pad3: [usize; 17],
-    pub renderable_to_world_transform: cfn!(&mut Matrix3x4, &'static Renderable),
+    pub renderable_to_world_transform: cfn!(&mut BoneMatrix, &'static Renderable),
 }
 
 pub type Renderable = WithVmt<VMTRenderable>;
@@ -73,8 +73,8 @@ pub struct ModelRenderInfo {
     angles: Angles,
     renderable: &'static c_void,
     model: &'static Model,
-    model_to_world: &'static Matrix3x4,
-    lighting_offset: &'static Matrix3x4,
+    model_to_world: &'static BoneMatrix,
+    lighting_offset: &'static BoneMatrix,
     lighting_origin: &'static Vector3,
     flags: isize,
     entity_index: isize,
@@ -90,7 +90,7 @@ pub struct DrawModelState {
     studio_hdr: *mut StudioHdr,
     studio_hw_data: *mut c_void,
     renderable: *mut c_void,
-    model_to_world: &'static Matrix3x4,
+    model_to_world: &'static BoneMatrix,
     decals: *mut c_void,
     draw_flags: isize,
     lod: isize,
@@ -107,6 +107,6 @@ pub struct VMTModelRender {
         &'static mut ModelRender,
         &'static mut DrawModelState,
         &'static mut ModelRenderInfo,
-        &'static mut Matrix3x4
+        &'static mut BoneMatrix
     ),
 }
