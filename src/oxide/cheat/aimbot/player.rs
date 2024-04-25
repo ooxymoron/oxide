@@ -55,13 +55,26 @@ impl Aimbot {
             ]
         }
     }
-    pub fn player_prioroty(player: Player) -> OxideResult<Option<isize>> {
+    pub fn player_prioroty(&self,player: &Player) -> OxideResult<Option<isize>> {
+        if self.ent_priority(player.as_ent())?.is_none() {
+            return Ok(None)
+        }
         let mut ignore_flags = vec![
             ConditionFlags::Ubercharged,
             ConditionFlags::UberchargeFading,
             ConditionFlags::Bonked,
         ];
-        if !player.get_condition().get(ConditionFlags::CloakFlicker) {
+        let spy_revealing_flags = vec![
+            ConditionFlags::Jarated,
+            ConditionFlags::Milked,
+            ConditionFlags::CloakFlicker,
+            ConditionFlags::OnFire,
+            ConditionFlags::Bleeding,
+        ];
+        let conditions = player.get_condition();
+
+        if spy_revealing_flags.into_iter()
+            .all(|flag| !conditions.get(flag)) {
             if !setting!(aimbot, target_invisible) {
                 ignore_flags.push(ConditionFlags::Cloaked)
             }
@@ -72,7 +85,7 @@ impl Aimbot {
 
         if ignore_flags
             .into_iter()
-            .any(|flag| player.get_condition().get(flag))
+            .any(|flag| conditions.get(flag))
         {
             return Ok(None);
         }
@@ -92,11 +105,11 @@ impl Aimbot {
                 continue;
             }
 
-            let Some(ent_prio) = self.ent_priority(player)? else {
+            let Some(player_prioroty) = self.player_prioroty(player.as_player()?)? else {
                 continue;
             };
             if let Some(best_target) = &best_target {
-                if best_target.prio.ent > ent_prio {
+                if best_target.prio.ent > player_prioroty {
                     continue;
                 }
             }
@@ -118,7 +131,7 @@ impl Aimbot {
                     }
                 }
                 let prio = Priority {
-                    ent: ent_prio,
+                    ent: player_prioroty,
                     hitbox: hitbox_prio,
                     point: point_prio,
                 };
