@@ -69,7 +69,9 @@ pub struct AimbotSettings {
     pub target_invisible: Arcm<bool>,
     pub target_disguised: Arcm<bool>,
     pub ambasador_wait_for_hs: Arcm<bool>,
+    pub wait_for_charge: Arcm<bool>,
     pub baim_if_lethal: Arcm<bool>,
+    pub auto_zoom: Arcm<bool>,
 }
 
 impl AimbotSettings {
@@ -88,7 +90,9 @@ impl AimbotSettings {
             target_disguised: Arcm::new(false),
             target_stickies: Arcm::new(false),
             ambasador_wait_for_hs: Arcm::new(false),
+            wait_for_charge: Arcm::new(false),
             baim_if_lethal: Arcm::new(false),
+            auto_zoom: Arcm::new(false),
         }
     }
 }

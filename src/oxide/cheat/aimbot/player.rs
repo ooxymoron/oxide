@@ -3,8 +3,8 @@ use crate::{
     o,
     sdk::{
         condition::ConditionFlags,
-        entity::{player::Player, weapon::ids::{ItemDefiniitonIndex, WeaponType}, Entity},
-        model_info::{Hitbox, HitboxId, HitboxWrapper},
+        entity::{player::Player, weapon::ids::ItemDefiniitonIndex, Entity},
+        model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
     setting, vmt_call,
@@ -16,29 +16,25 @@ impl Aimbot {
     pub fn hitbox_order(&self, ent: &Entity) -> Vec<(isize, HitboxWrapper)> {
         let p_local = &*Entity::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-        let id = vmt_call!(weapon, get_weapon_id);
         let baim = (|| {
             if weapon.can_headshot() {
-                return setting!(aimbot, baim_if_lethal)
-                    && (matches!(
-                        id,
-                        WeaponType::Sniperrifle
-                            | WeaponType::SniperrifleClassic
-                            | WeaponType::SniperrifleDecap
-                    ) || matches!(
-                        *weapon.get_item_definition_index(),
-                        ItemDefiniitonIndex::SpyMTheAmbassador
-                            | ItemDefiniitonIndex::SpyMFestiveAmbassador
-                    ))
-                    && vmt_call!(weapon.as_gun(), get_projectile_damage)
-                        >= vmt_call!(ent, get_health) as f32;
+                if weapon.is_sniper_rifle() && !p_local.get_condition().get(ConditionFlags::Zoomed)
+                {
+                    return true;
+                }
+                return setting!(aimbot, baim_if_lethal) && self.is_lethal(ent, false);
             }
             return true;
         })();
 
-
-
-        let hitboxes = ent.get_hitboxes(vec![HitboxId::Pelvis,HitboxId::Head,HitboxId::LeftFoot,HitboxId::RightFoot]).unwrap();
+        let hitboxes = ent
+            .get_hitboxes(vec![
+                HitboxId::Pelvis,
+                HitboxId::Head,
+                HitboxId::LeftFoot,
+                HitboxId::RightFoot,
+            ])
+            .unwrap();
         if baim {
             vec![
                 (2, hitboxes[0]),
@@ -55,10 +51,27 @@ impl Aimbot {
             ]
         }
     }
-    pub fn player_prioroty(&self,player: &Player) -> OxideResult<Option<isize>> {
+    pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {
         if self.ent_priority(player.as_ent())?.is_none() {
-            return Ok(None)
+            return Ok(None);
         }
+        let p_local = &*Entity::get_local().unwrap();
+        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
+        if weapon.is_sniper_rifle()
+            && setting!(aimbot, wait_for_charge)
+            && p_local.get_condition().get(ConditionFlags::Zoomed)
+            && !self.is_lethal(player.as_ent(), true)
+        {
+            return Ok(None);
+        }
+        if weapon.is_ambassador()
+            && setting!(aimbot, ambasador_wait_for_hs)
+            && o!().global_vars.curtime - *weapon.get_last_fire() < 1.0
+            && !self.is_lethal(player.as_ent(), false)
+        {
+            return Ok(None);
+        }
+
         let mut ignore_flags = vec![
             ConditionFlags::Ubercharged,
             ConditionFlags::UberchargeFading,
@@ -73,8 +86,10 @@ impl Aimbot {
         ];
         let conditions = player.get_condition();
 
-        if spy_revealing_flags.into_iter()
-            .all(|flag| !conditions.get(flag)) {
+        if spy_revealing_flags
+            .into_iter()
+            .all(|flag| !conditions.get(flag))
+        {
             if !setting!(aimbot, target_invisible) {
                 ignore_flags.push(ConditionFlags::Cloaked)
             }
@@ -83,10 +98,7 @@ impl Aimbot {
             }
         }
 
-        if ignore_flags
-            .into_iter()
-            .any(|flag| conditions.get(flag))
-        {
+        if ignore_flags.into_iter().any(|flag| conditions.get(flag)) {
             return Ok(None);
         }
         Ok(Some(1))
@@ -101,7 +113,7 @@ impl Aimbot {
             .get_ent(ClassId::CTFPlayer)
         {
             let Some(player) = Entity::get_ent(id) else {continue};
-            if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive){
+            if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {
                 continue;
             }
 

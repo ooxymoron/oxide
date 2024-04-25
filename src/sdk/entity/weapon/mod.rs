@@ -1,9 +1,10 @@
 use std::{ffi::CStr, mem::transmute};
 
-use crate::{vmt_call, o};
+use crate::{o, vmt_call};
 
 use self::{
-    entity::Entity, ids::{ItemDefiniitonIndex, WeaponType},
+    entity::Entity,
+    ids::{ItemDefiniitonIndex, WeaponType},
 };
 
 use super::*;
@@ -39,7 +40,7 @@ pub struct VMTWeapon {
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Weapon {
-    pub vmt: *const VMTWeapon
+    pub vmt: *const VMTWeapon,
 }
 
 #[repr(C)]
@@ -59,6 +60,12 @@ pub struct Gun {
     pub vmt: *mut VMTGun,
 }
 
+impl Gun {
+    pub fn as_weapon(&mut self) -> &'static mut Weapon {
+        return unsafe { transmute(self) };
+    }
+}
+
 #[repr(C)]
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
@@ -72,19 +79,6 @@ pub struct MeleWeapon {
 }
 
 impl Weapon {
-    pub fn can_attack_primary(&mut self) -> bool {
-        let now = o!().global_vars.now();
-        *self.get_next_primary_attack() <= now
-    }
-    pub fn can_headshot(&self) -> bool {
-        matches!(
-            vmt_call!(self, get_weapon_id),
-            WeaponType::Sniperrifle | WeaponType::SniperrifleClassic | WeaponType::SniperrifleDecap
-        ) || matches!(
-            self.get_item_definition_index(),
-            ItemDefiniitonIndex::SpyMTheAmbassador | ItemDefiniitonIndex::SpyMFestiveAmbassador
-        )
-    }
     pub fn as_ent(&mut self) -> &'static mut Entity {
         return unsafe { transmute(self) };
     }
@@ -96,6 +90,27 @@ impl Weapon {
     }
 }
 
+impl Weapon {
+    pub fn can_attack_primary(&mut self) -> bool {
+        let now = o!().global_vars.now();
+        *self.get_next_primary_attack() <= now
+    }
+    pub fn is_sniper_rifle(&mut self) -> bool {
+        matches!(
+            vmt_call!(self, get_weapon_id),
+            WeaponType::Sniperrifle | WeaponType::SniperrifleClassic | WeaponType::SniperrifleDecap
+        )
+    }
+    pub fn is_ambassador(&mut self) -> bool {
+        matches!(
+            self.get_item_definition_index(),
+            ItemDefiniitonIndex::SpyMTheAmbassador | ItemDefiniitonIndex::SpyMFestiveAmbassador
+        )
+    }
+    pub fn can_headshot(&mut self) -> bool {
+        self.is_sniper_rifle() || self.is_ambassador()
+    }
+}
 impl HasNetvars for Weapon {
     fn get_class_name() -> String {
         "CTFWeaponBase".to_string()
@@ -103,15 +118,34 @@ impl HasNetvars for Weapon {
 }
 
 impl Weapon {
-    define_netvar!(get_item_definition_index, ["baseclass","baseclass","m_AttributeManager","m_Item","m_iItemDefinitionIndex"], ItemDefiniitonIndex);
-    define_netvar!(get_next_primary_attack, ["baseclass","LocalActiveWeaponData","m_flNextPrimaryAttack"], f32);
-    define_netvar!(get_last_fire, ["LocalActiveTFWeaponData","m_flLastFireTime"], f32);
-
+    define_netvar!(
+        get_item_definition_index,
+        [
+            "baseclass",
+            "baseclass",
+            "m_AttributeManager",
+            "m_Item",
+            "m_iItemDefinitionIndex"
+        ],
+        ItemDefiniitonIndex
+    );
+    define_netvar!(
+        get_next_primary_attack,
+        [
+            "baseclass",
+            "LocalActiveWeaponData",
+            "m_flNextPrimaryAttack"
+        ],
+        f32
+    );
+    define_netvar!(
+        get_last_fire,
+        ["LocalActiveTFWeaponData", "m_flLastFireTime"],
+        f32
+    );
 }
 
 impl_has_vmt!(Weapon, VMTWeapon);
-
-
 
 //CTFWeaponBase{
 //CTFWeaponBase m_bDisguiseWeapon

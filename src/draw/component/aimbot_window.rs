@@ -92,8 +92,20 @@ impl AimbotWindow {
             y
         ));
         a!(Checkbox::new(
+            "wait for charge",
+            s!().aimbot.wait_for_charge.clone(),
+            10,
+            y
+        ));
+        a!(Checkbox::new(
             "baim if lethal",
             s!().aimbot.baim_if_lethal.clone(),
+            10,
+            y
+        ));
+        a!(Checkbox::new(
+            "auto zoom",
+            s!().aimbot.auto_zoom.clone(),
             10,
             y
         ));

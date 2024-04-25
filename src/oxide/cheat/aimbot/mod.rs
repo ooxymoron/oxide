@@ -142,64 +142,55 @@ impl Aimbot {
         }
         Ok(())
     }
+    pub fn is_lethal(&self, target: &Entity, crit: bool) -> bool {
+        let p_local = &*Entity::get_local().unwrap();
+        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
+        let mut mult = if crit { 3.0 } else { 1.0 };
+        if crit
+            && matches!(
+                weapon.get_item_definition_index(),
+                ItemDefiniitonIndex::SniperMTheSydneySleeper
+            )
+        {
+            mult = 1.35
+        }
+
+        return vmt_call!(weapon.as_gun(), get_projectile_damage) * mult
+            >= (vmt_call!(target, get_health)) as f32;
+    }
     pub fn shoot(&mut self, cmd: &mut UserCmd, found: Option<Target>) -> bool {
         let p_local = &*Entity::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let id = vmt_call!(weapon, get_weapon_id);
 
-        //let attributes = weapon.as_ent().attributes;
-        //let manager = vmt_call!(attributes, get_attribute_manager);
-        //let res = (*manager).get_float("bodyshot_damage_modify", weapon.as_ent(), 1.0);
-        //let res = (*manager).get_float("mult_bullets_per_shot", weapon.as_ent(), 1.0);
         let Some(found) = found else {
-            if matches!(id, WeaponType::SniperrifleClassic) {
+            if matches!(id, WeaponType::SniperrifleClassic) && setting!(aimbot, auto_zoom){
                 cmd.buttons.set(ButtonFlags::InAttack, true);
             }
             return false;
         };
-        let class = found.ent.as_networkable().get_client_class().class_id;
-        if matches!(
-            weapon.get_item_definition_index(),
-            ItemDefiniitonIndex::SpyMTheAmbassador | ItemDefiniitonIndex::SpyMFestiveAmbassador
-        ) && setting!(aimbot, ambasador_wait_for_hs)
-        {
-            let baim_lethal = (setting!(aimbot, baim_if_lethal)
-                && vmt_call!(weapon.as_gun(), get_projectile_damage)
-                    >= (vmt_call!(found.ent, get_health)) as f32);
-            let shoot = o!().global_vars.curtime - *weapon.get_last_fire() > 1.0
-                || baim_lethal
-                || matches!(class, ClassId::CObjectSentrygun);
+        let lethal = self.is_lethal(found.ent, false);
 
-            if shoot {
-                cmd.buttons.set(ButtonFlags::InAttack, shoot);
-            }
-            return shoot;
-        }
-
-        match id {
-            WeaponType::Sniperrifle
-            | WeaponType::SniperrifleDecap
-            | WeaponType::SniperrifleClassic => {
-                let baim_lethal = (setting!(aimbot, baim_if_lethal)
-                    && vmt_call!(weapon.as_gun(), get_projectile_damage)
-                        >= (vmt_call!(found.ent, get_health)) as f32);
-                let classic = matches!(id, WeaponType::SniperrifleClassic);
-                if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !baim_lethal
-                {
+        if weapon.is_sniper_rifle() {
+            let classic = matches!(id, WeaponType::SniperrifleClassic);
+            if setting!(aimbot, auto_zoom) {
+                if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !lethal {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;
                 }
-                if !p_local.can_attack()
-                    || (!vmt_call!(weapon, can_fire_critical_shot, true) && !baim_lethal)
+                if !vmt_call!(weapon, can_fire_critical_shot, true)
+                    && !matches!(
+                        weapon.get_item_definition_index(),
+                        ItemDefiniitonIndex::SniperMTheSydneySleeper
+                    )
                 {
-                    if classic {
-                        cmd.buttons.set(ButtonFlags::InAttack, true);
-                    }
                     return false;
                 }
-                cmd.buttons.set(ButtonFlags::InAttack, !classic);
-                true
             }
+            cmd.buttons.set(ButtonFlags::InAttack, !classic);
+            return true;
+        }
+        match id {
             WeaponType::Knife => {
                 if weapon.as_mele().ready_to_backstab {
                     cmd.buttons.set(ButtonFlags::InAttack, true);
