@@ -64,6 +64,21 @@ impl Gun {
     pub fn as_weapon(&mut self) -> &'static mut Weapon {
         return unsafe { transmute(self) };
     }
+
+    pub fn is_lethal(&mut self, target: &Entity, crit: bool) -> bool {
+        let mut mult = if crit { 3.0 } else { 1.0 };
+        if crit
+            && matches!(
+                self.as_weapon().get_item_definition_index(),
+                ItemDefiniitonIndex::SniperMTheSydneySleeper
+            )
+        {
+            mult = 1.35
+        }
+
+        return vmt_call!(self, get_projectile_damage) * mult
+            >= (vmt_call!(target, get_health)) as f32;
+    }
 }
 
 #[repr(C)]
@@ -85,8 +100,15 @@ impl Weapon {
     pub fn as_mele(&mut self) -> &'static mut MeleWeapon {
         return unsafe { transmute(self) };
     }
-    pub fn as_gun(&mut self) -> &'static mut Gun {
-        return unsafe { transmute(self) };
+    pub fn as_gun(&mut self) -> OxideResult<&'static mut Gun> {
+        if !self
+            .as_ent()
+            .as_networkable()
+            .get_client_class()
+            .get_ingeritance_chain().contains(&"CTFWeaponBaseGun".to_string()) {
+            return Err(OxideError::new("this weapon is not a gun"))
+        };
+        return Ok(unsafe { transmute(self) });
     }
 }
 

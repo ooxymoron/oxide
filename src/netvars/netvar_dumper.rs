@@ -16,7 +16,6 @@ pub fn load_netvars(client: &BaseClient) -> HashMap<String, HashMap<String, Netv
 
     let mut classes = HashMap::new();
     loop {
-
         let mut netvars = HashMap::new();
 
         let table = unsafe { client_class.recv_table.read() };
@@ -42,8 +41,12 @@ pub fn parse_table(table: RecvTable, super_offset: usize, netvars: &mut HashMap<
                 offset: prop.offset as usize + super_offset,
                 name: name.clone(),
             };
-            if let NetvarType::OBJECT(child_netvars) = &mut netvar.netvar_type {
+            if let NetvarType::OBJECT((table_name, child_netvars)) = &mut netvar.netvar_type {
                 let data_table = prop.data_table.read();
+                *table_name = CStr::from_ptr(data_table.table_name)
+                    .to_str()
+                    .unwrap()
+                    .to_string().replace("DT_", "C");
                 parse_table(
                     data_table,
                     prop.offset as usize + super_offset,

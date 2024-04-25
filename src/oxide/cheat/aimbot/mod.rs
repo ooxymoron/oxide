@@ -124,41 +124,28 @@ impl Aimbot {
         if !self.should_run() {
             return Ok(());
         }
-
-        if let Some(target) = self.find_target()? {
-            let p_local = &*Entity::get_local().unwrap();
-            let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
-            let diff = my_eyes - target.point;
-            let angle = diff.angle();
-            if setting!(aimbot, autoshoot) {
-                if self.shoot(cmd, Some(target)) {
+        let p_local = &*Entity::get_local().unwrap();
+        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
+        if weapon.as_gun().is_ok() {
+            if let Some(target) = self.find_target()? {
+                let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
+                let diff = my_eyes - target.point;
+                let angle = diff.angle();
+                if setting!(aimbot, autoshoot) {
+                    if self.shoot_weapon(cmd, Some(target)) {
+                        cmd.viewangles = angle;
+                    }
+                } else {
                     cmd.viewangles = angle;
                 }
             } else {
-                cmd.viewangles = angle;
+                self.shoot_weapon(cmd, None);
             }
-        } else {
-            self.shoot(cmd, None);
-        }
-        Ok(())
-    }
-    pub fn is_lethal(&self, target: &Entity, crit: bool) -> bool {
-        let p_local = &*Entity::get_local().unwrap();
-        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-        let mut mult = if crit { 3.0 } else { 1.0 };
-        if crit
-            && matches!(
-                weapon.get_item_definition_index(),
-                ItemDefiniitonIndex::SniperMTheSydneySleeper
-            )
-        {
-            mult = 1.35
         }
 
-        return vmt_call!(weapon.as_gun(), get_projectile_damage) * mult
-            >= (vmt_call!(target, get_health)) as f32;
+        Ok(())
     }
-    pub fn shoot(&mut self, cmd: &mut UserCmd, found: Option<Target>) -> bool {
+    pub fn shoot_weapon(&mut self, cmd: &mut UserCmd, found: Option<Target>) -> bool {
         let p_local = &*Entity::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let id = vmt_call!(weapon, get_weapon_id);
@@ -169,11 +156,11 @@ impl Aimbot {
             }
             return false;
         };
-        let lethal = self.is_lethal(found.ent, false);
 
         if weapon.is_sniper_rifle() {
             let classic = matches!(id, WeaponType::SniperrifleClassic);
             if setting!(aimbot, auto_zoom) {
+                let lethal = weapon.as_gun().unwrap().is_lethal(found.ent, false);
                 if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !lethal {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;

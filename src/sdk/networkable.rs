@@ -4,10 +4,7 @@ use libc::c_void;
 use serde::de::Error;
 
 use crate::{
-    cfn,
-    error::{OxideError, OxideResult},
-    sdk::*,
-    vmt_call,
+    cfn, error::{OxideError, OxideResult}, netvars::NetvarType, o, sdk::*, vmt_call
 };
 
 #[repr(C)]
@@ -73,6 +70,20 @@ pub struct ClientClass {
     pub recv_table: *const RecvTable,
     pub class_id: ClassId,
 }
+impl ClientClass {
+    pub fn get_ingeritance_chain(&self) -> Vec<String>{
+
+        let mut netvars = o!().netvars.get(&self.network_name).unwrap();
+        let mut res = vec![self.network_name.clone()];
+        loop {
+            let Some(netvar) = netvars.get("baseclass") else {break;};
+            let NetvarType::OBJECT((name,next_netvars)) = &netvar.netvar_type else {break;};
+            res.push(name.clone());
+            netvars = next_netvars;
+        };
+        res
+    }
+}
 impl From<UnparsedClientClass> for ClientClass {
     fn from(value: UnparsedClientClass) -> Self {
         let network_name = if !value.network_name.is_null() {
@@ -111,6 +122,7 @@ impl Networkable {
     pub fn get_client_class(&self) -> ClientClass {
         (*vmt_call!(self, get_client_class)).clone().into()
     }
+
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

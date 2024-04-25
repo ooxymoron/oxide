@@ -22,7 +22,7 @@ impl Aimbot {
                 {
                     return true;
                 }
-                return setting!(aimbot, baim_if_lethal) && self.is_lethal(ent, false);
+                return setting!(aimbot, baim_if_lethal) && weapon.as_gun().unwrap().is_lethal(ent, false);
             }
             return true;
         })();
@@ -60,14 +60,14 @@ impl Aimbot {
         if weapon.is_sniper_rifle()
             && setting!(aimbot, wait_for_charge)
             && p_local.get_condition().get(ConditionFlags::Zoomed)
-            && !self.is_lethal(player.as_ent(), true)
+            && !weapon.as_gun()?.is_lethal(player.as_ent(), true)
         {
             return Ok(None);
         }
         if weapon.is_ambassador()
             && setting!(aimbot, ambasador_wait_for_hs)
             && o!().global_vars.curtime - *weapon.get_last_fire() < 1.0
-            && !self.is_lethal(player.as_ent(), false)
+            && !weapon.as_gun()?.is_lethal(player.as_ent(), false)
         {
             return Ok(None);
         }

@@ -32,7 +32,8 @@ pub fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>>
     unsafe {
         let handle = dlopen(CString::new(name)?.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
         if handle.is_null() {
-            let error = CStr::from_ptr(dlerror()).to_str()?;
+            let error = dlerror();
+            let error = if error.is_null() {"module not found"} else { CStr::from_ptr(error).to_str()?};
             return Err(std::boxed::Box::new(OxideError::new(&format!(
                 "{} handle not found\n {}",
                 name, error

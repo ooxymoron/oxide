@@ -3,7 +3,7 @@ use std::{
     mem::transmute, thread::sleep, time::Duration,
 };
 
-use libc::{dlclose, dlopen, RTLD_LAZY, RTLD_NOLOAD};
+use libc::{dlclose, dlopen, RTLD_LAZY, RTLD_NOLOAD, RTLD_NOW};
 use sdl2_sys::SDL_Event;
 
 use crate::{
@@ -57,27 +57,31 @@ pub type GetBonePositionFn =
 
 impl Oxide {
     pub fn can_load() -> bool {
-        let name = CString::new("./bin/linux64/ServerBrowser.so").unwrap();
+        let name = CString::new("/usr/lib/gio/modules/libdconfsettings.so").unwrap();
         unsafe {
             let handle = dlopen(name.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
             if !handle.is_null() {
+                dbg!("a");
                 dlclose(handle);
                 return true;
             }
+            dbg!("b");
             return false;
         }
     }
     pub fn init() -> OxideResult<Oxide> {
-        if !Oxide::can_load() {
-            println!("awaiting tf2 load");
-            loop {
-                if Oxide::can_load() {
-                    break;
-                }
-                sleep(Duration::from_secs(1))
-            }
-            println!("tf2 loaded");
-        }
+        //TODO: x64 fucked up load order
+        //if !Oxide::can_load() {
+        //    println!("awaiting tf2 load");
+        //    loop {
+        //        if Oxide::can_load() {
+        //            dbg!("c");
+        //            break;
+        //        }
+        //        sleep(Duration::from_secs(1))
+        //    }
+        //    println!("tf2 loaded");
+        //}
 
         //let sig =
         //    "55 89 E5 53 8D 5D ? 83 EC 44 8B 45 ? 89 5C 24 ? 89 44 24 ? 8B 45 ? 89 04 24 E8 ? ? ? ? 8B 45";

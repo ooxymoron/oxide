@@ -18,7 +18,7 @@ pub enum NetvarType {
     BOOL,
     ARRAY(Box<(NetvarType, usize)>),
     INT64,
-    OBJECT(HashMap<String, Netvar>),
+    OBJECT((String,HashMap<String, Netvar>)),
 }
 impl NetvarType {
     pub fn from_prop(prop: &RecvProp) -> NetvarType {
@@ -36,7 +36,7 @@ impl NetvarType {
                     PropType::ARRAY => {
                         NetvarType::ARRAY(Box::new((NetvarType::INT, prop.elements as usize)))
                     }
-                    PropType::DATATABLE => NetvarType::OBJECT(HashMap::new()),
+                    PropType::DATATABLE => NetvarType::OBJECT(("".to_string(),HashMap::new())),
                     PropType::INT64 => NetvarType::INT64,
                 }
             }
@@ -63,7 +63,7 @@ pub trait HasNetvars {
         let mut path = path.into_iter();
         let mut netvar = netvars.get(path.next().unwrap()).ok_or(err!())?;
         for name in path {
-            let NetvarType::OBJECT(netvars) = &netvar.netvar_type else {
+            let NetvarType::OBJECT((_,netvars)) = &netvar.netvar_type else {
                 return Err(err!())
             };
             netvar = netvars.get(name).ok_or(err!())?;
