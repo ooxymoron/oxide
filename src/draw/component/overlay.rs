@@ -3,12 +3,16 @@ use std::isize;
 use sdl2_sys::*;
 
 use crate::{
-    vmt_call, draw::{
+    draw::{
         colors::*,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    }, error::OxideResult, interface, util::arcm::Arcm, NAME, VERSION
+    },
+    error::OxideResult,
+    interface,
+    util::arcm::Arcm,
+    vmt_call, NAME, VERSION,
 };
 
 use super::{
@@ -91,12 +95,12 @@ impl Overlay {
         let w = text_size.0 + 2 * pad;
         let h = (text_size.1 + text_size.2) + 2 * pad;
 
-        frame.logo(x - h + 1, y + 1, h - 1, h - 1);
-        frame.filled_rect(x, y, w, h, BACKGROUND, 200);
-        frame.filled_rect(x - h + 1, y, w + h - 1, 1, FOREGROUND, 200);
+        frame.filled_rect(x, y, w+h, h, BACKGROUND, 200);
+        frame.filled_rect(x, y, w+h, 1, FOREGROUND, 200);
+        frame.logo(x, y + 1, h - 1, h - 1);
         frame.text(
             &NAME.to_uppercase(),
-            x + w / 2,
+            x + w / 2 + h,
             y + h / 2,
             FontSize::Small,
             true,
@@ -107,7 +111,7 @@ impl Overlay {
 }
 
 impl Component for Overlay {
-    fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) -> OxideResult<()>{
+    fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) -> OxideResult<()> {
         let size = frame.window_size();
         if self.visible != vmt_call!(interface!(surface), id_cursor_visible) {
             vmt_call!(interface!(surface), set_cursor_always_visible, self.visible);
@@ -170,8 +174,8 @@ impl Component for Overlay {
                 vmt_call!(interface!(surface), unlock_cursor);
             } else {
                 vmt_call!(interface!(surface), lock_cursor);
-               // vmt_call!(interface!(input), activate_mouse);
-               // vmt_call!(interface!(input), deactivate_mouse);
+                // vmt_call!(interface!(input), activate_mouse);
+                // vmt_call!(interface!(input), deactivate_mouse);
             }
         }
         if !self.visible {
