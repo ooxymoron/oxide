@@ -24,7 +24,7 @@ pub mod fonts;
 pub mod frame;
 pub mod sdl_wrappers;
 
-pub static LOGO: &[u8; 1126522] = include_bytes!("../../oxide-logo.bmp");
+pub static LOGO: &[u8; 1125850] = include_bytes!("../../assets/oxide-logo-outlined.bmp");
 
 pub struct Draw {
     pub fonts: Fonts,

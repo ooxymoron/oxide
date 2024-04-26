@@ -3,7 +3,7 @@ use crate::{
     o,
     sdk::{
         condition::ConditionFlags,
-        entity::{player::Player, weapon::ids::ItemDefiniitonIndex, Entity},
+        entity::{player::Player,Entity},
         model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },

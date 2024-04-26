@@ -2,7 +2,6 @@ use std::{
     alloc::{alloc, Layout},
     error::Error,
     ffi::CString,
-    intrinsics::breakpoint,
     mem::transmute,
     usize,
 };
@@ -20,7 +19,7 @@ use crate::{
         engine_vgui::{EngineVgui, VMTEngineVgui},
         entity_list::{EntityList, VMTEntityList},
         game_movement::{GameMovement, VMTGameMovement},
-        input::{Input, VMTInput},
+        //input::{Input, VMTInput},
         mat_surface::{Surface, VMTMatSurface},
         material_system::{MaterialSystem, VMTMaterialSystem},
         model_info::{ModelInfo, VMTModelInfo},
@@ -30,12 +29,7 @@ use crate::{
         render_view::{RenderView, VMTRenderView},
         HasVmt,
     },
-    util::{
-        debug::{print_bytes, print_module_addres_offset},
-        get_handle,
-        sigscanner::find_sig,
-        vmt_size,
-    },
+    util::{get_handle, vmt_size},
 };
 
 #[derive(Debug, Clone)]
@@ -152,10 +146,10 @@ impl Interfaces {
 
     fn get_client_mode(base_client: &BaseClient) -> &'static mut ClientMode {
         unsafe {
-            let client_mode = (((*base_client.vmt).hud_process_input as usize + 3) as *const u32).read_unaligned()
-                    as usize
-                    + (*base_client.vmt).hud_process_input as usize
-                    + 7;
+            let client_mode = (((*base_client.vmt).hud_process_input as usize + 3) as *const u32)
+                .read_unaligned() as usize
+                + (*base_client.vmt).hud_process_input as usize
+                + 7;
             *transmute::<usize, &'static mut &'static mut ClientMode>(client_mode)
         }
     }

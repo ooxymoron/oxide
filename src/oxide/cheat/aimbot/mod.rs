@@ -2,7 +2,6 @@ use crate::{
     draw::event::EventType,
     error::OxideResult,
     math::vector::Vector3,
-    o,
     sdk::{
         condition::ConditionFlags,
         engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
@@ -10,8 +9,7 @@ use crate::{
             weapon::ids::{ItemDefiniitonIndex, WeaponType},
             Entity,
         },
-        model_info::{Hitbox, HitboxId, HitboxWrapper},
-        networkable::ClassId,
+        model_info::{HitboxId, HitboxWrapper},
         user_cmd::{ButtonFlags, UserCmd},
     },
     setting, vmt_call,

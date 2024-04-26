@@ -1,9 +1,9 @@
 use crate::cfn;
 
-use super::{networkable::{ClientClass, UnparsedClientClass}, view_setup::ViewSetup, WithVmt};
+use super::{networkable::UnparsedClientClass, view_setup::ViewSetup, WithVmt};
 
 #[repr(C)]
-#[derive(Debug, Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum FrameStage {
     FrameUndefined = -1,
     FrameStart,
@@ -16,7 +16,6 @@ pub enum FrameStage {
 }
 
 pub type BaseClient = WithVmt<VMTBaseClient>;
-
 
 #[repr(C)]
 #[derive(Debug, Clone)]

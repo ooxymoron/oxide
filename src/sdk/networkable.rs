@@ -1,11 +1,8 @@
-use std::{ffi::CStr, fmt::Display};
+use std::ffi::CStr;
 
 use libc::c_void;
-use serde::de::Error;
 
-use crate::{
-    cfn, error::{OxideError, OxideResult}, netvars::NetvarType, o, sdk::*, vmt_call
-};
+use crate::{cfn, netvars::NetvarType, o, sdk::*, vmt_call};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -19,7 +16,6 @@ pub enum PropType {
     DATATABLE,
     INT64,
 }
-
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -71,8 +67,7 @@ pub struct ClientClass {
     pub class_id: ClassId,
 }
 impl ClientClass {
-    pub fn get_ingeritance_chain(&self) -> Vec<String>{
-
+    pub fn get_ingeritance_chain(&self) -> Vec<String> {
         let mut netvars = o!().netvars.get(&self.network_name).unwrap();
         let mut res = vec![self.network_name.clone()];
         loop {
@@ -80,7 +75,7 @@ impl ClientClass {
             let NetvarType::OBJECT((name,next_netvars)) = &netvar.netvar_type else {break;};
             res.push(name.clone());
             netvars = next_netvars;
-        };
+        }
         res
     }
 }
@@ -122,7 +117,6 @@ impl Networkable {
     pub fn get_client_class(&self) -> ClientClass {
         (*vmt_call!(self, get_client_class)).clone().into()
     }
-
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

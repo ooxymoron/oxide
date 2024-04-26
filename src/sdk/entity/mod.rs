@@ -13,7 +13,7 @@ use crate::{
 };
 
 use self::{
-    model_info::{Hitbox, HitboxId, HitboxSet, HitboxWrapper, ModelInfo, StudioHdr},
+    model_info::{HitboxId, HitboxWrapper, StudioHdr},
     model_render::BoneMatrix,
     networkable::ClassId,
     object::Object,
@@ -186,18 +186,21 @@ impl Entity {
             let hitbox_set = studio_model
                 .get_hitbox_set(HITBOX_SET)
                 .ok_or(OxideError::new("could not get hitboxes"))?;
-            hitbox_ids.into_iter().map(|id| {
-                let hitbox = hitbox_set.get_hitbox(id)?;
-                Ok(HitboxWrapper {
-                    id,
-                    bone: bones[hitbox.bone as usize].clone(),
-                    group: hitbox.group,
-                    min: hitbox.min,
-                    max: hitbox.max,
-                    nameindex: hitbox.nameindex,
-                    owner: transmute(self)
+            hitbox_ids
+                .into_iter()
+                .map(|id| {
+                    let hitbox = hitbox_set.get_hitbox(id)?;
+                    Ok(HitboxWrapper {
+                        id,
+                        bone: bones[hitbox.bone as usize].clone(),
+                        group: hitbox.group,
+                        min: hitbox.min,
+                        max: hitbox.max,
+                        nameindex: hitbox.nameindex,
+                        owner: transmute(self),
+                    })
                 })
-            }).collect()
+                .collect()
         }
     }
 }

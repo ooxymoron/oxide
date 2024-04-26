@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use crate::{
     error::OxideResult,
     hex_to_rgb, interface, o,
@@ -7,8 +5,7 @@ use crate::{
     rgb_to_hex,
     sdk::{
         entity::Entity,
-        model_info::{Hitbox, HitboxId, HitboxWrapper},
-        model_render::BoneMatrix,
+        model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
     setting,

@@ -1,7 +1,4 @@
-use std::{
-    mem::{transmute, MaybeUninit},
-    ptr::null,
-};
+use std::mem::{transmute, MaybeUninit};
 
 use crate::{
     error::{OxideError, OxideResult},
@@ -131,7 +128,7 @@ impl EnginePredicion {
             return Err(OxideError::new("not predicting"));
         };
         data.restore();
-        *data.player().get_current_command() = unsafe { transmute(0i64) };
+        //*data.player().get_current_command() = unsafe { transmute(0i64) };
         vmt_call!(interface!(game_movement), finish_prediction, data.player());
         self.data = None;
         Ok(())

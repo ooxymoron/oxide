@@ -11,13 +11,11 @@ use crate::{
     interface,
     math::{angles::Angles, vector::Vector3},
     netvars::HasNetvars,
-    o,
-    sdk::CBaseHandle,
-    vmt_call,
+    o, vmt_call,
 };
 
 use super::{
-    base_engine::PlayerInfo, condition::Condition, flags::Flags, networkable::ClassId,
+    base_engine::PlayerInfo, condition::Condition, flags::Flags,
     player_class::PlayerClass, user_cmd::UserCmd, Entity, WaterLevel,
 };
 
@@ -67,7 +65,7 @@ impl Player {
         ["baseclass", "baseclass", "bcc_localdata", "m_flNextAttack"],
         f32
     );
-    define_netvar!(get_condition,  ["m_Shared", "m_nPlayerCond"], Condition);
+    define_netvar!(get_condition, ["m_Shared", "m_nPlayerCond"], Condition);
     define_netvar!(
         get_punch_angle,
         ["baseclass", "localdata", "m_Local", "m_vecPunchAngle"],
@@ -78,7 +76,7 @@ impl Player {
         ["baseclass", "localdata", "m_nTickBase"],
         i32
     );
-    define_netvar!(get_player_class, ["m_PlayerClass","m_iClass"], PlayerClass);
+    define_netvar!(get_player_class, ["m_PlayerClass", "m_iClass"], PlayerClass);
     define_netvar!(
         get_velocity,
         ["baseclass", "localdata", "m_vecVelocity[0]"],

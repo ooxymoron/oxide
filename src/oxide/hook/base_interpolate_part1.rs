@@ -1,7 +1,7 @@
-use std::{intrinsics::breakpoint, mem::transmute};
+use std::mem::transmute;
 
 use crate::{
-    call_original, cfn,
+    cfn,
     math::{angles::Angles, vector::Vector3},
     o,
 };
@@ -10,7 +10,7 @@ pub const NAME: &str = "BaseInterpolatePart1Hook";
 
 pub type BaseInterpolatePart1HookType = cfn!(isize, f32, Vector3, Angles, Vector3, isize);
 
-pub extern "C" fn BaseInterpolatePart1Hook(
+pub extern "C" fn base_interpolate_part1_hook(
     curr_time: f32,
     old_origin: Vector3,
     old_angle: Angles,

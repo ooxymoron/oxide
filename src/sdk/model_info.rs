@@ -1,4 +1,3 @@
-use std::{mem::MaybeUninit, time::Instant};
 pub use std::{
     ffi::{c_char, CStr},
     mem::{size_of, transmute},
@@ -13,14 +12,9 @@ use crate::{
         get_corners,
         vector::{Vector3, Vector4},
     },
-    o, vmt_call,
 };
 
-use super::{
-    entity::{Entity, MAX_STUDIO_BONES},
-    model_render::BoneMatrix,
-    WithVmt,
-};
+use super::{entity::Entity, model_render::BoneMatrix, WithVmt};
 
 pub type ModelInfo = WithVmt<VMTModelInfo>;
 
@@ -40,7 +34,7 @@ impl HitboxSet {
         if ptr.is_null() {
             return Err(OxideError::new("could not get hitbox"));
         }
-        return Ok(unsafe{transmute(ptr)});
+        return Ok(unsafe { transmute(ptr) });
     }
 }
 
@@ -56,14 +50,14 @@ pub struct Hitbox {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct HitboxWrapper{
+pub struct HitboxWrapper {
     pub bone: BoneMatrix,
     pub id: HitboxId,
     pub group: i32,
     pub min: Vector3,
     pub max: Vector3,
     pub nameindex: i32,
-    pub owner: &'static Entity
+    pub owner: &'static Entity,
 }
 
 impl HitboxWrapper {
@@ -72,7 +66,6 @@ impl HitboxWrapper {
         Ok((corners[0] + corners[7]) / 2.0)
     }
     pub fn get_pos(&self) -> OxideResult<(Vector3, [Vector3; 3])> {
-
         let pos = Vector3::new(self.bone[0][3], self.bone[1][3], self.bone[2][3]);
         let angle = [
             Vector3::new(self.bone[0][0], self.bone[0][1], self.bone[0][2]),

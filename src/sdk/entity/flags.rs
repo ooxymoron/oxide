@@ -1,8 +1,6 @@
-use core::fmt;
 use std::{
     fmt::{Debug, Display},
     mem::transmute,
-    ops::Range,
 };
 
 #[derive(Debug, Clone, Copy)]

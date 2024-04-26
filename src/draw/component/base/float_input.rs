@@ -1,7 +1,6 @@
 use crate::{
     draw::{component::Component, event::Event, frame::Frame},
     error::OxideResult,
-    s,
     util::arcm::Arcm,
 };
 

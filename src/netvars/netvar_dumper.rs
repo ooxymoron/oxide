@@ -1,10 +1,10 @@
 use core::slice;
-use std::{collections::HashMap, ffi::CStr, intrinsics::breakpoint};
+use std::{collections::HashMap, ffi::CStr};
 
 use crate::{
     sdk::{
         base_client::BaseClient,
-        networkable::{ClassId, ClientClass, RecvProp, RecvTable},
+        networkable::{ClientClass, RecvTable},
     },
     vmt_call,
 };
@@ -46,7 +46,8 @@ pub fn parse_table(table: RecvTable, super_offset: usize, netvars: &mut HashMap<
                 *table_name = CStr::from_ptr(data_table.table_name)
                     .to_str()
                     .unwrap()
-                    .to_string().replace("DT_", "C");
+                    .to_string()
+                    .replace("DT_", "C");
                 parse_table(
                     data_table,
                     prop.offset as usize + super_offset,

@@ -1,8 +1,7 @@
-
 use crate::{
     define_hook,
     oxide::{cheat::visual::Visuals, entity_cache::EntityCache},
-    sdk::{base_client::{BaseClient, FrameStage}, networkable::ClassId},
+    sdk::base_client::{BaseClient, FrameStage},
 };
 
 fn subhooks(hook: &mut FrameStageNotifyHook) {
@@ -19,7 +18,6 @@ fn subhooks(hook: &mut FrameStageNotifyHook) {
                 };
                 let mut visuals = o!().cheats.get::<Visuals>(Visuals::name());
                 visuals.net_update_end().unwrap();
-                
             }
             _ => {}
         }

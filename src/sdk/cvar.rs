@@ -1,12 +1,11 @@
 use std::{
-    ffi::{c_char, CStr, CString, VaList},
+    ffi::{c_char, CStr, CString},
     mem::transmute,
 };
 
 use crate::{
     error::{OxideError, OxideResult},
     interface,
-    util::debug::print_module_addres_offset,
     vmt_call,
 };
 

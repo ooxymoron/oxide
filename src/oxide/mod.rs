@@ -1,28 +1,16 @@
-use std::{
-    collections::HashMap, error::Error, ffi::CString, fmt::format, intrinsics::breakpoint,
-    mem::transmute, thread::sleep, time::Duration,
-};
+use std::{collections::HashMap, ffi::CString, mem::transmute};
 
-use libc::{dlclose, dlopen, RTLD_LAZY, RTLD_NOLOAD, RTLD_NOW};
+use libc::{dlclose, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Event;
 
 use crate::{
     d,
     draw::event::Event,
-    error::{OxideError, OxideResult},
+    error::OxideResult,
     math::{angles::Angles, vector::Vector3},
-    netvars::{netvar_dumper::load_netvars, Netvar, NetvarType},
+    netvars::{netvar_dumper::load_netvars, Netvar},
     oxide::{cheat::cheats::Cheats, hook::hooks::Hooks, interfaces::Interfaces},
-    sdk::{
-        base_client::BaseClient,
-        entity::Entity,
-        global_vars::GlobalVars,
-        networkable::{ClassId, PropType},
-    },
-    util::{
-        debug::{print_bytes, print_module_addres_offset},
-        get_handle, LinkMap,
-    },
+    sdk::{base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
     DRAW,
 };
 

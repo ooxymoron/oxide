@@ -1,9 +1,9 @@
-use std::{collections::HashMap, ffi::CStr, mem::transmute};
+use std::{collections::HashMap, ffi::CStr};
 
 use crate::{
     error::{OxideError, OxideResult},
     o,
-    sdk::networkable::{ClassId, PropType, RecvProp},
+    sdk::networkable::{PropType, RecvProp},
 };
 
 pub mod netvar_dumper;
@@ -18,7 +18,7 @@ pub enum NetvarType {
     BOOL,
     ARRAY(Box<(NetvarType, usize)>),
     INT64,
-    OBJECT((String,HashMap<String, Netvar>)),
+    OBJECT((String, HashMap<String, Netvar>)),
 }
 impl NetvarType {
     pub fn from_prop(prop: &RecvProp) -> NetvarType {
@@ -36,7 +36,7 @@ impl NetvarType {
                     PropType::ARRAY => {
                         NetvarType::ARRAY(Box::new((NetvarType::INT, prop.elements as usize)))
                     }
-                    PropType::DATATABLE => NetvarType::OBJECT(("".to_string(),HashMap::new())),
+                    PropType::DATATABLE => NetvarType::OBJECT(("".to_string(), HashMap::new())),
                     PropType::INT64 => NetvarType::INT64,
                 }
             }

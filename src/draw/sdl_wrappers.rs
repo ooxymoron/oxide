@@ -6,7 +6,6 @@ use crate::{d, hex_to_rgb, setting};
 
 use super::{fonts::FontSize, frame::Frame};
 
-pub static LOGO: &[u8; 1126522] = include_bytes!("../../oxide-logo.bmp");
 
 impl Frame {
     pub fn filled_rect(&self, x: isize, y: isize, w: isize, h: isize, color: usize, alpha: u8) {

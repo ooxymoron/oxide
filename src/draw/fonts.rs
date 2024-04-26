@@ -9,7 +9,7 @@ use sdl2_sys::{
 
 use crate::{d, hex_to_rgb};
 
-pub static HACK_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
+pub static HACK_FONT: &[u8; 2215536] = include_bytes!("./../../assets/HackNerdFont-Regular.ttf");
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct CacheKey {

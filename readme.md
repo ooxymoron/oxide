@@ -1,4 +1,4 @@
-<img src='https://github.com/ooxymoron/oxide/blob/master/oxide-logo.png' width='100'>
+<img src='https://github.com/ooxymoron/oxide/blob/master/assets/oxide-logo-outlined.png' width='100'>
 
 https://discord.gg/bwjtk8F93S
 
