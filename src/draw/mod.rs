@@ -7,8 +7,7 @@ use libc::c_void;
 use sdl2_sys::*;
 
 use crate::{
-    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay, spectator_list::SpectatorList},
-    AUTHOR, NAME, VERSION,
+    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay, spectator_list::SpectatorList}, log, AUTHOR, NAME, VERSION
 };
 
 use self::{
@@ -39,7 +38,7 @@ pub struct Draw {
 
 impl Draw {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Draw, std::boxed::Box<dyn Error>> {
-        println!("loading menu");
+        log!("loading menu");
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
         let mut renderer = SDL_CreateRenderer(window, -1, 0);
@@ -68,7 +67,7 @@ impl Draw {
         let bmp = SDL_LoadBMP_RW(rw, 0);
         let logo = SDL_CreateTextureFromSurface(renderer, bmp);
 
-        println!("loaded menu");
+        log!("loaded menu");
         Ok(Draw {
             components,
             fonts: Fonts::init(),
@@ -95,7 +94,7 @@ impl Draw {
 
         let mut frame = Frame::new(window, self.renderer, &mut self.fonts);
         if let Err(e) = self.components.draw(&mut frame, 0, 0) {
-            eprintln!("error during drawing {}",e)
+            log!("error during drawing {}",e);
         }
 
         unsafe {

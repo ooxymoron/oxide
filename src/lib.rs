@@ -39,27 +39,12 @@ static mut SETTINGS: Option<*mut c_void> = None;
 
 
 unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
-    println!("loading");
+    println!("loading base");
 
     init_global!(SETTINGS,Settings::load()?,Settings);
     init_global!(OXIDE,Oxide::init()?,Oxide);
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
-    o!().logger.log("test");
 
-    println!("loaded");
+    log!("loaded base");
     Ok(())
 }
 
@@ -84,7 +69,7 @@ static LOAD: unsafe extern "C" fn() = {
 extern "C" fn unload() {
     unsafe {
 
-        println!("unloading");
+        log!("unloading");
 
         if DRAW.is_some() {
             d!().restore();
@@ -95,6 +80,6 @@ extern "C" fn unload() {
             std::ptr::drop_in_place(o!());
         }
 
-        println!("unloaded");
+        eprintln!("unloaded");
     }
 }

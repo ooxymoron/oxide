@@ -19,7 +19,7 @@ pub trait Hook: std::fmt::Debug {
 #[macro_export]
 macro_rules! define_hook{
     ($name:ident,$stringName:expr,$return:ty,$default:expr,$subhooks:expr,$($argName:ident,$argType:ty),*) => {
-        use crate::{cfn,o,OXIDE,oxide::hook::Hook,error::OxideResult};
+        use crate::{cfn,o,OXIDE,oxide::hook::Hook,log};
         use core::intrinsics::{transmute,transmute_unchecked};
         use std::panic::{catch_unwind,AssertUnwindSafe};
         use libc::{PROT_EXEC, PROT_READ, PROT_WRITE};
@@ -74,15 +74,13 @@ macro_rules! define_hook{
                 }
 
                 let mut hook = o!().hooks.get::<Self>(Self::name());
-                //dbg!($stringName);
-                //return (hook.org)($($argName),*);
 
 
                 let mut custom_return_value = if let Some(fun) = &hook.before {
                     match catch_unwind( AssertUnwindSafe(||(fun)($($argName),*))) {
                         Ok(res) => res,
                         Err(e) => {
-                            eprintln!("unhandled error in {} bofere hook: {:?}",$stringName,e);
+                            log!("unhandled error in {} bofere hook: {:?}",$stringName,e);
                             None
                         }
                     }
@@ -99,7 +97,7 @@ macro_rules! define_hook{
                 if let Some(fun) = hook.after {
                     match catch_unwind( AssertUnwindSafe(||(fun)($($argName),*,&mut return_value))) {
                         Err(e) => {
-                            eprintln!("unhandled error in {} bofere hook: {:?}",$stringName,e);
+                            log!("unhandled error in {} bofere hook: {:?}",$stringName,e);
                             return $default;
                         }
                         _ => {}

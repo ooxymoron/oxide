@@ -27,7 +27,7 @@ use crate::{
 };
 
 use self::{
-    engine_prediction::EnginePredicion, entity_cache::EntityCache, log::Logger, paint::Paint,
+    engine_prediction::EnginePredicion, entity_cache::EntityCache, logger::Logger, paint::Paint,
 };
 
 pub mod cheat;
@@ -35,7 +35,7 @@ pub mod engine_prediction;
 pub mod entity_cache;
 pub mod hook;
 pub mod interfaces;
-pub mod log;
+pub mod logger;
 pub mod paint;
 
 #[derive(Debug)]
