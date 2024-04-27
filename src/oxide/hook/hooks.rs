@@ -8,10 +8,10 @@ use libc::dlsym;
 
 use crate::{
     oxide::{
-        hook::{detour::DetourHook, run_command::RunCommandHook},
+        hook::{detour::DetourHook, load_whitelist, run_command::RunCommandHook},
         interfaces::Interfaces,
     },
-    util::get_handle,
+    util::{get_handle, sigscanner::find_sig},
 };
 
 use super::{
@@ -38,7 +38,7 @@ macro_rules! InitVmtHook {
 impl Hooks {
     pub fn init(interfaces: &Interfaces) -> Hooks {
         let mut ptr_hooks = HashMap::new();
-        let tramp_hooks = HashMap::new();
+        let mut tramp_hooks = HashMap::new();
 
         InitVmtHook!(
             ptr_hooks,
@@ -70,6 +70,19 @@ impl Hooks {
             RunCommandHook,
             &(*interfaces.prediction.get_vmt()).run_command
         );
+        //load whitelist
+        //55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60
+
+        tramp_hooks.insert(
+            load_whitelist::NAME.to_string(),
+            DetourHook::hook(
+                find_sig(
+                    "./bin/linux64/engine.so",
+                    "55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60",
+                ).unwrap(),
+                load_whitelist::load_whitelist_hook as *const u8,
+            ),
+        );
 
         //tramp_hooks.insert(
         //    base_interpolate_part1::NAME.to_string(),
@@ -85,20 +98,14 @@ impl Hooks {
         unsafe {
             let handle = get_handle("/usr/lib/libSDL2-2.0.so.0").unwrap();
             let name = CString::new("SDL_GL_SwapWindow").unwrap();
-            let exprted_fn: *const u8 = transmute(dlsym(
-                handle,
-                name.as_ptr()
-            ));
+            let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let swap_window_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
 
             InitVmtHook!(ptr_hooks, SwapWindowHook, transmute(swap_window_ptr));
 
             let name = CString::new("SDL_PollEvent").unwrap();
-            let exprted_fn: *const u8 = transmute(dlsym(
-                handle,
-                name.as_ptr(),
-            ));
+            let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let poll_event_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
             InitVmtHook!(ptr_hooks, PollEventHook, transmute(poll_event_ptr));

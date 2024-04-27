@@ -117,13 +117,14 @@ impl Visuals {
             return;
         }
         if !p_local.get_condition().get(ConditionFlags::Zoomed)
-            || (p_local.get_condition().get(ConditionFlags::Zoomed) && setting!(visual, remove_zoom))
+            || (p_local.get_condition().get(ConditionFlags::Zoomed)
+                && setting!(visual, remove_zoom))
         {
             view_setup.fov = setting!(visual, fov);
         };
         let force_taunt_cam = p_local.get_force_taunt_cam();
         if setting!(visual, third_person) {
-            let dirs = vmt_call!(p_local.as_ent(),get_abs_angles).to_vectors();
+            let dirs = vmt_call!(p_local.as_ent(), get_abs_angles).to_vectors();
             *force_taunt_cam = true;
             let x = setting!(visual, tp_offset_x);
             let y = setting!(visual, tp_offset_y);
@@ -163,25 +164,14 @@ impl Cheat for Visuals {
                         let mut y = s!().visual.tp_offset_y.lock().unwrap();
                         let mut z = s!().visual.tp_offset_z.lock().unwrap();
                         match key {
-                            SDL_Scancode::SDL_SCANCODE_UP => *x += 10.0,
-                            SDL_Scancode::SDL_SCANCODE_DOWN => *x -= 10.0,
-                            SDL_Scancode::SDL_SCANCODE_LEFT => *y += 10.0,
+                            SDL_Scancode::SDL_SCANCODE_UP    => *x += 10.0,
+                            SDL_Scancode::SDL_SCANCODE_DOWN  => *x -= 10.0,
+                            SDL_Scancode::SDL_SCANCODE_LEFT  => *y += 10.0,
                             SDL_Scancode::SDL_SCANCODE_RIGHT => *y -= 10.0,
                             SDL_Scancode::SDL_SCANCODE_SPACE => *z += 10.0,
                             SDL_Scancode::SDL_SCANCODE_LCTRL => *z -= 10.0,
                             _ => {}
                         }
-                    }
-                    match key {
-                        SDL_Scancode::SDL_SCANCODE_LCTRL
-                        | SDL_Scancode::SDL_SCANCODE_SPACE
-                        | SDL_Scancode::SDL_SCANCODE_RIGHT
-                        | SDL_Scancode::SDL_SCANCODE_LEFT
-                        | SDL_Scancode::SDL_SCANCODE_DOWN
-                        | SDL_Scancode::SDL_SCANCODE_UP => {
-                            s!().save().unwrap();
-                        }
-                        _ => {}
                     }
                 }
             }

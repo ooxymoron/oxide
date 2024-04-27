@@ -11,6 +11,7 @@ pub mod paint_traverse;
 pub mod poll_event;
 pub mod run_command;
 pub mod swap_window;
+pub mod load_whitelist;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);

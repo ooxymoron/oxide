@@ -8,11 +8,7 @@ use crate::{
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    },
-    error::OxideResult,
-    interface,
-    util::arcm::Arcm,
-    vmt_call, NAME, VERSION,
+    }, error::OxideResult, interface, s, util::arcm::Arcm, vmt_call, NAME, VERSION
 };
 
 use super::{
@@ -171,8 +167,11 @@ impl Component for Overlay {
             event.handled = true;
 
             if self.visible {
+
                 vmt_call!(interface!(surface), unlock_cursor);
             } else {
+
+                s!().save().unwrap();
                 vmt_call!(interface!(surface), lock_cursor);
                 // vmt_call!(interface!(input), activate_mouse);
                 // vmt_call!(interface!(input), deactivate_mouse);

@@ -1,11 +1,14 @@
 use crate::{
-    d, draw::{
+    d,
+    draw::{
         colors::{BACKGROUND, FOREGROUND},
         component::Component,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    }, error::OxideResult, s, util::arcm::Arcm 
+    },
+    error::OxideResult,
+    util::arcm::Arcm,
 };
 
 const SIZE: isize = 12;
@@ -32,7 +35,7 @@ impl Checkbox {
     }
 }
 impl Component for Checkbox {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{
+    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()> {
         self.rooted_x = root_x.wrapping_add(self.x);
         self.rooted_y = root_y + self.y;
         frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, FOREGROUND, 255);
@@ -69,8 +72,6 @@ impl Component for Checkbox {
                     let mut checked = self.checked.lock().unwrap();
                     *checked = !*checked;
                     event.handled = true;
-                    drop(checked);
-                    s!().save().unwrap();
                 }
             }
             _ => (),

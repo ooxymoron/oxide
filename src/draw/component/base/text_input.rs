@@ -1,13 +1,16 @@
 use sdl2_sys::*;
 
 use crate::{
-    d, draw::{
+    d,
+    draw::{
         colors::{BACKGROUND, BLUE, FOREGROUND},
         component::Component,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    }, error::OxideResult, s, util::{arcm::Arcm, point_in_bounds, sdl_scancode_to_char} 
+    },
+    error::OxideResult,
+    util::{arcm::Arcm, point_in_bounds, sdl_scancode_to_char},
 };
 
 const SIZE: isize = FontSize::Small as isize + 4;
@@ -25,13 +28,7 @@ pub struct TextInput {
 }
 
 impl TextInput {
-    pub fn new(
-        label: &'static str,
-        x: isize,
-        y: isize,
-        w: isize,
-        val: Arcm<String>,
-    ) -> TextInput {
+    pub fn new(label: &'static str, x: isize, y: isize, w: isize, val: Arcm<String>) -> TextInput {
         TextInput {
             label,
             x,
@@ -46,7 +43,7 @@ impl TextInput {
 }
 
 impl Component for TextInput {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{
+    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()> {
         let x = self.x + root_x;
         let y = self.y + root_y;
         self.rooted_x = x;
@@ -116,7 +113,6 @@ impl Component for TextInput {
                     }
                     SDL_Scancode::SDL_SCANCODE_RETURN | SDL_Scancode::SDL_SCANCODE_ESCAPE => {
                         self.focussed = false;
-                        s!().save().unwrap();
                     }
                     _ => {}
                 }

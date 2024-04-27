@@ -112,6 +112,12 @@ impl VisualsWindow {
             10,
             y,
         ));
+        a!(Checkbox::new(
+            "pure bypass",
+            s!().visual.pure_bypass.clone(),
+            10,
+            y,
+        ));
         let window = Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }
     }

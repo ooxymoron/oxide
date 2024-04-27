@@ -1,9 +1,7 @@
-use std::mem::transmute;
 
 use crate::{
-    cfn,
+    call_original, cfn,
     math::{angles::Angles, vector::Vector3},
-    o,
 };
 
 pub const NAME: &str = "BaseInterpolatePart1Hook";
@@ -17,19 +15,13 @@ pub extern "C" fn base_interpolate_part1_hook(
     old_vel: Vector3,
     no_more_changes: isize,
 ) -> isize {
-    let hook = o!().hooks.detour_hooks.get_mut(NAME).unwrap();
-    hook.unpatch();
-
-    let res = unsafe {
-        transmute::<_, BaseInterpolatePart1HookType>(hook.target)(
-            curr_time,
-            old_origin,
-            old_angle,
-            old_vel,
-            no_more_changes,
-        )
-    };
-    hook.patch();
-    return res;
-    //call_original!(NAME);
+    call_original!(
+        NAME,
+        BaseInterpolatePart1HookType,
+        curr_time,
+        old_origin,
+        old_angle,
+        old_vel,
+        no_more_changes
+    )
 }

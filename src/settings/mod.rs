@@ -115,6 +115,7 @@ pub struct VisualSettings {
     pub hitboxes: Arcm<bool>,
     pub remove_disguises: Arcm<bool>,
     pub spectator_list: Arcm<bool>,
+    pub pure_bypass: Arcm<bool>,
 }
 
 impl VisualSettings {
@@ -136,6 +137,7 @@ impl VisualSettings {
             hitboxes: Arcm::new(false),
             remove_disguises: Arcm::new(false),
             spectator_list: Arcm::new(false),
+            pure_bypass: Arcm::new(false),
         }
     }
 }
