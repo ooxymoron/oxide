@@ -2,15 +2,15 @@ use derivative::Derivative;
 
 use crate::{define_netvar, netvars::HasNetvars};
 
-#[derive(Debug,Clone, Copy)]
-pub enum PipeType{
-	REGULAR = 0,
-	RemoteDetonate,
-	RemoteDetonatePractice,
-	CANNONBALL,
+#[derive(Debug, Clone, Copy)]
+pub enum PipeType {
+    REGULAR = 0,
+    RemoteDetonate,
+    RemoteDetonatePractice,
+    CANNONBALL,
 }
 impl PipeType {
-    pub fn to_str(&self) -> &str{
+    pub fn to_str(&self) -> &str {
         match self {
             PipeType::REGULAR => "pipe",
             PipeType::RemoteDetonate => "sticky",
@@ -23,18 +23,16 @@ impl PipeType {
 #[repr(C)]
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
-pub struct PipeBomb {
-}
+pub struct PipeBomb {}
 
 impl HasNetvars for PipeBomb {
-    fn get_class_name() -> String {
-        "CTFGrenadePipebombProjectile".to_string()
+    fn get_class_name() -> &'static str {
+        "CTFGrenadePipebombProjectile"
     }
 }
 impl PipeBomb {
     define_netvar!(get_type, ["m_iType"], PipeType);
 }
-
 
 //CTFGrenadePipebombProjectile{
 //CTFGrenadePipebombProjectile baseclass m_vecOrigin

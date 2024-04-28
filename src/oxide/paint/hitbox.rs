@@ -5,7 +5,7 @@ use crate::{
     rgb_to_hex,
     sdk::{
         entity::Entity,
-        model_info::{HitboxId, HitboxWrapper},
+        interfaces::model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
     setting,

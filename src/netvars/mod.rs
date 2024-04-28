@@ -52,14 +52,14 @@ pub struct Netvar {
 }
 
 pub trait HasNetvars {
-    fn get_class_name() -> String;
+    fn get_class_name() -> &'static str;
     fn get_netvar<const L: usize>(&self, path: [&str; L]) -> OxideResult<Netvar> {
         macro_rules! err {
             () => {
                 OxideError::new("netvar not found")
             };
         }
-        let netvars = o!().netvars.get(&Self::get_class_name()).unwrap();
+        let netvars = o!().netvars.get(Self::get_class_name()).unwrap();
         let mut path = path.into_iter();
         let mut netvar = netvars.get(path.next().unwrap()).ok_or(err!())?;
         for name in path {

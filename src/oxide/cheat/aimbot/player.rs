@@ -4,7 +4,7 @@ use crate::{
     sdk::{
         condition::ConditionFlags,
         entity::{player::Player,Entity},
-        model_info::{HitboxId, HitboxWrapper},
+        interfaces::model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
     setting, vmt_call,

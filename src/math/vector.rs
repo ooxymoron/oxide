@@ -1,6 +1,6 @@
 use std::{f32::consts::PI, ops::Sub};
 
-use crate::sdk::engine_trace::VectorAligned;
+use crate::sdk::interfaces::engine_trace::VectorAligned;
 
 use super::angles::Angles;
 

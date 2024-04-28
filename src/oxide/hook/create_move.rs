@@ -2,7 +2,7 @@ use crate::{
     define_hook,
     oxide::cheat::{aimbot::Aimbot, movement::Movement},
     sdk::{
-        client_mode::ClientMode,
+        interfaces::client_mode::ClientMode,
         entity::{player::Player, Entity},
         user_cmd::UserCmd,
     },

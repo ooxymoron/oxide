@@ -11,22 +11,24 @@ use libc::{c_void, dlsym};
 use crate::{
     cfn,
     sdk::{
-        base_client::{BaseClient, VMTBaseClient},
-        base_engine::{BaseEngine, VMTBaseEngine},
-        client_mode::{ClientMode, VMTClientMode},
-        cvar::{CVar, VMTCVar},
-        engine_trace::{EngineTrace, VMTEngineTrace},
-        engine_vgui::{EngineVgui, VMTEngineVgui},
-        entity_list::{EntityList, VMTEntityList},
-        game_movement::{GameMovement, VMTGameMovement},
-        //input::{Input, VMTInput},
-        mat_surface::{Surface, VMTMatSurface},
-        material_system::{MaterialSystem, VMTMaterialSystem},
-        model_info::{ModelInfo, VMTModelInfo},
-        model_render::{ModelRender, VMTModelRender},
-        panel::{Panel, VMTPanel},
-        predictions::{Prediction, VMTPrediction},
-        render_view::{RenderView, VMTRenderView},
+        interfaces::{
+            base_client::{BaseClient, VMTBaseClient},
+            base_engine::{BaseEngine, VMTBaseEngine},
+            client_mode::{ClientMode, VMTClientMode},
+            cvar::{CVar, VMTCVar},
+            engine_trace::{EngineTrace, VMTEngineTrace},
+            engine_vgui::{EngineVgui, VMTEngineVgui},
+            entity_list::{EntityList, VMTEntityList},
+            game_movement::{GameMovement, VMTGameMovement},
+            //input::{Input, VMTInput},
+            mat_surface::{Surface, VMTMatSurface},
+            material_system::{MaterialSystem, VMTMaterialSystem},
+            model_info::{ModelInfo, VMTModelInfo},
+            model_render::{ModelRender, VMTModelRender},
+            panel::{Panel, VMTPanel},
+            predictions::{Prediction, VMTPrediction},
+            render_view::{RenderView, VMTRenderView},
+        },
         HasVmt,
     },
     util::{get_handle, vmt_size},
@@ -118,12 +120,6 @@ impl Interfaces {
 
         let client_mode = Interfaces::get_client_mode(base_client.interface_ref());
 
-        //let input = find_sig(
-        //    "./tf/bin/client.so",
-        //    "A1 ? ? ? ? C6 05 ? ? ? ? ? 8B 10 89 04 24 FF 92 ? ? ? ? A1",
-        //) as usize
-        //    + 1;
-        //let input = unsafe { transmute(**(input as *const *const *const Input)) };
         Ok(Interfaces {
             base_client,
             base_engine: Interface::create(engine_handle, "VEngineClient014")?,

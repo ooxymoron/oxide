@@ -1,7 +1,7 @@
 use crate::{
     define_hook,
     oxide::cheat::visual::Visuals,
-    sdk::{client_mode::ClientMode, view_setup::ViewSetup},
+    sdk::{interfaces::client_mode::ClientMode, view_setup::ViewSetup},
 };
 
 fn subhooks(hook: &mut OverrideViewHook) {

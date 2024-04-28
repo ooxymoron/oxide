@@ -1,4 +1,4 @@
-use crate::{define_hook, sdk::client_mode::ClientMode};
+use crate::{define_hook, sdk::interfaces::client_mode::ClientMode};
 
 fn subhooks(hook: &mut LevelShutdownHook) {
     hook.before = Some(|_| {

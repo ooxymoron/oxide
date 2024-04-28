@@ -3,7 +3,7 @@ use std::{collections::HashMap, ffi::CStr};
 
 use crate::{
     sdk::{
-        base_client::BaseClient,
+        interfaces::base_client::BaseClient,
         networkable::{ClientClass, RecvTable},
     },
     vmt_call,

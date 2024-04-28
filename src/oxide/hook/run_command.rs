@@ -2,7 +2,7 @@ use crate::{
     define_hook,
     sdk::{
         entity::player::Player,
-        predictions::{MoveHelper, Prediction},
+        interfaces::predictions::{MoveHelper, Prediction},
         user_cmd::UserCmd,
     },
 };

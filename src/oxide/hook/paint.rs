@@ -1,4 +1,4 @@
-use crate::{define_hook, sdk::engine_vgui::EngineVgui};
+use crate::{define_hook, sdk::interfaces::engine_vgui::EngineVgui};
 
 fn subhooks(hook: &mut PaintHook) {
     hook.after = Some(|_, _, _| {

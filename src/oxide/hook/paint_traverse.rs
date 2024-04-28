@@ -2,7 +2,7 @@ use std::ffi::CStr;
 
 use crate::{
     define_hook,
-    sdk::panel::{Panel, VPanel},
+    sdk::interfaces::panel::{Panel, VPanel},
     setting, vmt_call,
 };
 

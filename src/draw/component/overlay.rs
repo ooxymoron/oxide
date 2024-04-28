@@ -8,7 +8,11 @@ use crate::{
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    }, error::OxideResult, interface, s, util::arcm::Arcm, vmt_call, NAME, VERSION
+    },
+    error::OxideResult,
+    interface, s,
+    util::arcm::Arcm,
+    vmt_call, NAME, VERSION,
 };
 
 use super::{
@@ -72,7 +76,7 @@ impl Overlay {
         windows.add(MovementWindow::new(show_movement_window.clone()));
 
         Overlay {
-            visible: true,
+            visible: false,
             components,
             windows,
         }
@@ -91,8 +95,8 @@ impl Overlay {
         let w = text_size.0 + 2 * pad;
         let h = (text_size.1 + text_size.2) + 2 * pad;
 
-        frame.filled_rect(x, y, w+h, h, BACKGROUND, 200);
-        frame.filled_rect(x, y, w+h, 1, FOREGROUND, 200);
+        frame.filled_rect(x, y, w + h, h, BACKGROUND, 200);
+        frame.filled_rect(x, y, w + h, 1, FOREGROUND, 200);
         frame.logo(x, y + 1, h - 1, h - 1);
         frame.text(
             &NAME.to_uppercase(),
@@ -104,14 +108,23 @@ impl Overlay {
             230,
         );
     }
+    fn update_cursor(&self) {
+            if self.visible {
+                vmt_call!(interface!(surface), unlock_cursor);
+            } else {
+                vmt_call!(interface!(surface), lock_cursor);
+                // vmt_call!(interface!(input), activate_mouse);
+                // vmt_call!(interface!(input), deactivate_mouse);
+            }
+            vmt_call!(interface!(surface), set_cursor_always_visible, self.visible);
+            vmt_call!(interface!(surface), apply_changes);
+    }
 }
 
 impl Component for Overlay {
     fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) -> OxideResult<()> {
+        self.update_cursor();
         let size = frame.window_size();
-        if self.visible != vmt_call!(interface!(surface), id_cursor_visible) {
-            vmt_call!(interface!(surface), set_cursor_always_visible, self.visible);
-        }
 
         if !self.visible {
             self.draw_watermark(frame);
@@ -166,16 +179,10 @@ impl Component for Overlay {
             self.visible = !self.visible;
             event.handled = true;
 
-            if self.visible {
-
-                vmt_call!(interface!(surface), unlock_cursor);
-            } else {
-
+            if !self.visible {
                 s!().save().unwrap();
-                vmt_call!(interface!(surface), lock_cursor);
-                // vmt_call!(interface!(input), activate_mouse);
-                // vmt_call!(interface!(input), deactivate_mouse);
             }
+            self.update_cursor();
         }
         if !self.visible {
             return;

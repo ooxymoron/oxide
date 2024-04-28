@@ -6,7 +6,7 @@ use crate::{
     interface, o,
     sdk::{
         entity::{BoneMask, Bones, Entity, MAX_STUDIO_BONES},
-        model_render::BoneMatrix,
+        interfaces::model_render::BoneMatrix,
         networkable::ClassId,
     },
 };

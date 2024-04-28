@@ -4,7 +4,7 @@ use crate::{
     o,
     sdk::{
         entity::{pipe::PipeType, Entity},
-        model_info::HitboxId,
+        interfaces::model_info::HitboxId,
         networkable::ClassId,
     },
 };

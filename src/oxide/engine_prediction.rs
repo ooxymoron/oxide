@@ -4,7 +4,8 @@ use crate::{
     error::{OxideError, OxideResult},
     interface, o,
     sdk::{
-        entity::player::Player, game_movement::MoveData, predictions::MoveHelper, user_cmd::UserCmd,
+        entity::player::Player, interfaces::game_movement::MoveData,
+        interfaces::predictions::MoveHelper, user_cmd::UserCmd,
     },
     vmt_call,
 };

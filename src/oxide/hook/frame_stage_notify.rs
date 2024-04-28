@@ -1,7 +1,7 @@
 use crate::{
     define_hook,
     oxide::{cheat::visual::Visuals, entity_cache::EntityCache},
-    sdk::base_client::{BaseClient, FrameStage},
+    sdk::interfaces::base_client::{BaseClient, FrameStage},
 };
 
 fn subhooks(hook: &mut FrameStageNotifyHook) {

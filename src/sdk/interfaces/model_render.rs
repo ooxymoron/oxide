@@ -1,11 +1,18 @@
-
 use std::ffi::c_ushort;
 
 use libc::c_void;
 
-use crate::{math::{angles::Angles, vector::Vector3}, sdk::*};
+use crate::{
+    math::{angles::Angles, vector::Vector3},
+    sdk::*,
+};
 
-use self::{entity::{BoneMask, MAX_STUDIO_BONES}, material_system::IMaterial, model_info::{Model, StudioHdr}};
+use self::entity::{BoneMask, MAX_STUDIO_BONES};
+
+use super::{
+    material_system::IMaterial,
+    model_info::{Model, StudioHdr},
+};
 
 pub type ModelRender = WithVmt<VMTModelRender>;
 
@@ -47,10 +54,10 @@ impl std::ops::IndexMut<usize> for BoneMatrix {
 #[derivative(Debug)]
 pub struct VMTRenderable {
     #[derivative(Debug = "ignore")]
-    _pad1: [usize;  9],
+    _pad1: [usize; 9],
     pub get_model: cfn!(*const Model, *const Renderable),
     #[derivative(Debug = "ignore")]
-    _pad2: [usize;  6],
+    _pad2: [usize; 6],
     pub setup_bones: cfn!(
         bool,
         *const Renderable,
@@ -99,9 +106,9 @@ pub struct DrawModelState {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTModelRender {
-    _pad1: [usize;  1],
+    _pad1: [usize; 1],
     pub forced_material_override: cfn!(c_void, &'static mut ModelRender, &'static IMaterial, isize),
-    _pad2: [usize;  17],
+    _pad2: [usize; 17],
     pub draw_model_execute: cfn!(
         c_void,
         &'static mut ModelRender,

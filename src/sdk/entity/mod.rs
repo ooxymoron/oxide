@@ -13,8 +13,8 @@ use crate::{
 };
 
 use self::{
-    model_info::{HitboxId, HitboxWrapper, StudioHdr},
-    model_render::BoneMatrix,
+    interfaces::model_info::{HitboxId, HitboxWrapper, StudioHdr},
+    interfaces::model_render::BoneMatrix,
     networkable::ClassId,
     object::Object,
     pipe::PipeBomb,
@@ -24,7 +24,7 @@ use self::{
 
 use super::*;
 
-use super::{collideable::Collideable, model_render::Renderable, networkable::Networkable};
+use super::{collideable::Collideable, interfaces::model_render::Renderable, networkable::Networkable};
 
 pub mod flags;
 pub mod object;
@@ -273,8 +273,8 @@ impl PartialEq for &Entity {
 }
 
 impl HasNetvars for Entity {
-    fn get_class_name() -> String {
-        "CBaseEntity".to_string()
+    fn get_class_name() -> &'static str {
+        "CBaseEntity"
     }
 }
 impl Entity {

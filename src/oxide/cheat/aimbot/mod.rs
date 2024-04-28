@@ -4,12 +4,12 @@ use crate::{
     math::vector::Vector3,
     sdk::{
         condition::ConditionFlags,
-        engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+        interfaces::engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
         entity::{
             weapon::ids::{ItemDefiniitonIndex, WeaponType},
             Entity,
         },
-        model_info::{HitboxId, HitboxWrapper},
+        interfaces::model_info::{HitboxId, HitboxWrapper},
         user_cmd::{ButtonFlags, UserCmd},
     },
     setting, vmt_call,

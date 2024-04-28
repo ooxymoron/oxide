@@ -15,7 +15,7 @@ use crate::{
 };
 
 use super::{
-    base_engine::PlayerInfo, condition::Condition, flags::Flags,
+    interfaces::base_engine::PlayerInfo, condition::Condition, flags::Flags,
     player_class::PlayerClass, user_cmd::UserCmd, Entity, WaterLevel,
 };
 
@@ -53,8 +53,8 @@ impl Player {
 }
 
 impl HasNetvars for Player {
-    fn get_class_name() -> String {
-        "CTFPlayer".to_string()
+    fn get_class_name() -> &'static str {
+        "CTFPlayer"
     }
 }
 

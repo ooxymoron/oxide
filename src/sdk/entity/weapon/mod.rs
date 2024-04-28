@@ -134,8 +134,8 @@ impl Weapon {
     }
 }
 impl HasNetvars for Weapon {
-    fn get_class_name() -> String {
-        "CTFWeaponBase".to_string()
+    fn get_class_name() -> &'static str {
+        "CTFWeaponBase"
     }
 }
 
