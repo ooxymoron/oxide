@@ -123,7 +123,6 @@ impl Overlay {
 
 impl Component for Overlay {
     fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) -> OxideResult<()> {
-        self.update_cursor();
         let size = frame.window_size();
 
         if !self.visible {
