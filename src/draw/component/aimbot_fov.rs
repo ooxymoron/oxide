@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{
+    d,
     draw::{colors::WHITE, frame::Frame},
     error::OxideResult,
     o,
@@ -8,12 +9,25 @@ use crate::{
     setting, vmt_call,
 };
 
-use super::Component;
+use super::{Component, ComponentBase};
 
 #[derive(Debug)]
-pub struct AimbotFov {}
+pub struct AimbotFov {
+    base: ComponentBase,
+}
 
 impl AimbotFov {
+    pub fn new() -> AimbotFov {
+        let size = d!().window_size;
+        AimbotFov {
+            base: ComponentBase {
+                x: 0,
+                y: 0,
+                w: size.0,
+                h: size.1,
+            },
+        }
+    }
     fn should_draw(&self) -> bool {
         if !setting!(aimbot, enabled) || !setting!(aimbot, draw_fov) {
             return false;
@@ -32,11 +46,11 @@ impl AimbotFov {
 }
 
 impl Component for AimbotFov {
-    fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) -> OxideResult<()> {
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         if !self.should_draw() {
             return Ok(());
         }
-        let size = frame.window_size();
+        let size = d!().window_size;
         let aimbot_fov = setting!(aimbot, fov);
         let fov = o!().fov;
 
@@ -46,5 +60,9 @@ impl Component for AimbotFov {
 
         frame.circle(size.0 / 2, size.1 / 2, radius, WHITE, 100);
         Ok(())
+    }
+
+    fn get_base(&mut self) -> &mut super::ComponentBase {
+        todo!()
     }
 }

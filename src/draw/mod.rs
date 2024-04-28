@@ -1,13 +1,11 @@
-use std::{
-    error::Error,
-    ffi::CString,
-};
+use std::{error::Error, ffi::CString};
 
 use libc::c_void;
 use sdl2_sys::*;
 
 use crate::{
-    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay, spectator_list::SpectatorList}, log, AUTHOR, NAME, VERSION
+    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay, spectator_list::SpectatorList},
+    log, AUTHOR, NAME, VERSION,
 };
 
 use self::{
@@ -33,7 +31,8 @@ pub struct Draw {
     pub ctx: *mut c_void,
     pub components: Components,
     pub cursor: (isize, isize),
-    pub logo: *mut SDL_Texture
+    pub logo: *mut SDL_Texture,
+    pub window_size: (isize, isize),
 }
 
 impl Draw {
@@ -57,26 +56,30 @@ impl Draw {
 
         SDL_GL_MakeCurrent(window, old_ctx);
 
-        let mut components = Components::new();
-
-        components.add(AimbotFov {});
-        components.add(SpectatorList {});
-        components.add(Overlay::new());
+        let components = Components::new();
 
         let rw = SDL_RWFromMem(LOGO.as_ptr() as *mut c_void, LOGO.len() as i32);
         let bmp = SDL_LoadBMP_RW(rw, 0);
         let logo = SDL_CreateTextureFromSurface(renderer, bmp);
 
         log!("loaded menu");
-        Ok(Draw {
+        let mut draw = Draw {
             components,
             fonts: Fonts::init(),
             old_ctx,
             ctx,
             renderer,
             cursor: (0, 0),
-            logo
-        })
+            logo,
+            window_size: (0, 0),
+        };
+        draw.update_window_size(window);
+        Ok(draw)
+    }
+    pub fn load_components(&mut self) {
+        self.components.add(AimbotFov::new());
+        self.components.add(SpectatorList::new());
+        self.components.add(Overlay::new());
     }
 
     pub fn restore(&self) {
@@ -86,6 +89,15 @@ impl Draw {
         }
         self.fonts.restore();
     }
+    pub fn update_window_size(&mut self,  window: *mut SDL_Window) {
+        let mut w = 0i32;
+        let mut h = 0i32;
+
+        unsafe {
+            SDL_GetWindowSize(window, &mut w, &mut h);
+        }
+        self.window_size = (w as isize, h as isize);
+    }
 
     pub fn run(&'static mut self, window: *mut SDL_Window) {
         unsafe {
@@ -93,8 +105,8 @@ impl Draw {
         }
 
         let mut frame = Frame::new(window, self.renderer, &mut self.fonts);
-        if let Err(e) = self.components.draw(&mut frame, 0, 0) {
-            log!("error during drawing {}",e);
+        if let Err(e) = self.components.draw(&mut frame) {
+            log!("error during drawing {}", e);
         }
 
         unsafe {

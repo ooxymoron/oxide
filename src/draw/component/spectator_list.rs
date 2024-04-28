@@ -1,18 +1,22 @@
+use std::borrow::BorrowMut;
+
 use crate::{
-    draw::{colors::FOREGROUND, fonts::FontSize},
-    error::OxideResult,
-    o,
-    oxide::cheat::visual::Visuals,
-    sdk::entity::Entity,
-    setting,
+    d, draw::{colors::FOREGROUND, fonts::FontSize}, error::OxideResult, o, oxide::cheat::visual::Visuals, sdk::entity::Entity, setting
 };
 
-use super::Component;
+use super::{Component, ComponentBase};
 
 #[derive(Debug)]
-pub struct SpectatorList {}
+pub struct SpectatorList {
+    base: ComponentBase
+}
 
 impl SpectatorList {
+    pub fn new() -> SpectatorList {
+        SpectatorList {
+            base: ComponentBase{x:100,y:100,w: 100,h:100}
+        }
+    }
     fn should_draw(&self) -> bool {
         if !setting!(visual, spectator_list) {
             return false;
@@ -28,8 +32,6 @@ impl Component for SpectatorList {
     fn draw(
         &mut self,
         frame: &mut crate::draw::frame::Frame,
-        _: isize,
-        _: isize,
     ) -> OxideResult<()> {
         if !self.should_draw() {
             return Ok(());
@@ -40,7 +42,7 @@ impl Component for SpectatorList {
             let text = format!("[{}] {}", mode.to_string(), name);
             frame.text(
                 &text,
-                frame.window_size().0 / 2,
+                d!().window_size.0 / 2,
                 y,
                 FontSize::Medium,
                 true,
@@ -52,5 +54,10 @@ impl Component for SpectatorList {
         }
 
         Ok(())
+    }
+
+
+    fn get_base(&mut self) -> &mut super::ComponentBase {
+        self.base.borrow_mut()
     }
 }

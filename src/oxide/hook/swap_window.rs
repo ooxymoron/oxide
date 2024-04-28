@@ -11,6 +11,7 @@ fn subhooks(hook: &mut SwapWindowHook) {
     hook.before = Some(|window| unsafe {
         if DRAW.is_none() {
             init_global!(DRAW,Draw::init(window).unwrap(),Draw);
+            d!().load_components();
         }
         d!().run(window);
         None

@@ -1,38 +1,37 @@
 
 use crate::{draw::{event::Event, frame::Frame}, error::OxideResult, s, util::arcm::Arcm};
 
-use super::{base::{checkbox::Checkbox, window::Window}, Component, Components};
+use super::{base::{checkbox::Checkbox, window::Window}, Component, ComponentBase, Components};
 
 
 #[derive(Debug)]
 pub struct MovementWindow {
+
     window: Window,
 }
 
 impl MovementWindow {
     pub fn new(visible: Arcm<bool>) -> MovementWindow {
-        let mut components = Components::new();
-
+        let mut window = Window::new("Movement".to_owned(), visible);
         let mut y = 10;
-        macro_rules! a {
+        macro_rules! add {
             ($e:expr) => {
-                components.add($e);
+                window.add($e);
                 #[allow(unused_assignments)]
-                y += $e.height() + 8
+                y += $e.get_base().h + 8
             };
         }
 
-        a!(Checkbox::new("bhop", s!().movement.bhop.clone(), 10, y));
-        a!(Checkbox::new("autostrafe", s!().movement.autostrafe.clone(), 10, y));
+        add!(Checkbox::new("bhop", s!().movement.bhop.clone(), 10, y));
+        add!(Checkbox::new("autostrafe", s!().movement.autostrafe.clone(), 10, y));
 
-        let window = Window::new("Movement".to_owned(), visible, components);
         MovementWindow { window }
     }
 }
 
 impl Component for MovementWindow {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{
-        self.window.draw(frame, root_x, root_y)
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()>{
+        self.window.draw(frame)
     }
 
     fn handle_event(&mut self, event: &mut Event) {
@@ -43,5 +42,8 @@ impl Component for MovementWindow {
     }
     fn set_draw_order(&mut self, order: super::DrawOrder) {
         self.window.set_draw_order(order)
+    }
+    fn get_base(&mut self) -> &mut ComponentBase{
+        self.window.get_base()
     }
 }

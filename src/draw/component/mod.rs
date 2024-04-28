@@ -18,10 +18,18 @@ pub enum DrawOrder {
     Value(usize)
 }
 
+#[derive(Debug,Clone)]
+pub struct ComponentBase {
+    pub x: isize,
+    pub y: isize,
+    pub w: isize,
+    pub h: isize
+}
+
 #[allow(unused)]
 pub trait Component: std::fmt::Debug {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{Ok(())}
-    fn height(&self) -> isize {0}
+    fn get_base(&mut self) -> &mut ComponentBase;
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()>{Ok(())}
     fn handle_event(&mut self, event: &mut Event){}
     fn get_draw_order(&self) -> DrawOrder {
         DrawOrder::Value(0)
@@ -32,7 +40,7 @@ pub trait Component: std::fmt::Debug {
 }
 
 #[derive(Debug)]
-pub struct Components(Vec<Box<dyn Component>>);
+pub struct Components(pub Vec<Box<dyn Component>>);
 
 impl Components {
     pub fn new() -> Components {
@@ -41,10 +49,10 @@ impl Components {
     pub fn add(&mut self, component: impl Component + 'static) {
         self.0.push(Box::new(component));
     }
-    pub fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{
+    pub fn draw(&mut self, frame: &mut Frame) -> OxideResult<()>{
         self.sort();
         for component in &mut self.0 {
-            component.draw(frame, root_x, root_y)?
+            component.draw(frame)?
         }
         Ok(())
     }

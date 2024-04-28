@@ -15,13 +15,4 @@ impl Frame {
             fonts
         }
     }
-    pub fn window_size(&self) -> (isize, isize) {
-        let mut w = 0i32;
-        let mut h = 0i32;
-
-        unsafe {
-            SDL_GetWindowSize(self.window, &mut w, &mut h);
-        }
-        return (w as isize, h as isize);
-    }
 }

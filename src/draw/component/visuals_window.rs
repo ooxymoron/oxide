@@ -1,6 +1,8 @@
-
 use crate::{
-    draw::{component::base::key_input::KeyInput, event::Event, frame::Frame}, error::OxideResult, s, util::arcm::Arcm
+    draw::{component::base::key_input::KeyInput, event::Event, frame::Frame},
+    error::OxideResult,
+    s,
+    util::arcm::Arcm,
 };
 
 use super::{
@@ -15,13 +17,13 @@ pub struct VisualsWindow {
 
 impl VisualsWindow {
     pub fn new(visible: Arcm<bool>) -> VisualsWindow {
-        let mut components = Components::new();
+        let mut window = Window::new("VISUALS".to_owned(), visible);
         let mut y = 10;
         macro_rules! a {
             ($e:expr) => {
-                components.add($e);
+                window.add($e);
                 #[allow(unused_assignments)]
-                y += $e.height() + 8
+                y += $e.get_base().h + 8
             };
         }
 
@@ -32,55 +34,60 @@ impl VisualsWindow {
             y,
         ));
         a!(KeyInput::new(
-            "toggle key",
             20,
             y,
+            "toggle key",
             s!().visual.tp_key.clone(),
         ));
         a!(KeyInput::new(
-            "offset key",
             20,
             y,
+            "offset key",
             s!().visual.tp_offset_key.clone(),
         ));
         a!(FloatInput::new(
-            "x offset",
             30,
             y,
-            100,
+            "x offset",
             s!().visual.tp_offset_x.clone(),
             None,
         ));
         a!(FloatInput::new(
-            "y offset",
             30,
             y,
-            100,
+            "y offset",
             s!().visual.tp_offset_y.clone(),
             None,
         ));
         a!(FloatInput::new(
-            "z offset",
             30,
             y,
-            100,
+            "z offset",
             s!().visual.tp_offset_z.clone(),
             None,
         ));
 
-        a!(FloatInput::new(
-            "fov",
-            10,
-            y,
-            100,
-            s!().visual.fov.clone(),
-            None,
-        ));
+        a!(FloatInput::new(10, y, "fov", s!().visual.fov.clone(), None,));
 
         a!(Checkbox::new("esp", s!().visual.esp.clone(), 10, y));
-        a!(Checkbox::new("friendlies", s!().visual.esp_friendlies.clone(), 20, y));
-        a!(Checkbox::new("sentries", s!().visual.esp_sentreis.clone(), 20, y));
-        a!(Checkbox::new("projectiles", s!().visual.esp_projectiles.clone(), 20, y));
+        a!(Checkbox::new(
+            "friendlies",
+            s!().visual.esp_friendlies.clone(),
+            20,
+            y
+        ));
+        a!(Checkbox::new(
+            "sentries",
+            s!().visual.esp_sentreis.clone(),
+            20,
+            y
+        ));
+        a!(Checkbox::new(
+            "projectiles",
+            s!().visual.esp_projectiles.clone(),
+            20,
+            y
+        ));
 
         a!(Checkbox::new(
             "hitboxes",
@@ -118,14 +125,13 @@ impl VisualsWindow {
             10,
             y,
         ));
-        let window = Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }
     }
 }
 
 impl Component for VisualsWindow {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{
-        self.window.draw(frame, root_x, root_y)
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
+        self.window.draw(frame)
     }
     fn handle_event(&mut self, event: &mut Event) {
         self.window.handle_event(event);
@@ -135,5 +141,8 @@ impl Component for VisualsWindow {
     }
     fn set_draw_order(&mut self, order: super::DrawOrder) {
         self.window.set_draw_order(order)
+    }
+    fn get_base(&mut self) -> &mut super::ComponentBase {
+        self.window.get_base()
     }
 }

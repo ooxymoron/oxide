@@ -1,5 +1,9 @@
 use crate::{
-    draw::{component::Component, event::Event, frame::Frame},
+    draw::{
+        component::{Component, ComponentBase},
+        event::Event,
+        frame::Frame,
+    },
     error::OxideResult,
     util::arcm::Arcm,
 };
@@ -16,10 +20,9 @@ pub struct FloatInput {
 
 impl FloatInput {
     pub fn new(
-        label: &'static str,
         x: isize,
         y: isize,
-        w: isize,
+        label: &'static str,
         val: Arcm<f32>,
         validator: Option<fn(f32) -> bool>,
     ) -> FloatInput {
@@ -27,7 +30,7 @@ impl FloatInput {
         let validator = validator.unwrap_or(|_| true);
 
         FloatInput {
-            text_input: TextInput::new(label, x, y, w, text_val.clone()),
+            text_input: TextInput::new(x, y, label, text_val.clone()),
             text_val,
             float_val: val,
             validator,
@@ -36,7 +39,7 @@ impl FloatInput {
 }
 
 impl Component for FloatInput {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()> {
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         let mut float_val = self.float_val.lock().unwrap();
         let text_val = self.text_val.lock().unwrap();
         if let Ok(val) = text_val.parse() {
@@ -45,14 +48,15 @@ impl Component for FloatInput {
             }
         }
         drop(text_val);
-        self.text_input.draw(frame, root_x, root_y)?;
+        self.text_input.draw(frame)?;
         Ok(())
     }
 
     fn handle_event(&mut self, event: &mut Event) {
         self.text_input.handle_event(event)
     }
-    fn height(&self) -> isize {
-        self.text_input.height()
+
+    fn get_base(&mut self) -> &mut ComponentBase {
+        self.text_input.get_base()
     }
 }

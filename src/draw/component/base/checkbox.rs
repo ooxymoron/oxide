@@ -1,8 +1,10 @@
+use std::borrow::BorrowMut;
+
 use crate::{
     d,
     draw::{
         colors::{BACKGROUND, FOREGROUND},
-        component::Component,
+        component::{Component, ComponentBase},
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
@@ -15,44 +17,33 @@ const SIZE: isize = 12;
 
 #[derive(Debug, Clone)]
 pub struct Checkbox {
+    base: ComponentBase,
     pub checked: Arcm<bool>,
-    x: isize,
-    y: isize,
-    rooted_x: isize,
-    rooted_y: isize,
-    text: &'static str,
+    label: &'static str,
 }
 impl Checkbox {
-    pub fn new(text: &'static str, checked: Arcm<bool>, x: isize, y: isize) -> Checkbox {
+    pub fn new(label: &'static str, checked: Arcm<bool>, x: isize, y: isize) -> Checkbox {
+        let text_size = d!().fonts.get_text_size(label, FontSize::Small);
+        let w = text_size.0 + SIZE + 10;
+        let h = SIZE;
         Checkbox {
+            base: ComponentBase { x, y, w, h },
             checked,
-            x,
-            y,
-            rooted_x: 0,
-            rooted_y: 0,
-            text,
+            label,
         }
     }
 }
 impl Component for Checkbox {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()> {
-        self.rooted_x = root_x.wrapping_add(self.x);
-        self.rooted_y = root_y + self.y;
-        frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, FOREGROUND, 255);
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
+        let ComponentBase { x, y, w:_, h:_ } = self.base;
+        frame.filled_rect(x, y, SIZE, SIZE, FOREGROUND, 255);
         if !*self.checked.lock().unwrap() {
-            frame.filled_rect(
-                self.rooted_x + 1,
-                self.rooted_y + 1,
-                SIZE - 2,
-                SIZE - 2,
-                BACKGROUND,
-                255,
-            );
+            frame.filled_rect(x + 1, y + 1, SIZE - 2, SIZE - 2, BACKGROUND, 255);
         }
         frame.text(
-            self.text,
-            self.rooted_x + SIZE + 10,
-            self.rooted_y + SIZE / 2,
+            self.label,
+            x + SIZE + 10,
+            y + SIZE / 2,
             FontSize::Small,
             false,
             FOREGROUND,
@@ -64,10 +55,11 @@ impl Component for Checkbox {
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown => {
-                if d!().cursor.0 as isize <= self.rooted_x + SIZE
-                    && self.rooted_x <= d!().cursor.0 as isize
-                    && d!().cursor.1 as isize <= self.rooted_y + SIZE
-                    && self.rooted_y <= d!().cursor.1 as isize
+                let ComponentBase { x, y, w:_, h:_ } = self.base;
+                if d!().cursor.0 as isize <= x + SIZE
+                    && x <= d!().cursor.0 as isize
+                    && d!().cursor.1 as isize <= y + SIZE
+                    && y <= d!().cursor.1 as isize
                 {
                     let mut checked = self.checked.lock().unwrap();
                     *checked = !*checked;
@@ -77,7 +69,8 @@ impl Component for Checkbox {
             _ => (),
         }
     }
-    fn height(&self) -> isize {
-        SIZE
+
+    fn get_base(&mut self) -> &mut crate::draw::component::ComponentBase {
+        self.base.borrow_mut()
     }
 }

@@ -1,10 +1,13 @@
 use crate::{
-    draw::{event::Event, frame::Frame}, error::OxideResult, s, util::arcm::Arcm
+    draw::{event::Event, frame::Frame},
+    error::OxideResult,
+    s,
+    util::arcm::Arcm,
 };
 
 use super::{
     base::{checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, window::Window},
-    Component, Components,
+    Component, ComponentBase, Components,
 };
 
 #[derive(Debug)]
@@ -14,13 +17,13 @@ pub struct AimbotWindow {
 
 impl AimbotWindow {
     pub fn new(visible: Arcm<bool>) -> AimbotWindow {
-        let mut components = Components::new();
-        let mut y = 10;
+        let mut window = Window::new("AIMBOT".to_owned(), visible);
+        let mut y =  10;
         macro_rules! a {
             ($e:expr) => {
-                components.add($e);
+                window.add($e);
                 #[allow(unused_assignments)]
-                y += $e.height() + 8
+                y += $e.get_base().h + 8
             };
         }
 
@@ -32,14 +35,13 @@ impl AimbotWindow {
             y,
         ));
         a!(FloatInput::new(
-            "aimbot fov",
             20,
             y,
-            100,
+            "aimbot fov",
             s!().aimbot.fov.clone(),
             None
         ));
-        a!(KeyInput::new("aimbot key", 10, y, s!().aimbot.key.clone()));
+        a!(KeyInput::new(10, y, "aimbot key", s!().aimbot.key.clone()));
         a!(Checkbox::new(
             "multipoint",
             s!().aimbot.multipoint.clone(),
@@ -47,10 +49,9 @@ impl AimbotWindow {
             y
         ));
         a!(FloatInput::new(
-            "hitbox scale",
             20,
             y,
-            100,
+            "hitbox scale",
             s!().aimbot.hitbox_scale.clone(),
             Some(|val| { val <= 1.0 && val >= 0.0 })
         ));
@@ -110,14 +111,13 @@ impl AimbotWindow {
             y
         ));
 
-        let window = Window::new("AIMBOT".to_owned(), visible, components);
         AimbotWindow { window }
     }
 }
 
 impl Component for AimbotWindow {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) -> OxideResult<()>{
-        self.window.draw(frame, root_x, root_y)
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
+        self.window.draw(frame)
     }
     fn handle_event(&mut self, event: &mut Event) {
         self.window.handle_event(event);
@@ -128,6 +128,7 @@ impl Component for AimbotWindow {
     fn set_draw_order(&mut self, order: super::DrawOrder) {
         self.window.set_draw_order(order)
     }
-
-    fn height(&self) -> isize {0}
+    fn get_base(&mut self) -> &mut ComponentBase {
+        self.window.get_base()
+    }
 }

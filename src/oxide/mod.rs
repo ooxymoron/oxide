@@ -49,11 +49,9 @@ impl Oxide {
         unsafe {
             let handle = dlopen(name.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
             if !handle.is_null() {
-                dbg!("a");
                 dlclose(handle);
                 return true;
             }
-            dbg!("b");
             return false;
         }
     }
@@ -63,7 +61,6 @@ impl Oxide {
         //    println!("awaiting tf2 load");
         //    loop {
         //        if Oxide::can_load() {
-        //            dbg!("c");
         //            break;
         //        }
         //        sleep(Duration::from_secs(1))
