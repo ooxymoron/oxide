@@ -1,116 +1,148 @@
-pub mod hooks;
+use std::{
+    collections::HashMap,
+    ffi::CString,
+    mem::{transmute, ManuallyDrop},
+};
+
+use libc::dlsym;
+
+use crate::{
+    oxide::hook::{
+        create_move::CreateMoveHook, fire_event::FireEvent, frame_stage_notify::FrameStageNotifyHook, override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, run_command::RunCommandHook, swap_window::SwapWindowHook
+    },
+    util::{get_handle, sigscanner::find_sig},
+};
+
+use self::detour::DetourHook;
+
+use super::interfaces::Interfaces;
 
 pub mod base_interpolate_part1;
 pub mod create_move;
 pub mod detour;
 pub mod frame_stage_notify;
 pub mod level_shutdown;
+pub mod load_whitelist;
 pub mod override_view;
 pub mod paint;
 pub mod paint_traverse;
+pub mod pointer_hook;
 pub mod poll_event;
 pub mod run_command;
 pub mod swap_window;
-pub mod load_whitelist;
+pub mod fire_event;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
 }
 
-#[macro_export]
-macro_rules! define_hook{
-    ($name:ident,$stringName:expr,$return:ty,$default:expr,$subhooks:expr,$($argName:ident,$argType:ty),*) => {
-        use crate::{cfn,o,OXIDE,oxide::hook::Hook,log};
-        use core::intrinsics::{transmute,transmute_unchecked};
-        use std::panic::{catch_unwind,AssertUnwindSafe};
-        use libc::{PROT_EXEC, PROT_READ, PROT_WRITE};
+#[derive(Debug)]
+pub struct Hooks {
+    ptr_hooks: HashMap<String, Box<dyn Hook + 'static>>,
+    pub detour_hooks: HashMap<String, DetourHook>,
+}
 
-        type RawHookFn = cfn!($return,$($argType),*);
-        type BeforeHookFn =  fn ($($argType),*) -> Option<$return>;
-        type AfterHookFn = fn ($($argType),*,&mut $return);
-
-
-        #[derive(Debug)]
-        pub struct $name
-        {
-            pub org: RawHookFn,
-            pub target: &'static mut RawHookFn,
-            pub before: Option<BeforeHookFn>,
-            pub after: Option<AfterHookFn>,
+impl Hooks {
+    pub fn init(interfaces: &Interfaces) -> Hooks {
+        let mut ptr_hooks = HashMap::new();
+        let mut tramp_hooks = HashMap::new();
+        macro_rules! InitVmtHook {
+            ($HookClass:ident,$val:expr) => {
+                ptr_hooks.insert(
+                    $HookClass::name(),
+                    Box::new($HookClass::init($val)) as Box<dyn Hook>,
+                );
+            };
         }
 
-        impl $name {
-            pub type RawFn = RawHookFn;
-            pub type BeforeFn = BeforeHookFn;
-            pub type AfterFn = AfterHookFn;
-            fn restore(&mut self) {
-                *self.target = self.org
-            }
-            pub fn init(target: &RawHookFn) -> Self {
-                let target = unsafe {transmute_unchecked::<_,&'static mut RawHookFn>(target)};
-                let org = (*target).clone();
-                let mut hook = $name { org, target, before: None, after: None};
+        InitVmtHook!(
+            OverrideViewHook,
+            &(*interfaces.client_mode.get_vmt()).override_view
+        );
+        InitVmtHook!(
+            FrameStageNotifyHook,
+            &(*interfaces.base_client.get_vmt()).frame_stage_notify
+        );
+        InitVmtHook!(
+            PaintTraverseHook,
+            &(*interfaces.panel.get_vmt()).paint_traverse
+        );
+        InitVmtHook!(PaintHook, &(*interfaces.engine_vgui.get_vmt()).paint);
+        InitVmtHook!(
+            CreateMoveHook,
+            &(*interfaces.client_mode.get_vmt()).create_move
+        );
+        InitVmtHook!(
+            RunCommandHook,
+            &(*interfaces.prediction.get_vmt()).run_command
+        );
+        //load whitelist
+        //55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60
 
-                let page = hook.target as *const _ as usize & !0xFFF;
+        tramp_hooks.insert(
+            load_whitelist::NAME.to_string(),
+            DetourHook::hook(
+                find_sig(
+                    "./bin/linux64/engine.so",
+                    "55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60",
+                )
+                .unwrap(),
+                load_whitelist::load_whitelist_hook as *const u8,
+            ),
+        );
 
-                unsafe{
-                    libc::mprotect(
-                        transmute(page),
-                        transmute(page + 0xFFF),
-                        PROT_WRITE | PROT_READ | PROT_EXEC,
-                    );
-                }
-                *hook.target = $name::hook_fn;
-                $subhooks(&mut hook);
-                hook
-            }
-            pub fn name() -> String{
-                $stringName.to_owned()
-            }
-            #[allow(unused)]
-            unsafe extern "C-unwind" fn hook_fn($($argName:$argType),*) -> $return{
+        tramp_hooks.insert(
+            fire_event::NAME.to_string(),
+            DetourHook::hook(
+                find_sig(
+                    "./bin/linux64/engine.so",
+                    "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC 88 00 00 00 48 85 F6",
+                )
+                .unwrap(),
+                fire_event::load_whitelist_hook as *const u8,
+            ),
+        );
 
-                if OXIDE.is_none() {
-                    return $default;
-                }
+        //tramp_hooks.insert(
+        //    base_interpolate_part1::NAME.to_string(),
+        //    DetourHook::hook(
+        //        find_sig(
+        //            "./tf/bin/client.so",
+        //            "55 89 E5 57 56 53 83 EC 2C 8B 45 ? 8B 5D ? 8B 75 ? 8B 7D ? C7 00 01 00 00 00",
+        //        ),
+        //        base_interpolate_part1::BaseInterpolatePart1Hook as *const u8,
+        //    ),
+        //);
 
-                let mut hook = o!().hooks.get::<Self>(Self::name());
+        unsafe {
+            let handle = get_handle("/usr/lib/libSDL2-2.0.so.0").unwrap();
+            let name = CString::new("SDL_GL_SwapWindow").unwrap();
+            let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
+            let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
+            let swap_window_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
+            InitVmtHook!(SwapWindowHook, transmute(swap_window_ptr));
 
-
-                let mut custom_return_value = if let Some(fun) = &hook.before {
-                    match catch_unwind( AssertUnwindSafe(||(fun)($($argName),*))) {
-                        Ok(res) => res,
-                        Err(e) => {
-                            log!("unhandled error in {} bofere hook: {:?}",$stringName,e);
-                            None
-                        }
-                    }
-
-                } else { None };
-
-
-                let mut return_value = if let Some(return_val) = custom_return_value {
-                    return_val
-                } else {
-                    (hook.org)($($argName),*)
-                };
-
-                if let Some(fun) = hook.after {
-                    match catch_unwind( AssertUnwindSafe(||(fun)($($argName),*,&mut return_value))) {
-                        Err(e) => {
-                            log!("unhandled error in {} bofere hook: {:?}",$stringName,e);
-                            return $default;
-                        }
-                        _ => {}
-                    }
-                }
-                return return_value;
-            }
+            let name = CString::new("SDL_PollEvent").unwrap();
+            let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
+            let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
+            let poll_event_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
+            InitVmtHook!(PollEventHook, transmute(poll_event_ptr));
         }
-        impl Hook for $name {
-            fn restore(&mut self) {
-                self.restore()
-            }
+
+        Hooks {
+            ptr_hooks,
+            detour_hooks: tramp_hooks,
+        }
+    }
+    pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>> {
+        unsafe { ManuallyDrop::new(transmute(self.ptr_hooks.get_mut(&name).unwrap())) }
+    }
+    pub fn restore(&mut self) {
+        for (_, hook) in &mut self.ptr_hooks {
+            hook.restore()
+        }
+        for (_, hook) in &mut self.detour_hooks {
+            hook.restore()
         }
     }
 }

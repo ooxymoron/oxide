@@ -16,6 +16,7 @@ pub mod view_setup;
 pub mod attribute_manager;
 pub mod interfaces;
 pub mod global_vars;
+pub mod game_event;
 
 pub type CBaseHandle = u32;
 pub type ConCommand = *const u8;

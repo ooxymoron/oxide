@@ -1,3 +1,5 @@
+use std::os::raw::c_char;
+
 use libc::c_void;
 
 use self::font::{FontDrawType, HFont};
@@ -49,15 +51,18 @@ pub struct VMTMatSurface {
     pub add_custom_font_file: cfn!(bool, &Surface, *const i8, *const i8),
     _pad8: [u64; 6],
     pub get_text_size: cfn!(
-        c_void,
+        (),
         &Surface,
         HFont,
         *const u32,
         &mut i32,
         &mut i32
     ),
-    _pad9: [u64; 23],
-    pub draw_circle: cfn!(c_void, &'static Surface, i32, i32, i32, i32),
+    _pad81: [u64; 2],
+    pub play_sound: cfn!((), &'static Surface, *const c_char),
+    //virtual void PlaySound(const char *fileName) = 0;
+    _pad9: [u64; 20],
+    pub draw_circle: cfn!((), &'static Surface, i32, i32, i32, i32),
     _pad10: [u64; 11],
-    pub on_screen_size_changed: cfn!(c_void, &'static Surface, i32, i32),
+    pub on_screen_size_changed: cfn!((), &'static Surface, i32, i32),
 }

@@ -73,12 +73,12 @@ impl Paint {
                 let Some(ent) = Entity::get_ent(id) else{
                     continue;
                 };
+                let obj = ent.as_object()?;
                 if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
-                    && !setting!(visual, esp_friendlies)
+                    && !setting!(visual, esp_friendlies) || *obj.get_carried()
                 {
                     continue;
                 }
-                let obj = ent.as_object()?;
                 let text = if *obj.get_mini() {
                     vec!["MINI".to_owned()]
                 } else {

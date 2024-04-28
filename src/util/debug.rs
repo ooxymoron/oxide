@@ -15,10 +15,10 @@ pub fn print_bytes<const T: usize, U>(addr: *const U) {
         log!("{}\n", buffer);
     }
 }
-pub fn print_module_addres_offset(addr: *const u8) {
+pub fn print_module_addres_offset(addr: *const u8, module: &str) {
     //TODO: uaot detect which module were in
     let link_map: *const LinkMap =
-        unsafe { transmute(get_handle("./bin/linux64/libvstdlib.so").unwrap()) };
+        unsafe { transmute(get_handle(module).unwrap()) };
     let start = unsafe { link_map.read().addr };
     log!("{:#0X} ", addr as i64 - start as i64 + 0x100000);
 }

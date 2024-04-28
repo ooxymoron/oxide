@@ -13,5 +13,6 @@ pub mod model_render;
 pub mod panel;
 pub mod predictions;
 pub mod render_view;
+pub mod debug_overlay;
 
 pub use super::*;

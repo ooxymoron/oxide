@@ -125,3 +125,11 @@ macro_rules! define_offset {
         
     };
 }
+
+#[macro_export]
+macro_rules! c_str_to_str {
+    ($c_str: expr) => {
+        unsafe{std::ffi::CStr::from_ptr($c_str).to_str().unwrap()}
+        
+    };
+}

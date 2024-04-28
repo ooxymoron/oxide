@@ -9,7 +9,7 @@ use crate::{
     error::OxideResult,
     math::{angles::Angles, vector::Vector3},
     netvars::{netvar_dumper::load_netvars, Netvar},
-    oxide::{cheat::cheats::Cheats, hook::hooks::Hooks, interfaces::Interfaces},
+    oxide::{cheat::cheats::Cheats, hook::Hooks, interfaces::Interfaces},
     sdk::{interfaces::base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
     DRAW,
 };
