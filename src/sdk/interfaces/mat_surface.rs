@@ -1,7 +1,5 @@
 use std::os::raw::c_char;
 
-use libc::c_void;
-
 use self::font::{FontDrawType, HFont};
 
 use super::*;

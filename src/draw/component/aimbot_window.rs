@@ -7,7 +7,7 @@ use crate::{
 
 use super::{
     base::{checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, window::Window},
-    Component, ComponentBase, Components,
+    Component, ComponentBase,
 };
 
 #[derive(Debug)]
@@ -18,7 +18,7 @@ pub struct AimbotWindow {
 impl AimbotWindow {
     pub fn new(visible: Arcm<bool>) -> AimbotWindow {
         let mut window = Window::new("AIMBOT".to_owned(), visible);
-        let mut y =  10;
+        let mut y = 10;
         macro_rules! a {
             ($e:expr) => {
                 window.add($e);

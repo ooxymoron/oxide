@@ -10,7 +10,6 @@ use crate::{
         frame::Frame,
     },
     error::OxideResult,
-    sdk::interfaces::base_client::BaseClient,
     util::{arcm::Arcm, point_in_bounds},
 };
 

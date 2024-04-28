@@ -8,7 +8,9 @@ use libc::dlsym;
 
 use crate::{
     oxide::hook::{
-        create_move::CreateMoveHook, fire_event::FireEvent, frame_stage_notify::FrameStageNotifyHook, override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, run_command::RunCommandHook, swap_window::SwapWindowHook
+        create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook,
+        override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook,
+        poll_event::PollEventHook, run_command::RunCommandHook, swap_window::SwapWindowHook,
     },
     util::{get_handle, sigscanner::find_sig},
 };
@@ -20,6 +22,7 @@ use super::interfaces::Interfaces;
 pub mod base_interpolate_part1;
 pub mod create_move;
 pub mod detour;
+pub mod fire_event;
 pub mod frame_stage_notify;
 pub mod level_shutdown;
 pub mod load_whitelist;
@@ -30,7 +33,6 @@ pub mod pointer_hook;
 pub mod poll_event;
 pub mod run_command;
 pub mod swap_window;
-pub mod fire_event;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);

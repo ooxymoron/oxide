@@ -1,6 +1,5 @@
-use std::{ffi::{CStr, CString}, mem::transmute};
 
-use crate::{c_str_to_str, call_original, cfn, sdk::game_event::GameEvent, util::debug::{print_bytes, print_module_addres_offset}, vmt_call};
+use crate::{call_original, cfn, sdk::game_event::GameEvent};
 
 
 pub const NAME: &str = "FireEvent";

@@ -39,7 +39,7 @@ static mut SETTINGS: Option<*mut c_void> = None;
 
 
 unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
-    println!("loading base");
+    println!("loading");
 
     init_global!(SETTINGS,Settings::load()?,Settings);
     init_global!(OXIDE,Oxide::init()?,Oxide);

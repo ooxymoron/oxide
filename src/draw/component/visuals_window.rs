@@ -7,7 +7,7 @@ use crate::{
 
 use super::{
     base::{checkbox::Checkbox, float_input::FloatInput, window::Window},
-    Component, Components,
+    Component,
 };
 
 #[derive(Debug)]

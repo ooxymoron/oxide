@@ -47,6 +47,9 @@ impl AimbotFov {
 
 impl Component for AimbotFov {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
+        let size = d!().window_size;
+        self.base.w = size.0;
+        self.base.h = size.1;
         if !self.should_draw() {
             return Ok(());
         }

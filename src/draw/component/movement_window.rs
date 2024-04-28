@@ -1,7 +1,7 @@
 
 use crate::{draw::{event::Event, frame::Frame}, error::OxideResult, s, util::arcm::Arcm};
 
-use super::{base::{checkbox::Checkbox, window::Window}, Component, ComponentBase, Components};
+use super::{base::{checkbox::Checkbox, window::Window}, Component, ComponentBase};
 
 
 #[derive(Debug)]
