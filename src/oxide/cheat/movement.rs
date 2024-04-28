@@ -4,10 +4,7 @@ use crate::{
     error::OxideResult,
     math::{angles::Angles, dtr},
     sdk::{
-        interfaces::cvar::get_cvar,
-        entity::{flags::Flag, Entity, WaterLevel},
-        player_class::PlayerClass,
-        user_cmd::{ButtonFlags, UserCmd},
+        entity::{flags::Flag, player::player_class::PlayerClass, Entity, WaterLevel}, interfaces::cvar::get_cvar, user_cmd::{ButtonFlags, UserCmd}
     },
     setting,
 };

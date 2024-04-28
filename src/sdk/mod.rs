@@ -11,7 +11,6 @@ pub mod entity;
 pub mod font;
 pub mod input;
 pub mod networkable;
-pub mod player_class;
 pub mod user_cmd;
 pub mod view_setup;
 pub mod attribute_manager;

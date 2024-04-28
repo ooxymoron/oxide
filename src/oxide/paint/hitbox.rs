@@ -90,18 +90,18 @@ impl Paint {
             .collect::<Vec<_>>();
 
         let pairs = [
-            (corners[0].clone(), corners[1].clone()),
-            (corners[0].clone(), corners[2].clone()),
-            (corners[0].clone(), corners[4].clone()),
-            (corners[7].clone(), corners[3].clone()),
-            (corners[7].clone(), corners[5].clone()),
-            (corners[7].clone(), corners[6].clone()),
-            (corners[2].clone(), corners[3].clone()),
-            (corners[2].clone(), corners[6].clone()),
-            (corners[1].clone(), corners[5].clone()),
-            (corners[1].clone(), corners[3].clone()),
-            (corners[4].clone(), corners[6].clone()),
-            (corners[4].clone(), corners[5].clone()),
+            (&corners[0], &corners[1]),
+            (&corners[0], &corners[2]),
+            (&corners[0], &corners[4]),
+            (&corners[7], &corners[3]),
+            (&corners[7], &corners[5]),
+            (&corners[7], &corners[6]),
+            (&corners[2], &corners[3]),
+            (&corners[2], &corners[6]),
+            (&corners[1], &corners[5]),
+            (&corners[1], &corners[3]),
+            (&corners[4], &corners[6]),
+            (&corners[4], &corners[5]),
         ];
 
         for pair in pairs {
