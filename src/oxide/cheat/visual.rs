@@ -41,12 +41,16 @@ impl Visuals {
         Ok(())
     }
     pub fn update_spectators(&mut self) -> OxideResult<()> {
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Entity::get_local()?;
         let ent = if vmt_call!(p_local.as_ent(), is_alive) {
             p_local.as_ent()
         } else {
             vmt_call!(p_local.as_ent(), get_observer_target)
         };
+        #[allow(useless_ptr_null_checks)]
+        if ent as *const _ == null() {
+            return Ok(());
+        }
         let Some(cache)= &o!().last_entity_cache else {
             return Ok(())
         };
