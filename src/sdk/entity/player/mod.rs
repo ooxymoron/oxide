@@ -37,6 +37,20 @@ pub struct Player {
 }
 
 impl Player {
+    pub fn get_local() -> OxideResult<&'static mut Player> {
+        let id = vmt_call!(interface!(base_engine), get_local_player);
+        let Some(ent) = Entity::get_ent(id) else {
+            return Err(OxideError::new("plocal is none"))
+        };
+        return ent.as_player();
+    }
+    pub fn get_by_user_id(id: u32) -> OxideResult<&'static mut Player> {
+        let id = vmt_call!(interface!(base_engine), get_player_from_user_id, id);
+        let Some(ent) = Entity::get_ent(id) else {
+            return Err(OxideError::new("player is none"))
+        };
+        return ent.as_player();
+    }
     pub fn as_ent(&self) -> &mut Entity {
         unsafe { transmute_unchecked(self) }
     }

@@ -14,7 +14,7 @@ fn subhooks(hook: &mut CreateMoveHook) {
         if cmd.command_number == 0 {
             return;
         }
-        let p_local = Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
 
         if !vmt_call!(p_local.as_ent(), is_alive) {
             return;

@@ -5,7 +5,7 @@ use crate::{
     draw::{colors::WHITE, frame::Frame},
     error::OxideResult,
     o,
-    sdk::entity::Entity,
+    sdk::entity::{player::Player, Entity},
     setting, vmt_call,
 };
 
@@ -32,7 +32,7 @@ impl AimbotFov {
         if !setting!(aimbot, enabled) || !setting!(aimbot, draw_fov) {
             return false;
         }
-        let Ok(p_local) = Entity::get_local() else {
+        let Ok(p_local) = Player::get_local() else {
             return false;
         };
         if !vmt_call!(p_local.as_ent(), is_alive) {

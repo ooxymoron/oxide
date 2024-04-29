@@ -8,7 +8,7 @@ use crate::{
     o, s,
     sdk::{
         condition::ConditionFlags,
-        entity::{Entity, ObserverMode},
+        entity::{player::Player, Entity, ObserverMode},
         networkable::ClassId,
         view_setup::ViewSetup,
     },
@@ -41,7 +41,7 @@ impl Visuals {
         Ok(())
     }
     pub fn update_spectators(&mut self) -> OxideResult<()> {
-        let p_local = Entity::get_local()?;
+        let p_local = Player::get_local()?;
         let ent = if vmt_call!(p_local.as_ent(), is_alive) {
             p_local.as_ent()
         } else {
@@ -85,7 +85,7 @@ impl Visuals {
         if !setting!(visual, remove_disguises) {
             return Ok(());
         }
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
 
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         for id in o!()
@@ -116,7 +116,7 @@ impl Visuals {
         Ok(())
     }
     pub fn override_view(&mut self, view_setup: &mut ViewSetup) {
-        let Ok(p_local) = Entity::get_local() else { return };
+        let Ok(p_local) = Player::get_local() else { return };
         if !vmt_call!(p_local.as_ent(), is_alive) {
             return;
         }

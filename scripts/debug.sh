@@ -1,2 +1,2 @@
 
-sudo gdb -n -q -ex "attach $(pidof hl2_linux)" -ex "continue" -ex "layout src"
+sudo gdb -n -q -ex "attach $(pidof tf_linux64)" -ex "continue" -ex "layout src"

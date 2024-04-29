@@ -6,7 +6,7 @@ use crate::{
     error::OxideResult,
     o,
     oxide::cheat::visual::Visuals,
-    sdk::entity::Entity,
+    sdk::entity::{player::Player, Entity},
     setting,
 };
 
@@ -32,7 +32,7 @@ impl SpectatorList {
         if !setting!(visual, spectator_list) {
             return false;
         }
-        if Entity::get_local().is_err() {
+        if Player::get_local().is_err() {
             return false;
         };
         return true;

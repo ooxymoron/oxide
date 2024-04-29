@@ -2,7 +2,7 @@ use crate::{
     error::OxideResult,
     interface,
     oxide::entity_cache::EntityCache,
-    sdk::{condition::ConditionFlags, entity::Entity, networkable::ClassId},
+    sdk::{condition::ConditionFlags, entity::{player::Player, Entity}, networkable::ClassId},
     setting,
     vmt_call,
 };
@@ -14,7 +14,7 @@ impl Paint {
         if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual, esp) {
             return Ok(());
         }
-        let p_local = Entity::get_local()?;
+        let p_local = Player::get_local()?;
         let conditions = vec![
             ConditionFlags::Ubercharged,
             ConditionFlags::Bonked,

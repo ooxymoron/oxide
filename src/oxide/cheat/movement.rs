@@ -4,7 +4,7 @@ use crate::{
     error::OxideResult,
     math::{angles::Angles, dtr},
     sdk::{
-        entity::{flags::Flag, player::player_class::PlayerClass, Entity, WaterLevel}, interfaces::cvar::get_cvar, user_cmd::{ButtonFlags, UserCmd}
+        entity::{flags::Flag, player::{player_class::PlayerClass, Player}, Entity, WaterLevel}, interfaces::cvar::get_cvar, user_cmd::{ButtonFlags, UserCmd}
     },
     setting,
 };
@@ -30,7 +30,7 @@ impl Movement {
         "Movement"
     }
     pub fn create_move(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
-        let p_local = Entity::get_local()?;
+        let p_local = Player::get_local()?;
         if p_local.get_flags().get(Flag::INWATER)
             || p_local.get_flags().get(Flag::SWIM)
             || *p_local.get_water_level() > WaterLevel::Feet
@@ -68,7 +68,7 @@ impl Movement {
         }
     }
     pub fn bhop(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
-        let p_local = Entity::get_local()?;
+        let p_local = Player::get_local()?;
         let on_ground = p_local.get_flags().get(Flag::ONGROUND);
         let jumping = cmd.buttons.get(ButtonFlags::InJump);
 
@@ -80,7 +80,7 @@ impl Movement {
         Ok(())
     }
     pub fn auto_strafe(&self, cmd: &mut UserCmd) -> OxideResult<()> {
-        let p_local = Entity::get_local()?;
+        let p_local = Player::get_local()?;
         if p_local.get_flags().get(Flag::ONGROUND) || !setting!(movement, autostrafe) {
             return Ok(());
         }

@@ -133,3 +133,9 @@ macro_rules! c_str_to_str {
         
     };
 }
+#[macro_export]
+macro_rules! str_to_c_str {
+    ($str: expr) => {
+        std::ffi::CString::new($str).unwrap().as_ptr();
+    };
+}

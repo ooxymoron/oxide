@@ -5,12 +5,12 @@ use crate::{
 
 use super::{
     entity::player::Player,
-    CBaseHandle, WithVmt,
+    Handle, WithVmt,
 };
 
 pub type GameMovement = WithVmt<VMTGameMovement>;
 
-type EntityHandle = CBaseHandle;
+type EntityHandle = Handle;
 
 #[repr(C)]
 #[derive(Debug, Clone)]

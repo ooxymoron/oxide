@@ -2,6 +2,8 @@ use std::ffi::c_char;
 
 use crate::math::angles::Angles;
 
+use self::entity::player::Player;
+
 use super::*;
 
 pub type BaseEngine = WithVmt<VMTBaseEngine>;
@@ -69,8 +71,8 @@ pub struct VMTBaseEngine {
     pub get_screen_size: cfn!((), &BaseEngine, &isize, &isize),
     _pad2: [usize; 2],
     pub get_player_info: cfn!(bool, &BaseEngine, isize, &mut PlayerInfoUnparsed),
-
-    _pad3: [usize; 3],
+    _pad3: [usize; 2],
+    pub get_player_from_user_id: cfn!(u32, &BaseEngine, u32),
     pub get_local_player: cfn!(u32, &BaseEngine),
     _pad4: [usize; 6],
     pub get_view_angles: cfn!((), &BaseEngine, Angles),

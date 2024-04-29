@@ -3,14 +3,9 @@ use crate::{
     error::OxideResult,
     math::vector::Vector3,
     sdk::{
-        condition::ConditionFlags,
-        interfaces::engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-        entity::{
-            weapon::ids::{ItemDefiniitonIndex, WeaponType},
-            Entity,
-        },
-        interfaces::model_info::{HitboxId, HitboxWrapper},
-        user_cmd::{ButtonFlags, UserCmd},
+        condition::ConditionFlags, entity::{
+            player::Player, weapon::ids::{ItemDefiniitonIndex, WeaponType}, Entity
+        }, interfaces::{engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT}, model_info::{HitboxId, HitboxWrapper}}, user_cmd::{ButtonFlags, UserCmd}
     },
     setting, vmt_call,
 };
@@ -47,7 +42,7 @@ impl Aimbot {
     }
 
     pub fn point_scan(&self, hitbox: &HitboxWrapper) -> OxideResult<Option<(Vector3, isize)>> {
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
 
         let scaled_hitbox = hitbox.scaled(setting!(aimbot, hitbox_scale));
@@ -106,7 +101,7 @@ impl Aimbot {
     }
 
     pub fn should_run(&self) -> bool {
-        let p_local = Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         if !setting!(aimbot, enabled) || !self.shoot_key_pressed {
             return false;
         }
@@ -122,7 +117,7 @@ impl Aimbot {
         if !self.should_run() {
             return Ok(());
         }
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
             if let Some(target) = self.find_target()? {
@@ -144,7 +139,7 @@ impl Aimbot {
         Ok(())
     }
     pub fn shoot_weapon(&mut self, cmd: &mut UserCmd, found: Option<Target>) -> bool {
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let id = vmt_call!(weapon, get_weapon_id);
 

@@ -16,11 +16,11 @@ use crate::{
             base_engine::{BaseEngine, VMTBaseEngine},
             client_mode::{ClientMode, VMTClientMode},
             cvar::{CVar, VMTCVar},
+            debug_overlay::{DebugOverlay, VMTDebugOverlay},
             engine_trace::{EngineTrace, VMTEngineTrace},
             engine_vgui::{EngineVgui, VMTEngineVgui},
             entity_list::{EntityList, VMTEntityList},
             game_movement::{GameMovement, VMTGameMovement},
-            //input::{Input, VMTInput},
             mat_surface::{Surface, VMTMatSurface},
             material_system::{MaterialSystem, VMTMaterialSystem},
             model_info::{ModelInfo, VMTModelInfo},
@@ -105,6 +105,7 @@ pub struct Interfaces {
     pub game_movement: Interface<GameMovement, VMTGameMovement>,
     pub prediction: Interface<Prediction, VMTPrediction>,
     pub client_mode: Interface<ClientMode, VMTClientMode>,
+    pub debug_overlay: Interface<DebugOverlay, VMTDebugOverlay>,
     //pub input: Interface<Input, VMTInput>,
 }
 impl Interfaces {
@@ -136,6 +137,7 @@ impl Interfaces {
             game_movement: Interface::create(client_handle, "GameMovement001")?,
             prediction: Interface::create(client_handle, "VClientPrediction001")?,
             client_mode: Interface::new(client_mode),
+            debug_overlay: Interface::create(engine_handle, "VDebugOverlay003")?,
             //    input: Interface::new(input),
         })
     }

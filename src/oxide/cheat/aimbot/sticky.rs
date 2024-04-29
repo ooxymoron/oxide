@@ -1,12 +1,9 @@
 use crate::{
-    vmt_call,
-    error::OxideResult,
-    o,
-    sdk::{
-        entity::{pipe::PipeType, Entity},
+    error::OxideResult, o, sdk::{
+        entity::{pipe::PipeType, player::Player, Entity},
         interfaces::model_info::HitboxId,
         networkable::ClassId,
-    },
+    }, vmt_call
 };
 
 use super::{priority::Priority, Aimbot, Target};
@@ -56,7 +53,7 @@ impl Aimbot {
         Ok(best_target)
     }
     pub fn sticky_priority(&self, ent: &mut Entity) -> OxideResult<Option<isize>> {
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = &*Player::get_local().unwrap();
         if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number) {
             return Ok(None);
         }

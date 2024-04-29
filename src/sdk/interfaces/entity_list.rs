@@ -1,6 +1,6 @@
 use crate::cfn;
 
-use super::{entity::Entity, CBaseHandle, WithVmt};
+use super::{entity::Entity, Handle, WithVmt};
 
 
 pub type EntityList = WithVmt<VMTEntityList>;
@@ -10,7 +10,7 @@ pub type EntityList = WithVmt<VMTEntityList>;
 pub struct VMTEntityList {
     _pad1: [usize; 3],
     pub get_client_entity: cfn!(*mut Entity, *const EntityList, u32),
-	pub get_client_entity_from_handle: cfn!(&'static Entity, *const EntityList, CBaseHandle ),
+	pub get_client_entity_from_handle: cfn!(&'static Entity, *const EntityList, Handle ),
 	pub number_of_entities: cfn!(isize, *const EntityList, bool ),
 	pub get_highest_entity_index: cfn!(isize, *const EntityList),
 	pub set_max_entities: cfn!((), *const EntityList),

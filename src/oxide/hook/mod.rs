@@ -33,6 +33,7 @@ pub mod pointer_hook;
 pub mod poll_event;
 pub mod run_command;
 pub mod swap_window;
+pub mod dispatch_effect;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -93,15 +94,25 @@ impl Hooks {
             ),
         );
 
+        //tramp_hooks.insert(
+        //    fire_event::NAME.to_string(),
+        //    DetourHook::hook(
+        //        find_sig(
+        //            "./bin/linux64/engine.so",
+        //            "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC 88 00 00 00 48 85 F6",
+        //        )
+        //        .unwrap(),
+        //        fire_event::fire_event as *const u8,
+        //    ),
+        //);
         tramp_hooks.insert(
-            fire_event::NAME.to_string(),
+            dispatch_effect::NAME.to_string(),
             DetourHook::hook(
                 find_sig(
-                    "./bin/linux64/engine.so",
-                    "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC 88 00 00 00 48 85 F6",
-                )
-                .unwrap(),
-                fire_event::load_whitelist_hook as *const u8,
+                    "./tf/bin/linux64/client.so",
+                    "55 48 89 E5 41 55 41 54 49 89 FC 53 48 83 EC 08 48 8B 1D",
+                ).unwrap(),
+                dispatch_effect::dispatch_effect as *const u8,
             ),
         );
 
@@ -111,7 +122,7 @@ impl Hooks {
         //        find_sig(
         //            "./tf/bin/client.so",
         //            "55 89 E5 57 56 53 83 EC 2C 8B 45 ? 8B 5D ? 8B 75 ? 8B 7D ? C7 00 01 00 00 00",
-        //        ),
+        //        ).unwrap(),
         //        base_interpolate_part1::BaseInterpolatePart1Hook as *const u8,
         //    ),
         //);

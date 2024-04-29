@@ -205,13 +205,6 @@ impl Entity {
 }
 
 impl Entity {
-    pub fn get_local() -> OxideResult<&'static mut Player> {
-        let id = vmt_call!(interface!(base_engine), get_local_player);
-        let Some(ent) = Self::get_ent(id) else {
-            return Err(OxideError::new("plocal is none"))
-        };
-        return ent.as_player();
-    }
 }
 impl Entity {
     pub fn get_ent(id: u32) -> Option<&'static mut Entity> {

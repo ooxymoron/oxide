@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::{vmt_call, error::OxideResult, math::vector::Vector3, sdk::entity::Entity, setting};
+use crate::{error::OxideResult, math::vector::Vector3, sdk::entity::{player::Player, Entity}, setting, vmt_call};
 
 use super::Aimbot;
 
@@ -33,7 +33,7 @@ impl PartialOrd for Priority {
 
 impl Aimbot {
     pub fn point_priority(&self, target_point: Vector3) -> Option<isize> {
-        let p_local = Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
 
 
@@ -56,7 +56,7 @@ impl Aimbot {
         Some(-distance_to_center as isize)
     }
     pub fn ent_priority(&self, ent: &mut Entity) -> OxideResult<Option<isize>> {
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number) {
             return Ok(None);
         }

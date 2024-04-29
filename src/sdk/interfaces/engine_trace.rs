@@ -174,7 +174,7 @@ pub struct VMTEngineTrace {
 }
 
 pub fn trace(start: Vector3, end: Vector3, mask: u32) -> Trace {
-    let p_local = Entity::get_local().unwrap();
+    let p_local = Player::get_local().unwrap();
     let trace_engine = interface!(engine_trace);
 
     let ray = Ray::new(start, end);

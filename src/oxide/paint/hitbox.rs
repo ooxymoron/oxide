@@ -4,7 +4,7 @@ use crate::{
     oxide::entity_cache::EntityCache,
     rgb_to_hex,
     sdk::{
-        entity::Entity,
+        entity::{player::Player, Entity},
         interfaces::model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
@@ -22,7 +22,7 @@ impl Paint {
         if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual, hitboxes) {
             return Ok(());
         }
-        let p_local = Entity::get_local()?;
+        let p_local = Player::get_local()?;
         for id in cache.get_ent(ClassId::CTFPlayer) {
             let Some(player) = Entity::get_ent(id ) else {continue};
             if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {

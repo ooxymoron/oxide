@@ -14,7 +14,7 @@ use super::{priority::Priority, Aimbot, Target};
 
 impl Aimbot {
     pub fn hitbox_order(&self, ent: &Entity) -> Vec<(isize, HitboxWrapper)> {
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let baim = (|| {
             if weapon.can_headshot() {
@@ -55,7 +55,7 @@ impl Aimbot {
         if self.ent_priority(player.as_ent())?.is_none() {
             return Ok(None);
         }
-        let p_local = &*Entity::get_local().unwrap();
+        let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.is_sniper_rifle()
             && setting!(aimbot, wait_for_charge)

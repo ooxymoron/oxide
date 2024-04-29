@@ -17,8 +17,9 @@ pub mod attribute_manager;
 pub mod interfaces;
 pub mod global_vars;
 pub mod game_event;
+pub mod effect_data;
 
-pub type CBaseHandle = u32;
+pub type Handle = u32;
 pub type ConCommand = *const u8;
 
 pub type VMatrix = [[f32; 4]; 4];
