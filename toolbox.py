@@ -68,7 +68,7 @@ def get_pid():
         .strip()
 
     if pid == '':
-        print('tf2 not runnig')
+        print('tf2 not running')
         exit(0)
     return pid
 
