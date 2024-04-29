@@ -39,6 +39,7 @@ pub struct Oxide {
     pub engine_prediction: EnginePredicion,
     pub logger: Logger,
     pub netvars: HashMap<String, HashMap<String, Netvar>>,
+    pub unloading: bool
 }
 pub type GetBonePositionFn =
     unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
@@ -109,6 +110,7 @@ impl Oxide {
             engine_prediction: EnginePredicion::new(),
             logger,
             netvars,
+            unloading: false
         };
 
         Ok(oxide)

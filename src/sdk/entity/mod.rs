@@ -1,4 +1,4 @@
-use std::mem::transmute;
+use std::{mem::transmute, usize};
 
 use derivative::Derivative;
 
@@ -24,7 +24,9 @@ use self::{
 
 use super::*;
 
-use super::{collideable::Collideable, interfaces::model_render::Renderable, networkable::Networkable};
+use super::{
+    collideable::Collideable, interfaces::model_render::Renderable, networkable::Networkable,
+};
 
 pub mod flags;
 pub mod object;
@@ -166,9 +168,6 @@ impl Entity {
         unsafe {
             let rend = self.as_renderable();
 
-            if !(rend as *const _ as *const u8).is_aligned_to(8) {
-                return Err(OxideError::new("unaligned ptr"));
-            }
             let model = vmt_call!(rend, get_model);
             let studio_model = transmute::<_, &StudioHdr>(vmt_call!(
                 interface!(model_info),
@@ -266,9 +265,7 @@ impl Team {
 
 impl PartialEq for &Entity {
     fn eq(&self, other: &Self) -> bool {
-        let self_id = vmt_call!(self.as_networkable(), get_index);
-        let other_id = vmt_call!(other.as_networkable(), get_index);
-        self_id == other_id
+        *self as *const _ as usize == *other as *const _ as usize
     }
 }
 

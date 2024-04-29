@@ -1,12 +1,10 @@
 #![feature(
     c_variadic,
-    pointer_is_aligned,
     associated_type_defaults,
     stmt_expr_attributes,
     core_intrinsics,
     unboxed_closures,
     inherent_associated_types,
-    absolute_path
 )]
 #![allow(improper_ctypes_definitions, internal_features, incomplete_features)]
 
@@ -18,7 +16,7 @@ use std::{
     thread,
 };
 
-use crate::{draw::Draw, oxide::Oxide, settings::Settings};
+use crate::{draw::Draw, oxide::{hook::Hook, Oxide}, settings::Settings};
 
 pub mod draw;
 pub mod error;
@@ -71,15 +69,14 @@ extern "C" fn unload() {
 
         log!("unloading");
 
-        if DRAW.is_some() {
-            d!().restore();
-            std::ptr::drop_in_place(d!());
-        }
-        if OXIDE.is_some() {
-            o!().restore();
-            std::ptr::drop_in_place(o!());
+        for (_, hook) in &mut o!().hooks.detour_hooks {
+            hook.restore()
         }
 
+        //std::ptr::drop_in_place(o!());
+        d!().restore();
+        std::ptr::drop_in_place(d!());
+        std::ptr::drop_in_place(s!());
         eprintln!("unloaded");
     }
 }

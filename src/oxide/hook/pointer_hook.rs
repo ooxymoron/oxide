@@ -52,6 +52,7 @@ macro_rules! define_hook{
             #[allow(unused)]
             unsafe extern "C-unwind" fn hook_fn($($argName:$argType),*) -> $return{
 
+
                 if OXIDE.is_none() {
                     return $default;
                 }

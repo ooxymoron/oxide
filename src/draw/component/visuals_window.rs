@@ -21,9 +21,11 @@ impl VisualsWindow {
         let mut y = 10;
         macro_rules! a {
             ($e:expr) => {
-                window.add($e);
                 #[allow(unused_assignments)]
-                y += $e.get_base().h + 8
+                {
+                    window.add($e);
+                    y += $e.get_base().h + 8
+                }
             };
         }
 
