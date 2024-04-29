@@ -2,7 +2,6 @@ use std::ffi::c_char;
 
 use crate::math::angles::Angles;
 
-use self::entity::player::Player;
 
 use super::*;
 

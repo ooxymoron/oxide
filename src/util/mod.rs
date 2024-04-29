@@ -12,6 +12,7 @@ pub mod sigscanner;
 pub mod arcm;
 pub mod scancode;
 pub mod debug;
+pub mod handles;
 
 pub fn vmt_size(vmt: *const c_void) -> usize {
     unsafe {

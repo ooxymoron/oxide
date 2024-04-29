@@ -31,7 +31,7 @@ use crate::{
         },
         HasVmt,
     },
-    util::{get_handle, vmt_size},
+    util::{get_handle, handles::{CLIENT, ENGINE, MATERIAL_SYSTEM, VGUI, VGUIMATSURFACE, VSTDLIB}, vmt_size},
 };
 
 #[derive(Debug, Clone)]
@@ -110,12 +110,12 @@ pub struct Interfaces {
 }
 impl Interfaces {
     pub fn init() -> Result<Interfaces, std::boxed::Box<dyn Error>> {
-        let client_handle = get_handle("./tf/bin/linux64/client.so")?;
-        let engine_handle = get_handle("./bin/linux64/engine.so")?;
-        let matsurface_handle = get_handle("./bin/linux64/vguimatsurface.so")?;
-        let vgui_handle = get_handle("./bin/linux64/vgui2.so")?;
-        let materialsystem_handle = get_handle("./bin/linux64/materialsystem.so")?;
-        let vstdlib_handle = get_handle("./bin/linux64/libvstdlib.so")?;
+        let client_handle = get_handle(CLIENT)?;
+        let engine_handle = get_handle(ENGINE)?;
+        let matsurface_handle = get_handle(VGUIMATSURFACE)?;
+        let vgui_handle = get_handle(VGUI)?;
+        let materialsystem_handle = get_handle(MATERIAL_SYSTEM)?;
+        let vstdlib_handle = get_handle(VSTDLIB)?;
         let base_client: Interface<BaseClient, VMTBaseClient> =
             Interface::create(client_handle, "VClient017")?;
 

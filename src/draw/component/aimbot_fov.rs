@@ -5,7 +5,7 @@ use crate::{
     draw::{colors::WHITE, frame::Frame},
     error::OxideResult,
     o,
-    sdk::entity::{player::Player, Entity},
+    sdk::entity::player::Player,
     setting, vmt_call,
 };
 

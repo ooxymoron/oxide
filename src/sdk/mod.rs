@@ -1,5 +1,5 @@
-use crate::{cfn, error::OxideResult, impl_has_vmt, log};
-use std::{fmt::Debug, intrinsics::breakpoint, mem::transmute};
+use crate::{cfn, impl_has_vmt};
+use std::{fmt::Debug, mem::transmute};
 
 pub use derivative::Derivative;
 
@@ -12,6 +12,7 @@ pub mod condition;
 pub mod convar;
 pub mod effect_data;
 pub mod entity;
+pub mod fire_bullets_info;
 pub mod font;
 pub mod game_event;
 pub mod global_vars;

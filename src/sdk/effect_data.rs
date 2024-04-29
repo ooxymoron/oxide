@@ -4,7 +4,7 @@ use libc::c_short;
 
 use crate::math::{angles::Angles, vector::Vector3};
 
-use super::{interfaces::cvar::Color, EntHandle};
+use super::EntHandle;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]

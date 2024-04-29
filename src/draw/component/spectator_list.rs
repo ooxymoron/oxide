@@ -6,7 +6,7 @@ use crate::{
     error::OxideResult,
     o,
     oxide::cheat::visual::Visuals,
-    sdk::entity::{player::Player, Entity},
+    sdk::entity::player::Player,
     setting,
 };
 

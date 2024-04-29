@@ -12,7 +12,11 @@ use crate::{
         override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook,
         poll_event::PollEventHook, run_command::RunCommandHook, swap_window::SwapWindowHook,
     },
-    util::{get_handle, sigscanner::find_sig},
+    util::{
+        get_handle,
+        handles::{CLIENT, ENGINE, SDL},
+        sigscanner::find_sig,
+    },
 };
 
 use self::detour::DetourHook;
@@ -22,6 +26,9 @@ use super::interfaces::Interfaces;
 pub mod base_interpolate_part1;
 pub mod create_move;
 pub mod detour;
+pub mod dispatch_effect;
+pub mod fire_bullet;
+pub mod fire_bullets;
 pub mod fire_event;
 pub mod frame_stage_notify;
 pub mod level_shutdown;
@@ -33,7 +40,6 @@ pub mod pointer_hook;
 pub mod poll_event;
 pub mod run_command;
 pub mod swap_window;
-pub mod dispatch_effect;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -48,12 +54,20 @@ pub struct Hooks {
 impl Hooks {
     pub fn init(interfaces: &Interfaces) -> Hooks {
         let mut ptr_hooks = HashMap::new();
-        let mut tramp_hooks = HashMap::new();
+        let mut detour_hooks = HashMap::new();
         macro_rules! InitVmtHook {
             ($HookClass:ident,$val:expr) => {
                 ptr_hooks.insert(
                     $HookClass::name(),
                     Box::new($HookClass::init($val)) as Box<dyn Hook>,
+                );
+            };
+        }
+        macro_rules! InitDetourHook {
+            ($hook:ident,$module:expr,$sig:expr) => {
+                detour_hooks.insert(
+                    $hook::NAME.to_string(),
+                    DetourHook::hook(find_sig($module, $sig).unwrap(), $hook::hook as *const u8),
                 );
             };
         }
@@ -79,19 +93,16 @@ impl Hooks {
             RunCommandHook,
             &(*interfaces.prediction.get_vmt()).run_command
         );
-        //load whitelist
-        //55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60
-
-        tramp_hooks.insert(
-            load_whitelist::NAME.to_string(),
-            DetourHook::hook(
-                find_sig(
-                    "./bin/linux64/engine.so",
-                    "55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60",
-                )
-                .unwrap(),
-                load_whitelist::load_whitelist_hook as *const u8,
-            ),
+        InitDetourHook!(
+            load_whitelist,
+            ENGINE,
+            "55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60"
+        );
+        InitDetourHook!(fire_bullets, CLIENT, "55 48 89 E5 41 57 49 89 FF 44 89 C7");
+        InitDetourHook!(
+            fire_bullet,
+            CLIENT,
+            "55 48 89 E5 41 57 49 89 D7 41 56 41 55 49 89 FD 41 54 49 89 F4"
         );
 
         //tramp_hooks.insert(
@@ -105,16 +116,16 @@ impl Hooks {
         //        fire_event::fire_event as *const u8,
         //    ),
         //);
-        tramp_hooks.insert(
-            dispatch_effect::NAME.to_string(),
-            DetourHook::hook(
-                find_sig(
-                    "./tf/bin/linux64/client.so",
-                    "55 48 89 E5 41 55 41 54 49 89 FC 53 48 83 EC 08 48 8B 1D",
-                ).unwrap(),
-                dispatch_effect::dispatch_effect as *const u8,
-            ),
-        );
+        //tramp_hooks.insert(
+        //    dispatch_effect::NAME.to_string(),
+        //    DetourHook::hook(
+        //        find_sig(
+        //            "./tf/bin/linux64/client.so",
+        //            "55 48 89 E5 41 55 41 54 49 89 FC 53 48 83 EC 08 48 8B 1D",
+        //        ).unwrap(),
+        //        dispatch_effect::dispatch_effect as *const u8,
+        //    ),
+        //);
 
         //tramp_hooks.insert(
         //    base_interpolate_part1::NAME.to_string(),
@@ -128,7 +139,7 @@ impl Hooks {
         //);
 
         unsafe {
-            let handle = get_handle("/usr/lib/libSDL2-2.0.so.0").unwrap();
+            let handle = get_handle(SDL).unwrap();
             let name = CString::new("SDL_GL_SwapWindow").unwrap();
             let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
@@ -144,7 +155,7 @@ impl Hooks {
 
         Hooks {
             ptr_hooks,
-            detour_hooks: tramp_hooks,
+            detour_hooks,
         }
     }
     pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>> {

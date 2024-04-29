@@ -1,4 +1,4 @@
-use std::{intrinsics::breakpoint, mem::transmute, usize};
+use std::mem::transmute;
 
 use derivative::Derivative;
 
@@ -215,9 +215,7 @@ impl Entity {
         unsafe { Some(&mut *ent) }
     }
     pub fn get_ent_from_handle(handle: EntHandle) -> Option<&'static mut Entity> {
-        unsafe{breakpoint()};
         let ent = vmt_call!(interface!(entity_list), get_client_entity_from_handle, handle);
-        unsafe{breakpoint()};
         if ent.is_null() {
             return None;
         }

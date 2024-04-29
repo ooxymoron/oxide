@@ -3,7 +3,7 @@ use crate::{
     oxide::cheat::{aimbot::Aimbot, movement::Movement},
     sdk::{
         interfaces::client_mode::ClientMode,
-        entity::{player::Player, Entity},
+        entity::player::Player,
         user_cmd::UserCmd,
     },
     setting, vmt_call,
