@@ -12,6 +12,7 @@ pub type DebugOverlay = WithVmt<VMTDebugOverlay>;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTDebugOverlay {
+    _pad: [usize; 1],
     pub add_box_overlay: cfn!(
         (),
         &DebugOverlay,

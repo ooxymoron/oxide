@@ -1,25 +1,40 @@
-use crate::{cfn, impl_has_vmt};
-use std::{fmt::Debug, mem::transmute};
+use crate::{cfn, error::OxideResult, impl_has_vmt, log};
+use std::{fmt::Debug, intrinsics::breakpoint, mem::transmute};
 
 pub use derivative::Derivative;
 
+use self::entity::Entity;
+
+pub mod attribute_manager;
 pub mod camerd_third_data;
 pub mod collideable;
 pub mod condition;
 pub mod convar;
+pub mod effect_data;
 pub mod entity;
 pub mod font;
+pub mod game_event;
+pub mod global_vars;
 pub mod input;
+pub mod interfaces;
 pub mod networkable;
 pub mod user_cmd;
 pub mod view_setup;
-pub mod attribute_manager;
-pub mod interfaces;
-pub mod global_vars;
-pub mod game_event;
-pub mod effect_data;
 
-pub type Handle = u32;
+#[repr(transparent)]
+#[derive(Debug, Clone, Copy)]
+pub struct EntHandle(u32);
+
+const INVALID_HANDLE: u32 = 0xffffffff;
+
+impl EntHandle {
+    pub fn resolve(self) -> Option<&'static mut Entity> {
+        if self.0 == INVALID_HANDLE {
+            return None;
+        }
+        Entity::get_ent_from_handle(self)
+    }
+}
 pub type ConCommand = *const u8;
 
 pub type VMatrix = [[f32; 4]; 4];
