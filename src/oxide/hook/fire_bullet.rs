@@ -7,7 +7,7 @@ pub const NAME: &str = "FireBullet";
 pub type FireBullet = cfn!(
     (),
     &mut Player,
-    &mut Weapon,
+    *mut Weapon,
     &FireBulletsInfo,
     bool,
     i32,
@@ -16,7 +16,7 @@ pub type FireBullet = cfn!(
 
 pub extern "C" fn hook(
     player: &mut Player,
-    weapon: &mut Weapon,
+    weapon: *mut Weapon,
     info: &FireBulletsInfo,
     do_effects: bool,
     damage_type: i32,
