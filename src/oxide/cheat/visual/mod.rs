@@ -19,6 +19,8 @@ use crate::{
 
 use super::Cheat;
 
+pub mod tracers;
+
 #[derive(Debug)]
 pub struct Visuals {
     pub spectators: Arcm<Vec<(String, ObserverMode)>>,

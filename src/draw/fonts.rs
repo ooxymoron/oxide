@@ -105,7 +105,7 @@ impl Fonts {
                 FT_Load_Char(face, letter as u64, FT_LOAD_RENDER);
 
                 let glyph = (*face).glyph.read_volatile();
-                w += (glyph.metrics.horiAdvance >> 6) as isize - 1;
+                w += (glyph.metrics.horiAdvance >> 6) as isize;
 
                 h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
                 h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);

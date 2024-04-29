@@ -127,6 +127,18 @@ impl VisualsWindow {
             10,
             y,
         ));
+        a!(Checkbox::new(
+            "tracers",
+            s!().visual.tracers.clone(),
+            10,
+            y,
+        ));
+        a!(Checkbox::new(
+            "impacts",
+            s!().visual.impacts.clone(),
+            10,
+            y,
+        ));
         VisualsWindow { window }
     }
 }

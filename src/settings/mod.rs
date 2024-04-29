@@ -116,6 +116,8 @@ pub struct VisualSettings {
     pub remove_disguises: Arcm<bool>,
     pub spectator_list: Arcm<bool>,
     pub pure_bypass: Arcm<bool>,
+    pub tracers: Arcm<bool>,
+    pub impacts: Arcm<bool>,
 }
 
 impl VisualSettings {
@@ -138,6 +140,8 @@ impl VisualSettings {
             remove_disguises: Arcm::new(false),
             spectator_list: Arcm::new(false),
             pure_bypass: Arcm::new(false),
+            tracers: Arcm::new(false),
+            impacts: Arcm::new(false),
         }
     }
 }

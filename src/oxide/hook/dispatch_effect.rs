@@ -33,7 +33,7 @@ pub extern "C" fn dispatch_effect(name: *const c_char, effect: &EffectData) -> b
                 }
             }
 
-            interface!(debug_overlay).add_box_overlay(&effect.origin, 4.0, color, 50, duration);
+            interface!(debug_overlay).rect(&effect.origin, 4.0, color, 50, duration);
         }
         _ => {}
     }
