@@ -113,7 +113,6 @@ impl Frame {
         let face = self.fonts.get_face(&size);
 
         for letter in text.chars() {
-            x -= 1;
             let advance = d!()
                 .fonts
                 .draw_glyph(&face, letter, size.clone(), x, y, color, alpha);

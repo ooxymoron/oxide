@@ -1,13 +1,16 @@
 use std::borrow::BorrowMut;
 
 use crate::{
-    d, draw::{
+    d,
+    draw::{
         colors::{CURSOR, CURSOR_TEXT, FOREGROUND},
         component::{Component, ComponentBase},
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    }, error::OxideResult, util::{arcm::Arcm, point_in_bounds} 
+    },
+    error::OxideResult,
+    util::{arcm::Arcm, point_in_bounds},
 };
 
 #[derive(Debug)]
@@ -19,12 +22,7 @@ pub struct Button {
 }
 
 impl Button {
-    pub fn new(
-        base: ComponentBase,
-        text: &str,
-        val: Arcm<bool>,
-        size: FontSize,
-    ) -> Button {
+    pub fn new(base: ComponentBase, text: &str, val: Arcm<bool>, size: FontSize) -> Button {
         Button {
             base,
             val,
@@ -35,14 +33,14 @@ impl Button {
 }
 
 impl Component for Button {
-    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()>{
-        let ComponentBase{x,y,w,h} = self.base;
+    fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
+        let ComponentBase { x, y, w, h } = self.base;
         frame.filled_rect(x, y, w, h, CURSOR_TEXT, 255);
         frame.outlined_rect(x, y, w, h, CURSOR, 255);
         frame.text(
             &self.text,
-            x + w / 2 - 1,
-            y + h / 2 + 1,
+            x + w / 2,
+            y + h / 2,
             self.size.clone(),
             true,
             FOREGROUND,
@@ -54,15 +52,8 @@ impl Component for Button {
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown => {
-                let ComponentBase{x,y,w,h} = self.base;
-                if point_in_bounds(
-                    d!().cursor.0,
-                    d!().cursor.1,
-                    x,
-                    y,
-                    w,
-                    h,
-                ) {
+                let ComponentBase { x, y, w, h } = self.base;
+                if point_in_bounds(d!().cursor.0, d!().cursor.1, x, y, w, h) {
                     let mut val = self.val.lock().unwrap();
                     *val = !*val;
                     event.handled = true;
@@ -75,6 +66,4 @@ impl Component for Button {
     fn get_base(&mut self) -> &mut ComponentBase {
         self.base.borrow_mut()
     }
-
 }
-

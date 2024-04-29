@@ -40,7 +40,7 @@ impl Window {
             d!().fonts.get_text_size(&title, FontSize::Medium).0 + CLOSE_BUTTON_SIZE + PADDING * 3;
         let close_button = Button::new(
             ComponentBase {
-                x: x + w - CLOSE_BUTTON_SIZE/2 - PADDING,
+                x: x + w - CLOSE_BUTTON_SIZE - PADDING,
                 y: y + PADDING,
                 w: CLOSE_BUTTON_SIZE,
                 h: CLOSE_BUTTON_SIZE,
