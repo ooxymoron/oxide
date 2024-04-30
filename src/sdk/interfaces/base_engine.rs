@@ -1,7 +1,8 @@
 use std::ffi::c_char;
 
-use crate::math::angles::Angles;
+use crate::{math::angles::Angles, vmt_call};
 
+use self::net_channel::NetChannel;
 
 use super::*;
 
@@ -82,6 +83,17 @@ pub struct VMTBaseEngine {
     pub is_connected: cfn!(bool, &BaseEngine),
     _pad6: [usize; 8],
     pub world_to_screen_matrix: cfn!(VMatrix, &BaseEngine),
-    _pad7: [usize; 48],
-    pub is_taking_screenshot: cfn!(bool, &BaseEngine),
+    _pad7: [usize; 35],
+    pub get_net_channel_info: cfn!(*const NetChannel, &BaseEngine),
+    _pad8: [usize; 55],
+    pub server_cmd_key_values: cfn!((),()),
+}
+impl BaseEngine {
+    pub fn get_net_channel(&self) -> Option<&NetChannel> {
+        let net_channel = vmt_call!(self, get_net_channel_info);
+        if net_channel.is_null() {
+            return None;
+        }
+        Some(unsafe { transmute(net_channel) })
+    }
 }

@@ -4,26 +4,27 @@ use std::{
 };
 
 use libc::c_void;
+use sdl2_sys::SDL_Window;
 
 use crate::{d, define_hook, draw::Draw, init_global, DRAW};
 
-fn subhooks(hook: &mut SwapWindowHook) {
-    hook.before = Some(|window| unsafe {
+fn hook(window: *mut SDL_Window,org:SwapWindowHook::RawFn) {
+    unsafe {
         if DRAW.is_none() {
             init_global!(DRAW,Draw::init(window).unwrap(),Draw);
             d!().load_components();
         }
         d!().run(window);
-        None
-    });
+    }
+    (org)(window)
 }
 
 define_hook!(
     SwapWindowHook,
     "SwapWindow",
+    hook,
     (),
     (),
-    subhooks,
     window,
-    *mut sdl2_sys::SDL_Window
+    *mut SDL_Window
 );

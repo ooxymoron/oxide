@@ -1,6 +1,6 @@
 use crate::cfn;
 
-use super::{networkable::UnparsedClientClass, view_setup::ViewSetup, WithVmt};
+use super::{bf_read::BfRead, networkable::UnparsedClientClass, view_setup::ViewSetup, WithVmt};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -31,6 +31,7 @@ pub struct VMTBaseClient {
     pub in_activate_mouse: cfn!((), &BaseClient),
     _pad4: [usize; 20],
     pub frame_stage_notify: cfn!((), &BaseClient, FrameStage),
-    _pad5: [usize; 23],
+    pub dispatch_user_message: cfn!(bool, *const u8, u32, &mut BfRead),
+    _pad5: [usize; 22],
     pub get_player_view: cfn!(bool, &BaseClient, &ViewSetup),
 }

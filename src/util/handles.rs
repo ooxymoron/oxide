@@ -5,3 +5,4 @@ pub const VGUIMATSURFACE: &str = "./bin/linux64/vguimatsurface.so";
 pub const VGUI: &str = "./bin/linux64/vgui2.so";
 pub const MATERIAL_SYSTEM: &str = "./bin/linux64/materialsystem.so";
 pub const VSTDLIB: &str = "./bin/linux64/libvstdlib.so";
+pub const TIER0: &str = "./bin/linux64/libtier0.so";

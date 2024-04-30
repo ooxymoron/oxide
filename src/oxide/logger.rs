@@ -14,7 +14,9 @@ impl Logger {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {
-        let text = format!($($arg)*);
-        crate::o!().logger.log(&text);
+        {
+            let text = format!($($arg)*);
+            crate::o!().logger.log(&text);
+        }
     };
 }

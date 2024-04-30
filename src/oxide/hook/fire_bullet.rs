@@ -1,5 +1,5 @@
 use crate::{
-    call_original, cfn, o, oxide::cheat::visual::Visuals, sdk::{entity::{player::Player, weapon::Weapon}, fire_bullets_info::FireBulletsInfo}
+    call_original, cfn, get_cheat, oxide::cheat::visual::Visuals, sdk::{entity::{player::Player, weapon::Weapon}, fire_bullets_info::FireBulletsInfo}
 };
 
 pub const NAME: &str = "FireBullet";
@@ -22,8 +22,7 @@ pub extern "C" fn hook(
     damage_type: i32,
     custom_damage_typ: i32,
 ) {
-    let visual = o!().cheats.get::<Visuals>(Visuals::name());
-    visual.draw_tracer(info, weapon);
+    get_cheat!(Visuals).draw_tracer(info, weapon);
 
     call_original!(
         NAME,

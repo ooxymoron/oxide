@@ -10,12 +10,18 @@ use crate::{
     math::{angles::Angles, vector::Vector3},
     netvars::{netvar_dumper::load_netvars, Netvar},
     oxide::{cheat::cheats::Cheats, hook::Hooks, interfaces::Interfaces},
-    sdk::{interfaces::base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
+    sdk::{
+        client_state::{self, ClientState},
+        entity::Entity,
+        global_vars::GlobalVars,
+        interfaces::{base_client::BaseClient, base_engine::BaseEngine},
+    },
     DRAW,
 };
 
 use self::{
     engine_prediction::EnginePredicion, entity_cache::EntityCache, logger::Logger, paint::Paint,
+    util::Util,
 };
 
 pub mod cheat;
@@ -25,6 +31,7 @@ pub mod hook;
 pub mod interfaces;
 pub mod logger;
 pub mod paint;
+pub mod util;
 
 #[derive(Debug)]
 pub struct Oxide {
@@ -39,7 +46,9 @@ pub struct Oxide {
     pub engine_prediction: EnginePredicion,
     pub logger: Logger,
     pub netvars: HashMap<String, HashMap<String, Netvar>>,
-    pub unloading: bool
+    pub unloading: bool,
+    pub util: Util,
+    pub client_state: &'static mut ClientState,
 }
 pub type GetBonePositionFn =
     unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
@@ -57,46 +66,18 @@ impl Oxide {
         }
     }
     pub fn init() -> OxideResult<Oxide> {
-        //TODO: x64 fucked up load order
-        //if !Oxide::can_load() {
-        //    println!("awaiting tf2 load");
-        //    loop {
-        //        if Oxide::can_load() {
-        //            break;
-        //        }
-        //        sleep(Duration::from_secs(1))
-        //    }
-        //    println!("tf2 loaded");
-        //}
-
-        //let sig =
-        //    "55 89 E5 53 8D 5D ? 83 EC 44 8B 45 ? 89 5C 24 ? 89 44 24 ? 8B 45 ? 89 04 24 E8 ? ? ? ? 8B 45";
-        //let get_bone_position_fn = unsafe { transmute(find_sig("./tf/bin/client.so", &sig)) };
         let interfaces = Interfaces::init()?;
         let hooks = Hooks::init(&interfaces);
         let cheats = Cheats::init();
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
+        let client_state =
+            Oxide::get_client_state(unsafe { transmute(interfaces.base_engine.interface_ref()) });
 
+        let netvars = load_netvars(unsafe { transmute(interfaces.base_client.interface_ref()) });
         let paint = Paint::init(&interfaces);
 
         let logger = Logger {};
-        let netvars = load_netvars(unsafe { transmute(interfaces.base_client.interface_ref) });
-        //fn print_props(pad: String,props: HashMap<String,Netvar>) {
-        //    for (name,prop) in props{
-        //        if let NetvarType::OBJECT(sub_props) = prop.netvar_type {
-        //            print_props(format!("{pad} {name}"), sub_props)
-        //        } else {
-        //            eprintln!("{pad} {name}")
-        //        }
-        //    }
-        //}
-        //for (k,v) in netvars.clone() {
-        //    eprintln!("{k}{}","{");
-        //    print_props(format!("{k}"), v);
-        //    eprintln!("{}","}");
-        //}
-        //return Err(OxideError::new("."));
 
         let oxide = Oxide {
             interfaces,
@@ -104,16 +85,29 @@ impl Oxide {
             hooks,
             global_vars,
             fov: 100.0,
-            //get_bone_position_fn,
             last_entity_cache: None,
             paint,
             engine_prediction: EnginePredicion::new(),
             logger,
             netvars,
-            unloading: false
+            unloading: false,
+            util: Util::init(),
+            client_state,
         };
 
         Ok(oxide)
+    }
+    fn get_client_state(base_engine: &BaseEngine) -> &'static mut ClientState {
+        unsafe {
+            let server_cmd_key_values = base_engine.vmt.read().server_cmd_key_values as *const u8;
+            let client_state: &'static mut ClientState = transmute(
+                transmute::<_, *const u32>(server_cmd_key_values)
+                    .byte_add(3)
+                    .read() as u64
+                    + transmute::<_, u64>(server_cmd_key_values),
+            );
+            client_state
+        }
     }
     fn get_global_vars(base_client: &BaseClient) -> &'static mut GlobalVars {
         unsafe {

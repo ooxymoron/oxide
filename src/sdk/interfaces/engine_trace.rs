@@ -4,10 +4,13 @@ use std::{
     ops::Sub,
 };
 
-use crate::{vmt_call, cfn, interface, math::vector::Vector3};
+use crate::{cfn, interface, math::vector::Vector3, vmt_call};
 
 use super::{
-    entity::{player::Player, Entity}, model_info::HitboxId, networkable::ClassId, WithVmt
+    entity::{player::Player, Entity},
+    model_info::HitboxId,
+    networkable::ClassId,
+    WithVmt,
 };
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
@@ -85,26 +88,24 @@ pub enum TraceType {
     EverythingFilterProps,
 }
 
-unsafe extern "C-unwind" fn should_hit_entity(
+extern "C" fn should_hit_entity(
     trace_filter: *const TraceFilter,
     ent: *const Entity,
     _: i32,
 ) -> bool {
     if ent as *const _ == unsafe { trace_filter.read().p_local } as *const Player as *const _ {
-        return false
+        return false;
     }
-    let networkable = (*ent).as_networkable();
+    let networkable = unsafe { (*ent).as_networkable() };
     let class = networkable.get_client_class();
     match class.class_id {
-        ClassId::CFuncRespawnRoomVisualizer => {
-            return false
-        }
+        ClassId::CFuncRespawnRoomVisualizer => return false,
         _ => {}
     }
-    return true
+    return true;
 }
 
-unsafe extern "C-unwind" fn get_trace_type(_: *const TraceFilter) -> TraceType {
+extern "C" fn get_trace_type(_: *const TraceFilter) -> TraceType {
     TraceType::Everything
 }
 
@@ -163,14 +164,7 @@ pub struct Trace {
 #[derive(Debug, Clone)]
 pub struct VMTEngineTrace {
     _pad1: [isize; 4],
-    pub trace_ray: cfn!(
-        i32,
-        *const EngineTrace,
-        &Ray,
-        u32,
-        &TraceFilter,
-        &mut Trace
-    ),
+    pub trace_ray: cfn!(i32, *const EngineTrace, &Ray, u32, &TraceFilter, &mut Trace),
 }
 
 pub fn trace(start: Vector3, end: Vector3, mask: u32) -> Trace {

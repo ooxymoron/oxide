@@ -10,13 +10,15 @@ use crate::{
     oxide::hook::{
         create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook,
         override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook,
-        poll_event::PollEventHook, run_command::RunCommandHook, swap_window::SwapWindowHook,
+        poll_event::PollEventHook, run_command::RunCommandHook, send_user_msg::SendUserMessageHook,
+        swap_window::SwapWindowHook,
     },
     util::{
         get_handle,
         handles::{CLIENT, ENGINE, SDL},
         sigscanner::find_sig,
     },
+    vmt_call,
 };
 
 use self::detour::DetourHook;
@@ -27,6 +29,7 @@ pub mod base_interpolate_part1;
 pub mod create_move;
 pub mod detour;
 pub mod dispatch_effect;
+pub mod dispatch_user_message;
 pub mod fire_bullet;
 pub mod fire_bullets;
 pub mod fire_event;
@@ -39,6 +42,7 @@ pub mod paint_traverse;
 pub mod pointer_hook;
 pub mod poll_event;
 pub mod run_command;
+pub mod send_user_msg;
 pub mod swap_window;
 
 pub trait Hook: std::fmt::Debug {
@@ -74,25 +78,22 @@ impl Hooks {
 
         InitVmtHook!(
             OverrideViewHook,
-            &(*interfaces.client_mode.get_vmt()).override_view
+            &interfaces.client_mode.get_vmt().override_view
         );
         InitVmtHook!(
             FrameStageNotifyHook,
-            &(*interfaces.base_client.get_vmt()).frame_stage_notify
+            &interfaces.base_client.get_vmt().frame_stage_notify
         );
         InitVmtHook!(
             PaintTraverseHook,
-            &(*interfaces.panel.get_vmt()).paint_traverse
+            &interfaces.panel.get_vmt().paint_traverse
         );
-        InitVmtHook!(PaintHook, &(*interfaces.engine_vgui.get_vmt()).paint);
+        InitVmtHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
         InitVmtHook!(
             CreateMoveHook,
-            &(*interfaces.client_mode.get_vmt()).create_move
+            &interfaces.client_mode.get_vmt().create_move
         );
-        InitVmtHook!(
-            RunCommandHook,
-            &(*interfaces.prediction.get_vmt()).run_command
-        );
+        InitVmtHook!(RunCommandHook, &interfaces.prediction.get_vmt().run_command);
         InitDetourHook!(
             load_whitelist,
             ENGINE,
@@ -103,6 +104,11 @@ impl Hooks {
             fire_bullet,
             CLIENT,
             "55 48 89 E5 41 57 49 89 D7 41 56 41 55 49 89 FD 41 54 49 89 F4"
+        );
+        InitDetourHook!(
+            dispatch_user_message,
+            CLIENT,
+            "55 48 89 E5 41 56 41 55 41 54 53 48 89 D3 48 83 EC 20"
         );
 
         //tramp_hooks.insert(

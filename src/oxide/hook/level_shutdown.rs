@@ -1,18 +1,16 @@
-use crate::{define_hook, sdk::interfaces::client_mode::ClientMode};
+use crate::{define_hook, sdk::interfaces::client_mode::{self, ClientMode}};
 
-fn subhooks(hook: &mut LevelShutdownHook) {
-    hook.before = Some(|_| {
-        o!().last_entity_cache = None;
-        None
-    });
+fn hook(client_mode: &ClientMode, org: LevelShutdownHook::RawFn) {
+    o!().last_entity_cache = None;
+    (org)(client_mode);
 }
 
 define_hook!(
     LevelShutdownHook,
     "LevelShutdown",
+    hook,
     (),
     (),
-    subhooks,
     client_mode,
     &ClientMode
 );

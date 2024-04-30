@@ -9,15 +9,15 @@ use crate::{
     setting, vmt_call,
 };
 
-fn subhooks(hook: &mut CreateMoveHook) {
-    hook.after = Some(|_, _, cmd, res| {
+fn hook( client_mode: &mut ClientMode, input_sample_time: f32, cmd: &mut UserCmd, org: CreateMoveHook::RawFn ) -> bool{
+        (org)(client_mode,input_sample_time,cmd);
         if cmd.command_number == 0 {
-            return;
+            return false;
         }
         let p_local = Player::get_local().unwrap();
 
         if !vmt_call!(p_local.as_ent(), is_alive) {
-            return;
+            return false;
         }
 
         let org_cmd = cmd.clone();
@@ -43,16 +43,15 @@ fn subhooks(hook: &mut CreateMoveHook) {
 
         movement.correct_movement(cmd, &org_cmd);
         remove_punch(p_local);
-        *res = !setting!(aimbot, silent);
-    });
+        !setting!(aimbot, silent)
 }
 
 define_hook!(
     CreateMoveHook,
     "CreateMove",
+    hook,
     bool,
     true,
-    subhooks,
     client_mode,
     &mut ClientMode,
     input_sample_time,

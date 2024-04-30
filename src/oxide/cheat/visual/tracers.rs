@@ -1,7 +1,7 @@
 use std::mem::transmute;
 
 use crate::{
-    draw::colors::{LIGHT_BLUE, LIGHT_RED, LIGHT_YELLOW},
+    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED},
     interface,
     sdk::{
         entity::{player::Player, weapon::Weapon},
@@ -47,7 +47,7 @@ impl Visuals {
                         color = LIGHT_RED;
                         alpha = 30;
                         if trace.hitbox == HitboxId::Head && weapon.can_headshot() {
-                            color = LIGHT_YELLOW;
+                            color = GREEN;
                         }
                     }
                 }
@@ -58,7 +58,7 @@ impl Visuals {
             interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
         }
         if line && setting!(visual, tracers) {
-            interface!(debug_overlay).line(&trace.startpos, &trace.endpos, color, alpha, time);
+            interface!(debug_overlay).line(&trace.startpos, &trace.endpos.clone(), color, alpha, time);
         }
     }
 }

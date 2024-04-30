@@ -1,18 +1,27 @@
-use std::{error::Error, ffi::{c_char, CStr, CString}, mem::{transmute, MaybeUninit}, usize};
+use std::{
+    error::Error,
+    ffi::{c_char, CStr, CString},
+    mem::{transmute, MaybeUninit},
+    usize,
+};
 
 use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
 use libc::{c_void, dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Scancode;
 
+use crate::{
+    error::OxideError,
+    interface,
+    math::vector::{Vector2, Vector3},
+    vmt_call,
+};
 
-use crate::{vmt_call, error::OxideError, interface, math::vector::{Vector2, Vector3}};
-
-pub mod macros;
-pub mod sigscanner;
 pub mod arcm;
-pub mod scancode;
 pub mod debug;
 pub mod handles;
+pub mod macros;
+pub mod scancode;
+pub mod sigscanner;
 
 pub fn vmt_size(vmt: *const c_void) -> usize {
     unsafe {
@@ -31,10 +40,15 @@ pub fn vmt_size(vmt: *const c_void) -> usize {
 
 pub fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>> {
     unsafe {
-        let handle = dlopen(CString::new(name)?.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
+        let module_name = CString::new(name)?;
+        let handle = dlopen(module_name.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
         if handle.is_null() {
             let error = dlerror();
-            let error = if error.is_null() {"module not found"} else { CStr::from_ptr(error).to_str()?};
+            let error = if error.is_null() {
+                "module not found"
+            } else {
+                CStr::from_ptr(error).to_str()?
+            };
             return Err(std::boxed::Box::new(OxideError::new(&format!(
                 "{} handle not found\n {}",
                 name, error
@@ -59,7 +73,7 @@ pub struct LinkMap {
     pub phdr: *const Elf64_Phdr,
 }
 
-pub fn sdl_scancode_name_from_string(string: &str) -> Result<SDL_Scancode,()> {
+pub fn sdl_scancode_name_from_string(string: &str) -> Result<SDL_Scancode, ()> {
     Ok(match string {
         "UNKNOWN" => SDL_Scancode::SDL_SCANCODE_UNKNOWN,
         "A" => SDL_Scancode::SDL_SCANCODE_A,
@@ -305,7 +319,7 @@ pub fn sdl_scancode_name_from_string(string: &str) -> Result<SDL_Scancode,()> {
         "AUDIOREWIND" => SDL_Scancode::SDL_SCANCODE_AUDIOREWIND,
         "AUDIOFASTFORWARD" => SDL_Scancode::SDL_SCANCODE_AUDIOFASTFORWARD,
         "" => SDL_Scancode::SDL_NUM_SCANCODES,
-        _ => return Err(())
+        _ => return Err(()),
     })
 }
 
@@ -642,7 +656,12 @@ pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
     let screen_w = 0;
     let screen_h = 0;
 
-    vmt_call!(interface!(base_engine), get_screen_size, &screen_w, &screen_h);
+    vmt_call!(
+        interface!(base_engine),
+        get_screen_size,
+        &screen_w,
+        &screen_h
+    );
 
     let x = w2s[0][0] * vec.x + w2s[0][1] * vec.y + w2s[0][2] * vec.z + w2s[0][3];
     let y = w2s[1][0] * vec.x + w2s[1][1] * vec.y + w2s[1][2] * vec.z + w2s[1][3];

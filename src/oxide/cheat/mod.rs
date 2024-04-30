@@ -6,7 +6,8 @@ pub mod cheats;
 pub mod aimbot;
 pub mod movement;
 pub mod visual;
+pub mod spread_reduction;
 
 pub trait Cheat: std::fmt::Debug {
-    fn handle_event(&mut self, event: &mut Event);
+    fn handle_event(&mut self, _: &mut Event) {}
 }

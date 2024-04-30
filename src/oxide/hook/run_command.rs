@@ -1,3 +1,5 @@
+use core::prelude;
+
 use crate::{
     define_hook,
     sdk::{
@@ -7,21 +9,25 @@ use crate::{
     },
 };
 
-fn subhooks(hook: &mut RunCommandHook) {
-    hook.before = Some(|_, _, _, move_helper| {
-        if o!().engine_prediction.move_helper.is_none() {
-            o!().engine_prediction.move_helper = Some(move_helper);
-        }
-        None
-    });
+fn hook(
+    prediction: &Prediction,
+    player: &Player,
+    user_cmd: &UserCmd,
+    move_helper: &'static MoveHelper,
+    org: RunCommandHook::RawFn,
+) {
+    if o!().engine_prediction.move_helper.is_none() {
+        o!().engine_prediction.move_helper = Some(move_helper);
+    }
+    (org)(prediction, player, user_cmd, move_helper)
 }
 
 define_hook!(
     RunCommandHook,
     "RunCommand",
+    hook,
     (),
     (),
-    subhooks,
     prediction,
     &Prediction,
     player,

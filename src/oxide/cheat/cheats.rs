@@ -3,7 +3,7 @@ use std::{
     mem::{transmute, ManuallyDrop},
 };
 
-use crate::draw::event::Event;
+use crate::{draw::event::Event, oxide::cheat::spread_reduction::SpreadReduction};
 
 use super::{aimbot::Aimbot, movement::Movement, visual::Visuals, Cheat};
 
@@ -15,14 +15,19 @@ impl Cheats {
         let cheats = HashMap::new();
         let mut cheats = Cheats(cheats);
 
-        let aimbot = Aimbot::init();
-        cheats.add(aimbot, Aimbot::name());
+        macro_rules! add {
+            ($cheat: ident) => {
+                {
+                    cheats.add($cheat::init(), $cheat::name());
+                }
+            };
+        }
+        add!(Aimbot);
+        add!(Movement);
+        add!(Visuals);
+        add!(SpreadReduction);
 
-        let movement = Movement::init();
-        cheats.add(movement, Movement::name());
 
-        let visuals = Visuals::init();
-        cheats.add(visuals, Visuals::name());
 
         cheats
     }

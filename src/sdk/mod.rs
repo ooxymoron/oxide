@@ -21,6 +21,10 @@ pub mod interfaces;
 pub mod networkable;
 pub mod user_cmd;
 pub mod view_setup;
+pub mod bf_read;
+pub mod user_message;
+pub mod net_channel;
+pub mod client_state;
 
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]

@@ -6,28 +6,28 @@ use crate::{
     setting, vmt_call,
 };
 
-fn subhooks(hook: &mut PaintTraverseHook) {
-    hook.before = Some(|panel, vpanel, _, _| {
-        let panel_name = unsafe { CStr::from_ptr(vmt_call!(panel, get_name, vpanel)) };
-        match panel_name.to_str() {
-            Ok("HudScope") => {
-                if setting!(visual, remove_scope) {
-                    Some(())
-                }else {
-                    None
-                }
-            }
-            _ => None,
+fn hook(panel: &Panel, vpanel: VPanel, force_paint: bool, allow_force: bool, org: PaintTraverseHook::RawFn){
+    let panel_name = unsafe { CStr::from_ptr(vmt_call!(panel, get_name, vpanel)) };
+    let mut skip = false;
+    match panel_name.to_str() {
+        Ok("HudScope") => {
+            if setting!(visual, remove_scope) {
+                skip = true;
+            }         
         }
-    });
+        _ => (),
+    }
+    if !skip {
+        (org)(panel,vpanel,force_paint,allow_force)
+    }
 }
 
 define_hook!(
     PaintTraverseHook,
     "PaintTraverse",
+    hook,
     (),
     (),
-    subhooks,
     panel,
     &Panel,
     vpanel,

@@ -3,7 +3,7 @@ use crate::{
     o,
     sdk::{
         condition::ConditionFlags,
-        entity::{player::Player,Entity},
+        entity::{player::Player, Entity},
         interfaces::model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
     },
@@ -13,7 +13,7 @@ use crate::{
 use super::{priority::Priority, Aimbot, Target};
 
 impl Aimbot {
-    pub fn hitbox_order(&self, ent: &Entity) -> Vec<(isize, HitboxWrapper)> {
+    pub fn player_hitbox_order(&self, player: &Player) -> Vec<(isize, HitboxWrapper)> {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let baim = (|| {
@@ -22,12 +22,14 @@ impl Aimbot {
                 {
                     return true;
                 }
-                return setting!(aimbot, baim_if_lethal) && weapon.as_gun().unwrap().is_lethal(ent, false);
+                return setting!(aimbot, baim_if_lethal)
+                    && weapon.as_gun().unwrap().is_lethal(player.as_ent(), false);
             }
             return true;
         })();
 
-        let hitboxes = ent
+        let hitboxes = player
+            .as_ent()
             .get_hitboxes(vec![
                 HitboxId::Pelvis,
                 HitboxId::Head,
@@ -36,6 +38,13 @@ impl Aimbot {
             ])
             .unwrap();
         if baim {
+            if weapon.is_sniper_rifle()
+                && setting!(aimbot, wait_for_charge)
+                && p_local.get_condition().get(ConditionFlags::Zoomed)
+                && !weapon.as_gun().unwrap().is_lethal(player.as_ent(), false)
+            {
+                return vec![];
+            }
             vec![
                 (2, hitboxes[0]),
                 (0, hitboxes[1]),
@@ -43,6 +52,14 @@ impl Aimbot {
                 (0, hitboxes[3]),
             ]
         } else {
+            if weapon.is_sniper_rifle()
+                && setting!(aimbot, wait_for_charge)
+                && p_local.get_condition().get(ConditionFlags::Zoomed)
+                && !weapon.as_gun().unwrap().is_lethal(player.as_ent(), true)
+            {
+                return vec![];
+            }
+            let hitboxes = vec![];
             vec![
                 (2, hitboxes[1]),
                 (1, hitboxes[0]),
@@ -57,21 +74,14 @@ impl Aimbot {
         }
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-        if weapon.is_sniper_rifle()
-            && setting!(aimbot, wait_for_charge)
-            && p_local.get_condition().get(ConditionFlags::Zoomed)
-            && !weapon.as_gun()?.is_lethal(player.as_ent(), true)
-        {
-            return Ok(None);
-        }
+
         if weapon.is_ambassador()
             && setting!(aimbot, ambasador_wait_for_hs)
             && o!().global_vars.curtime - *weapon.get_last_fire() < 1.0
-            && !weapon.as_gun()?.is_lethal(player.as_ent(), false)
+            && !weapon.as_gun().unwrap().is_lethal(player.as_ent(), false)
         {
             return Ok(None);
         }
-
         let mut ignore_flags = vec![
             ConditionFlags::Ubercharged,
             ConditionFlags::UberchargeFading,
@@ -126,7 +136,7 @@ impl Aimbot {
                 }
             }
 
-            for (hitbox_prio, hitbox) in self.hitbox_order(player) {
+            for (hitbox_prio, hitbox) in self.player_hitbox_order(player.as_player()?) {
                 if let Some(target) = &best_target {
                     if target.prio.hitbox > hitbox_prio {
                         break;
