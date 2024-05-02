@@ -68,6 +68,7 @@ pub struct VMTEntity {
     _pad2: [usize; 6],
     pub get_abs_origin: cfn!(*const Vector3, *const Entity),
     pub get_abs_angles: cfn!(&'static Angles, *const Entity),
+
     #[derivative(Debug = "ignore")]
     _pad3: [usize; 66],
     pub get_index: cfn!(u32, &Entity),

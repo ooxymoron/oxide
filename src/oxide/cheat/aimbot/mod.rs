@@ -2,10 +2,19 @@ use crate::{
     draw::event::EventType,
     error::OxideResult,
     math::vector::Vector3,
+    o,
     sdk::{
-        condition::ConditionFlags, entity::{
-            player::Player, weapon::ids::{ItemDefiniitonIndex, WeaponType}, Entity
-        }, interfaces::{engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT}, model_info::{HitboxId, HitboxWrapper}}, user_cmd::{ButtonFlags, UserCmd}
+        condition::ConditionFlags,
+        entity::{
+            player::Player,
+            weapon::ids::{ItemDefiniitonIndex, WeaponType},
+            Entity,
+        },
+        interfaces::{
+            engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+            model_info::{HitboxId, HitboxWrapper},
+        },
+        user_cmd::{ButtonFlags, UserCmd},
     },
     setting, vmt_call,
 };
@@ -120,7 +129,12 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
-            if let Some(target) = self.find_target()? {
+
+            //INFO: this will cause jittering maybe a option for it
+            let can_fire = *weapon.get_next_primary_attack() < o!().global_vars.curtime;
+            let target = if can_fire { self.find_target()? } else { None };
+
+            if let Some(target) = target {
                 let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
                 let diff = my_eyes - target.point;
                 let angle = diff.angle();

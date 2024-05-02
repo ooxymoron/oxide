@@ -85,7 +85,9 @@ pub struct VMTBaseEngine {
     pub world_to_screen_matrix: cfn!(VMatrix, &BaseEngine),
     _pad7: [usize; 35],
     pub get_net_channel_info: cfn!(*const NetChannel, &BaseEngine),
-    _pad8: [usize; 55],
+    _pad8: [usize; 33],
+    pub send_cmd_unrestricted: cfn!((), &BaseEngine, *const c_char),
+    _pad9: [usize; 21],
     pub server_cmd_key_values: cfn!((),()),
 }
 impl BaseEngine {

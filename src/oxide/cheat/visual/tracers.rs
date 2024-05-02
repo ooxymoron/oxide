@@ -30,7 +30,6 @@ impl Visuals {
         let mut time = 0.5;
         let mut color = LIGHT_BLUE;
         let mut alpha = 10;
-        let mut line = false;
         if !trace.entity.is_null() {
             let target = unsafe { transmute::<_, &Entity>(trace.entity) };
 
@@ -42,7 +41,6 @@ impl Visuals {
                     let target_team = vmt_call!(target, get_team_number);
                     let my_team = vmt_call!(plocal.as_ent(), get_team_number);
                     if target_team != my_team {
-                        line = true;
                         time = 2.0;
                         color = LIGHT_RED;
                         alpha = 30;
@@ -57,7 +55,7 @@ impl Visuals {
         if setting!(visual, impacts) {
             interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
         }
-        if line && setting!(visual, tracers) {
+        if setting!(visual, tracers) {
             interface!(debug_overlay).line(&trace.startpos, &trace.endpos.clone(), color, alpha, time);
         }
     }

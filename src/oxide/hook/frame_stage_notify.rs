@@ -5,6 +5,7 @@ use crate::{
 };
 
 fn hook(client: &BaseClient, stage: FrameStage, org: FrameStageNotifyHook::RawFn) {
+
     match stage {
         FrameStage::FrameNetUpdateEnd => {
             match EntityCache::init() {

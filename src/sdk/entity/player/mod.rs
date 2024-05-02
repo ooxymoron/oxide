@@ -14,12 +14,16 @@ use crate::{
     o, vmt_call,
 };
 
+use self::anim_state::AnimState;
+
 use super::{
     interfaces::base_engine::PlayerInfo, condition::Condition, flags::Flags,
     user_cmd::UserCmd, Entity, WaterLevel,
 };
 
 pub mod player_class;
+pub mod anim_state;
+
 use player_class::PlayerClass;
 
 pub const MAX_WEAPONS: usize = 48;
@@ -44,10 +48,10 @@ impl Player {
         };
         return ent.as_player();
     }
-    pub fn get_by_user_id(id: u32) -> OxideResult<&'static mut Player> {
+    pub fn get_byt_user_id(id: u32) -> OxideResult<&'static mut Player> {
         let id = vmt_call!(interface!(base_engine), get_player_from_user_id, id);
         let Some(ent) = Entity::get_ent(id) else {
-            return Err(OxideError::new("player is none"))
+            return Err(OxideError::new("plocal is none"))
         };
         return ent.as_player();
     }
@@ -111,6 +115,9 @@ impl Player {
     define_offset!(get_current_command, 0x1620, &UserCmd);
     //"C_BasePlayer::PhysicsSimulate"
     define_offset!(get_flags, 0x460, Flags);
+    //"spyMask"
+    define_offset!(get_anim_state, 0x2348, AnimState);
+    
 }
 
 //CTFPlayer{

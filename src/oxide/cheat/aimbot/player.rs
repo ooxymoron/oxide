@@ -59,7 +59,6 @@ impl Aimbot {
             {
                 return vec![];
             }
-            let hitboxes = vec![];
             vec![
                 (2, hitboxes[1]),
                 (1, hitboxes[0]),

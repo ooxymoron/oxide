@@ -1,4 +1,5 @@
 pub const CLIENT: &str = "./tf/bin/linux64/client.so";
+pub const SERVER: &str = "./tf/bin/linux64/server.so";
 pub const ENGINE: &str = "./bin/linux64/engine.so";
 pub const SDL: &str = "/usr/lib/libSDL2-2.0.so.0";
 pub const VGUIMATSURFACE: &str = "./bin/linux64/vguimatsurface.so";

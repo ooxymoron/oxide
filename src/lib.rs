@@ -40,6 +40,7 @@ unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
 
     init_global!(SETTINGS, Settings::load()?, Settings);
     init_global!(OXIDE, Oxide::init()?, Oxide);
+    o!().hooks.init_hooks();
 
     log!("loaded base");
     Ok(())

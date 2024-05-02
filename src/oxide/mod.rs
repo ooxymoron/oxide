@@ -11,7 +11,7 @@ use crate::{
     netvars::{netvar_dumper::load_netvars, Netvar},
     oxide::{cheat::cheats::Cheats, hook::Hooks, interfaces::Interfaces},
     sdk::{
-        client_state::{self, ClientState},
+        client_state::ClientState,
         entity::Entity,
         global_vars::GlobalVars,
         interfaces::{base_client::BaseClient, base_engine::BaseEngine},
@@ -67,7 +67,7 @@ impl Oxide {
     }
     pub fn init() -> OxideResult<Oxide> {
         let interfaces = Interfaces::init()?;
-        let hooks = Hooks::init(&interfaces);
+        let hooks = Hooks::init();
         let cheats = Cheats::init();
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());

@@ -84,7 +84,7 @@ macro_rules! call_original {
                 )
             };
             hook.patch();
-            return res
+            res
         }
     };
 }

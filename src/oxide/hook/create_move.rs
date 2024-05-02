@@ -1,49 +1,50 @@
 use crate::{
-    define_hook,
-    oxide::cheat::{aimbot::Aimbot, movement::Movement},
-    sdk::{
-        interfaces::client_mode::ClientMode,
-        entity::player::Player,
-        user_cmd::UserCmd,
-    },
+    define_hook, get_cheat,
+    oxide::cheat::{aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction},
+    sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
 };
 
-fn hook( client_mode: &mut ClientMode, input_sample_time: f32, cmd: &mut UserCmd, org: CreateMoveHook::RawFn ) -> bool{
-        (org)(client_mode,input_sample_time,cmd);
-        if cmd.command_number == 0 {
-            return false;
-        }
-        let p_local = Player::get_local().unwrap();
+fn hook(
+    client_mode: &mut ClientMode,
+    input_sample_time: f32,
+    cmd: &mut UserCmd,
+    org: CreateMoveHook::RawFn,
+) -> bool {
+    (org)(client_mode, input_sample_time, cmd);
+    if cmd.command_number == 0 {
+        return false;
+    }
+    let p_local = Player::get_local().unwrap();
 
-        if !vmt_call!(p_local.as_ent(), is_alive) {
-            return false;
-        }
+    if !vmt_call!(p_local.as_ent(), is_alive) {
+        return false;
+    }
 
-        let org_cmd = cmd.clone();
+    let org_cmd = cmd.clone();
 
-        let mut movement = o!().cheats.get::<Movement>(Movement::name());
-        movement.create_move(cmd).unwrap();
+    let mut movement = o!().cheats.get::<Movement>(Movement::name());
+    movement.create_move(cmd).unwrap();
 
-
-        if o!().engine_prediction.move_helper.is_some() {
-            if o!().engine_prediction.data.is_some() {
-                o!().engine_prediction.finish().unwrap();
-            }
-            o!().engine_prediction.init(p_local, cmd).unwrap();
-            o!().engine_prediction.step().unwrap();
-        }
-
-        let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
-        aimbot.create_move(cmd).unwrap();
-
-        if o!().engine_prediction.move_helper.is_some() {
+    if o!().engine_prediction.move_helper.is_some() {
+        if o!().engine_prediction.data.is_some() {
             o!().engine_prediction.finish().unwrap();
         }
+        o!().engine_prediction.init(p_local, cmd).unwrap();
+        o!().engine_prediction.step().unwrap();
+    }
 
-        movement.correct_movement(cmd, &org_cmd);
-        remove_punch(p_local);
-        !setting!(aimbot, silent)
+    let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
+    aimbot.create_move(cmd).unwrap();
+
+    if o!().engine_prediction.move_helper.is_some() {
+        o!().engine_prediction.finish().unwrap();
+    }
+
+    movement.correct_movement(cmd, &org_cmd);
+    remove_punch(p_local);
+    get_cheat!(SpreadReduction).create_move(&cmd);
+    !setting!(aimbot, silent)
 }
 
 define_hook!(

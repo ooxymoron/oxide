@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! define_hook{
     ($name:ident,$stringName:expr,$proxyFn:expr,$return:ty,$default:expr,$($argName:ident,$argType:ty),*) => {
-        use crate::{cfn,o,OXIDE,oxide::hook::Hook,log};
+        use crate::{o,OXIDE,oxide::hook::Hook,log};
         use core::intrinsics::{transmute,transmute_unchecked};
         use std::panic::{catch_unwind,AssertUnwindSafe};
         use libc::{PROT_EXEC, PROT_READ, PROT_WRITE};

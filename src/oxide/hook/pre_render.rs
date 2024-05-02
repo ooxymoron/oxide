@@ -1,26 +1,23 @@
 use crate::{
     define_hook,
     oxide::cheat::visual::Visuals,
-    sdk::{
-        interfaces::client_mode::ClientMode,
-        view_setup::{self, ViewSetup},
-    },
+    sdk::{interfaces::client_mode::ClientMode, view_setup::ViewSetup},
 };
 
-fn hook(client_move: &mut ClientMode, view_setup: &mut ViewSetup, org: OverrideViewHook::RawFn) {
+fn hook(client_move: &mut ClientMode, view_setup: &mut ViewSetup, org: PreRenderHook::RawFn) {
     let mut visuals = o!().cheats.get::<Visuals>(Visuals::name());
-    visuals.override_view(view_setup);
+    visuals.pre_render(view_setup);
     o!().fov = view_setup.fov;
     (org)(client_move, view_setup)
 }
 
 define_hook!(
-    OverrideViewHook,
-    "OverrideView",
+    PreRenderHook,
+    "PreRender",
     hook,
     (),
     (),
-    client_move,
+    client_mode,
     &mut ClientMode,
     view_setup,
     &mut ViewSetup

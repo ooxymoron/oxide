@@ -3,7 +3,7 @@ use std::ops::Sub;
 use super::{dtr, vector::Vector3};
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Angles {
     pub pitch: f32,
     pub yaw: f32,

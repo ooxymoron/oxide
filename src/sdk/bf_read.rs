@@ -42,14 +42,13 @@ impl BfRead {
         Ok(res)
     }
     pub fn read_string(&mut self, len: usize) -> OxideResult<String> {
-        dbg!(self.cur_bit, len * 4, self.bits);
-        if self.cur_bit + len as i32 * 4 > self.bits {
+        if self.cur_bit + len as i32 > self.bits {
             self.cur_bit = 0;
             return Err(OxideError::new("buffer overflow"));
         }
         unsafe {
             let bytes = slice::from_raw_parts(self.data.byte_add((self.cur_bit / 4) as usize), len).to_vec();
-            let res = String::from_utf8(transmute(bytes))?;
+            let res = String::from_utf8(transmute(bytes))?.trim_matches('\0').to_string();
 
             self.cur_bit += len as i32 * 4;
             Ok(res)

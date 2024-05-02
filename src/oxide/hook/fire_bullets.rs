@@ -1,7 +1,10 @@
+use std::mem::transmute;
+
 use crate::{
-    call_original, cfn,
+    call_original, cfn, interface, log,
     math::{angles::Angles, vector::Vector3},
     sdk::entity::weapon::Weapon,
+    vmt_call,
 };
 
 pub const NAME: &str = "FireBullets";
@@ -32,7 +35,9 @@ pub extern "C" fn hook(
     damage: f32,
     critical: bool,
 ) {
-    call_original!(NAME, FireBullets, 
+    call_original!(
+        NAME,
+        FireBullets,
         weapon,
         player_id,
         origin,

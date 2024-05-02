@@ -7,25 +7,24 @@ use std::{
 use libc::dlsym;
 
 use crate::{
+    o,
     oxide::hook::{
-        create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook,
-        override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook,
-        poll_event::PollEventHook, run_command::RunCommandHook, send_user_msg::SendUserMessageHook,
+        create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook, paint::PaintHook,
+        paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook,
+        run_command::RunCommandHook, should_draw_view_model::ShouldDrawViewModelHook,
         swap_window::SwapWindowHook,
     },
     util::{
         get_handle,
-        handles::{CLIENT, ENGINE, SDL},
+        handles::{CLIENT, ENGINE, SDL, SERVER},
         sigscanner::find_sig,
     },
-    vmt_call,
 };
 
 use self::detour::DetourHook;
 
-use super::interfaces::Interfaces;
-
 pub mod base_interpolate_part1;
+pub mod cl_send_move;
 pub mod create_move;
 pub mod detour;
 pub mod dispatch_effect;
@@ -36,14 +35,19 @@ pub mod fire_event;
 pub mod frame_stage_notify;
 pub mod level_shutdown;
 pub mod load_whitelist;
-pub mod override_view;
 pub mod paint;
 pub mod paint_traverse;
 pub mod pointer_hook;
 pub mod poll_event;
+pub mod pre_render;
 pub mod run_command;
+pub mod send_perf_server;
 pub mod send_user_msg;
+pub mod should_draw_local_player;
+pub mod should_draw_view_model;
 pub mod swap_window;
+pub mod write_user_cmd;
+pub mod process_user_cmds;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -56,12 +60,17 @@ pub struct Hooks {
 }
 
 impl Hooks {
-    pub fn init(interfaces: &Interfaces) -> Hooks {
-        let mut ptr_hooks = HashMap::new();
-        let mut detour_hooks = HashMap::new();
+    pub fn init() -> Hooks {
+        Hooks {
+            ptr_hooks: HashMap::new(),
+            detour_hooks: HashMap::new(),
+        }
+    }
+    pub fn init_hooks(&mut self) {
+        let interfaces = &o!().interfaces;
         macro_rules! InitVmtHook {
             ($HookClass:ident,$val:expr) => {
-                ptr_hooks.insert(
+                self.ptr_hooks.insert(
                     $HookClass::name(),
                     Box::new($HookClass::init($val)) as Box<dyn Hook>,
                 );
@@ -69,16 +78,21 @@ impl Hooks {
         }
         macro_rules! InitDetourHook {
             ($hook:ident,$module:expr,$sig:expr) => {
-                detour_hooks.insert(
+                self.detour_hooks.insert(
                     $hook::NAME.to_string(),
                     DetourHook::hook(find_sig($module, $sig).unwrap(), $hook::hook as *const u8),
                 );
             };
         }
 
+        InitVmtHook!(PreRenderHook, &interfaces.client_mode.get_vmt().pre_render);
+        //InitVmtHook!(
+        //    ShouldDrawLocalPlayerHook,
+        //    &interfaces.client_mode.get_vmt().should_draw_local_player
+        //);
         InitVmtHook!(
-            OverrideViewHook,
-            &interfaces.client_mode.get_vmt().override_view
+            ShouldDrawViewModelHook,
+            &interfaces.client_mode.get_vmt().should_draw_view_model
         );
         InitVmtHook!(
             FrameStageNotifyHook,
@@ -106,11 +120,34 @@ impl Hooks {
             "55 48 89 E5 41 57 49 89 D7 41 56 41 55 49 89 FD 41 54 49 89 F4"
         );
         InitDetourHook!(
+            process_user_cmds,
+            SERVER,
+            "55 48 89 E5 41 57 41 56 45 89 CE 41 55 49 89 F5"
+        );
+
+        //TODO: virt hook it
+        InitDetourHook!(
             dispatch_user_message,
             CLIENT,
             "55 48 89 E5 41 56 41 55 41 54 53 48 89 D3 48 83 EC 20"
         );
+        InitDetourHook!(
+            cl_send_move,
+            ENGINE,
+            "55 66 0F EF C0 48 89 E5 41 57 41 56 48 8D BD"
+        );
+        InitDetourHook!(
+            write_user_cmd,
+            CLIENT,
+            "55 48 89 E5 41 55 49 89 D5 41 54 49 89 FC 53 48 89 F3 48 83 EC 08 8B 72"
+        );
 
+        //InitDetourHook!(
+        //    send_perf_server,
+        //    SERVER,
+        //    "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC A8 01 00 00 48 85 F6 48 89 BD"
+        //);
+        //
         //tramp_hooks.insert(
         //    fire_event::NAME.to_string(),
         //    DetourHook::hook(
@@ -157,11 +194,6 @@ impl Hooks {
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let poll_event_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
             InitVmtHook!(PollEventHook, transmute(poll_event_ptr));
-        }
-
-        Hooks {
-            ptr_hooks,
-            detour_hooks,
         }
     }
     pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>> {

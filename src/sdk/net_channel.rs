@@ -5,8 +5,19 @@ pub type NetChannel = WithVmt<VMTNetChannel>;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTNetChannel {
-    _pad: [usize; 38],
+    _pad: [usize; 11],
+    pub get_latency: cfn!(f32, &NetChannel, LatencyFlow),
+    _pad1: [usize; 26],                                                 //38 -> 36
     pub send_net_msg: cfn!(bool, &NetChannel, &NetMessage, bool, bool), //virtual bool	SendNetMsg(INetMessage &msg, bool bForceReliable = false, bool bVoice = false ) = 0;
+    _pad2: [usize; 6],
+    pub transmit: cfn!(bool, &NetChannel, bool),
+}
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum LatencyFlow {
+    OUTGOING = 0,
+    INCOMING = 1,
+    BOTH = 2,
 }
 
 pub type NetMessage = WithVmt<VMTNetMessage>;
@@ -16,6 +27,7 @@ pub struct VMTNetMessage {
     _pad: [usize; 8],
     pub get_type: extern "C" fn() -> NetMessageTypeClient,
 }
+
 impl NetMessage {
     pub fn get_type(&self) -> NetMessageTypeClient {
         (self.get_vmt().get_type)()
