@@ -1,9 +1,9 @@
-use crate::{get_cheat, oxide::cheat::spread_reduction::SpreadReduction};
+use crate::call_original;
 
 pub const NAME: &str = "ClSendMove";
 
 pub type ClSendMove = extern "C" fn();
 
 pub extern "C" fn hook() {
-    get_cheat!(SpreadReduction).cl_send_move();
+    call_original!(NAME,ClSendMove);
 }

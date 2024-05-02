@@ -18,7 +18,7 @@ pub struct UserCmd {
     pub impulse: u8,
     pub weaponselect: i32,
     pub weaponsubtype: i32,
-    pub random_seed: i32,
+    pub seed: i32,
     pub mousedx: i16,
     pub mousedy: i16,
     pub hasbeenpredicted: bool,

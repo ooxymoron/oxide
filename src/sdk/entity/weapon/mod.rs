@@ -48,7 +48,9 @@ pub struct Weapon {
 #[derivative(Debug)]
 pub struct VMTGun {
     #[derivative(Debug = "ignore")]
-    _pad7: [usize; 543],
+    _pad: [usize; 547],
+    pub get_projectile_spread: cfn!(f32, &Gun), //0x87c
+    _pad1: [usize; 5],
     pub get_projectile_damage: cfn!(f32, &Gun), //0x87c
                                                 //0x8A4
 }

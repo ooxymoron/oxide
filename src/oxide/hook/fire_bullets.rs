@@ -1,10 +1,7 @@
-use std::mem::transmute;
-
 use crate::{
-    call_original, cfn, interface, log,
+    call_original, cfn,
     math::{angles::Angles, vector::Vector3},
     sdk::entity::weapon::Weapon,
-    vmt_call,
 };
 
 pub const NAME: &str = "FireBullets";

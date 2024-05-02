@@ -16,7 +16,7 @@ use crate::{
     },
     util::{
         get_handle,
-        handles::{CLIENT, ENGINE, SDL, SERVER},
+        handles::*,
         sigscanner::find_sig,
     },
 };
@@ -37,6 +37,7 @@ pub mod level_shutdown;
 pub mod load_whitelist;
 pub mod paint;
 pub mod paint_traverse;
+pub mod plat_floattime;
 pub mod pointer_hook;
 pub mod poll_event;
 pub mod pre_render;
@@ -47,7 +48,7 @@ pub mod should_draw_local_player;
 pub mod should_draw_view_model;
 pub mod swap_window;
 pub mod write_user_cmd;
-pub mod process_user_cmds;
+pub mod add_to_tail_server;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -68,7 +69,7 @@ impl Hooks {
     }
     pub fn init_hooks(&mut self) {
         let interfaces = &o!().interfaces;
-        macro_rules! InitVmtHook {
+        macro_rules! InitPointerHook {
             ($HookClass:ident,$val:expr) => {
                 self.ptr_hooks.insert(
                     $HookClass::name(),
@@ -85,29 +86,28 @@ impl Hooks {
             };
         }
 
-        InitVmtHook!(PreRenderHook, &interfaces.client_mode.get_vmt().pre_render);
+        InitPointerHook!(PreRenderHook, &interfaces.client_mode.get_vmt().pre_render);
         //InitVmtHook!(
         //    ShouldDrawLocalPlayerHook,
         //    &interfaces.client_mode.get_vmt().should_draw_local_player
         //);
-        InitVmtHook!(
+        InitPointerHook!(
             ShouldDrawViewModelHook,
             &interfaces.client_mode.get_vmt().should_draw_view_model
         );
-        InitVmtHook!(
+        InitPointerHook!(
             FrameStageNotifyHook,
             &interfaces.base_client.get_vmt().frame_stage_notify
         );
-        InitVmtHook!(
+        InitPointerHook!(
             PaintTraverseHook,
             &interfaces.panel.get_vmt().paint_traverse
         );
-        InitVmtHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
-        InitVmtHook!(
+        InitPointerHook!(
             CreateMoveHook,
             &interfaces.client_mode.get_vmt().create_move
         );
-        InitVmtHook!(RunCommandHook, &interfaces.prediction.get_vmt().run_command);
+        InitPointerHook!(RunCommandHook, &interfaces.prediction.get_vmt().run_command);
         InitDetourHook!(
             load_whitelist,
             ENGINE,
@@ -119,28 +119,30 @@ impl Hooks {
             CLIENT,
             "55 48 89 E5 41 57 49 89 D7 41 56 41 55 49 89 FD 41 54 49 89 F4"
         );
-        InitDetourHook!(
-            process_user_cmds,
-            SERVER,
-            "55 48 89 E5 41 57 41 56 45 89 CE 41 55 49 89 F5"
-        );
 
-        //TODO: virt hook it
+        //INFO: PAINT HOOK NEEDS TO LOAD AFTER DISPATCH HOOK
         InitDetourHook!(
             dispatch_user_message,
             CLIENT,
             "55 48 89 E5 41 56 41 55 41 54 53 48 89 D3 48 83 EC 20"
         );
         InitDetourHook!(
-            cl_send_move,
-            ENGINE,
-            "55 66 0F EF C0 48 89 E5 41 57 41 56 48 8D BD"
+            add_to_tail_server,
+            SERVER,
+            "55 48 89 E5 41 56 49 89 FE 41 55 41 89 F5 41 54 49 89 D4"
         );
-        InitDetourHook!(
-            write_user_cmd,
-            CLIENT,
-            "55 48 89 E5 41 55 49 89 D5 41 54 49 89 FC 53 48 89 F3 48 83 EC 08 8B 72"
-        );
+        InitPointerHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
+        //InitDetourHook!(
+        //    cl_send_move,
+        //    ENGINE,
+        //    "55 66 0F EF C0 48 89 E5 41 57 41 56 48 8D BD"
+        //);
+        //InitDetourHook!(
+        //    write_user_cmd,
+        //    CLIENT,
+        //    "55 48 89 E5 41 55 49 89 D5 41 54 49 89 FC 53 48 89 F3 48 83 EC 08 8B 72"
+        //);
+        //InitDetourHook!(plat_floattime, TIER0, "80 3D ? ? ? ? 00 75 ? 55 48 89 E5");
 
         //InitDetourHook!(
         //    send_perf_server,
@@ -187,13 +189,13 @@ impl Hooks {
             let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let swap_window_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
-            InitVmtHook!(SwapWindowHook, transmute(swap_window_ptr));
+            InitPointerHook!(SwapWindowHook, transmute(swap_window_ptr));
 
             let name = CString::new("SDL_PollEvent").unwrap();
             let exprted_fn: *const u8 = transmute(dlsym(handle, name.as_ptr()));
             let jump_dist = (exprted_fn.byte_add(6) as *const i32).read() as usize;
             let poll_event_ptr = exprted_fn.byte_add(6 + jump_dist + 4);
-            InitVmtHook!(PollEventHook, transmute(poll_event_ptr));
+            InitPointerHook!(PollEventHook, transmute(poll_event_ptr));
         }
     }
     pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>> {

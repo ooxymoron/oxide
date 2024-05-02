@@ -10,7 +10,7 @@ pub const NAME: &str = "FireEvent";
 
 pub type FireEvent = cfn!(bool, *const u8, &GameEvent, bool);
 
-pub extern "C" fn fire_event(
+pub extern "C" fn hook(
     event_manager: *const u8,
     event: &GameEvent,
     no_boradcast: bool,

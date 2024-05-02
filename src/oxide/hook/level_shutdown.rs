@@ -5,8 +5,7 @@ use crate::{
 
 fn hook(client_mode: &ClientMode, org: LevelShutdownHook::RawFn) {
     o!().last_entity_cache = None;
-    get_cheat!(SpreadReduction).time_delta = None;
-    get_cheat!(SpreadReduction).playerperf_send_time = None;
+    get_cheat!(SpreadReduction).playerperf_send_data = None;
     (org)(client_mode);
 }
 
