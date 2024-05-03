@@ -7,7 +7,7 @@ use crate::{
         condition::ConditionFlags,
         entity::{
             player::Player,
-            weapon::ids::{ItemDefiniitonIndex, WeaponType},
+            weapon::ids::{WeaponId, WeaponType},
             Entity,
         },
         interfaces::{
@@ -131,6 +131,7 @@ impl Aimbot {
         if weapon.as_gun().is_ok() {
 
             //INFO: this will cause jittering maybe a option for it
+            //FIXME: breaks on fan when reloading doesnt fire
             let can_fire = *weapon.get_next_primary_attack() < o!().global_vars.curtime;
             let target = if can_fire { self.find_target()? } else { None };
 
@@ -175,7 +176,7 @@ impl Aimbot {
                 if !vmt_call!(weapon, can_fire_critical_shot, true)
                     && !matches!(
                         weapon.get_item_definition_index(),
-                        ItemDefiniitonIndex::SniperMTheSydneySleeper
+                        WeaponId::SniperMTheSydneySleeper
                     )
                 {
                     return false;

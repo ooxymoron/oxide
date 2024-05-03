@@ -1,5 +1,6 @@
-use std::mem::transmute;
+use std::{mem::transmute, ptr::null};
 
+use std::ffi::CString;
 use derivative::Derivative;
 
 use crate::{
@@ -203,10 +204,18 @@ impl Entity {
                 .collect()
         }
     }
+    pub fn get_float_attrib(&self,name: &str) -> Option<f32> {
+        let name = CString::new(name).unwrap();
+        let defualt_value = -10101010101.0;
+        let val = (o!().util.get_float_attribute)(defualt_value,name.as_ptr(),self,null(),true);
+        if val == defualt_value {
+            return None;
+        }
+        Some(val)
+            
+    }
 }
 
-impl Entity {
-}
 impl Entity {
     pub fn get_ent(id: u32) -> Option<&'static mut Entity> {
         let ent = vmt_call!(interface!(entity_list), get_client_entity, id);

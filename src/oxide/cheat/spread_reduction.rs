@@ -1,10 +1,12 @@
 use std::{ffi::CString, mem::transmute};
 
 use crate::{
-    interface, o,
+    interface,
+    math::angles::Angles,
+    o,
     sdk::{
         bf_read::BfRead,
-        entity::{player::Player, weapon::{self, Gun, Weapon}},
+        entity::{player::Player, weapon::Gun},
         net_channel::{LatencyFlow, NetMessage, NetMessageTypeClient},
         user_cmd::{ButtonFlags, UserCmd},
     },
@@ -137,15 +139,15 @@ impl SpreadReduction {
         );
         client_time + self.delta + latency
     }
-    pub fn get_seed(&self, time: f32) -> u8 {
-        (unsafe { transmute::<_, i32>((time) * 1000.0) } & 0xFF) as u8
+    pub fn get_seed(&self, time: f32) -> i32 {
+        (unsafe { transmute::<_, i32>((time) * 1000.0) } & 0xFF)
     }
     pub fn create_move(&mut self, cmd: &UserCmd) {
         if !cmd.buttons.get(ButtonFlags::InAttack) {
             return;
         }
         let plocal = Player::get_local().unwrap();
-        let weapon = vmt_call!(plocal.as_ent(),get_weapon);
+        let weapon = vmt_call!(plocal.as_ent(), get_weapon);
         if let Ok(gun) = weapon.as_gun() {
             self.calculate_spread(gun);
         }
@@ -153,12 +155,36 @@ impl SpreadReduction {
         self.last_predicted_time = self.get_server_time(time);
     }
     pub fn calculate_spread(&mut self, gun: &mut Gun) {
-        let spread = vmt_call!(gun,get_projectile_spread);
-        if spread == 0.0{
+        let spread = vmt_call!(gun, get_projectile_spread);
+        if spread == 0.0 {
             return;
         }
-        dbg!(spread);
 
+        let mode = gun.as_weapon().get_mode();
+        let mut bullet_count =
+            gun.as_weapon().get_info().weapon_dat[mode as usize].bullets_per_shot;
+        if let Some(bullets_attrib) = gun
+            .as_weapon()
+            .as_ent()
+            .get_float_attrib("mult_bullets_per_shot")
+        {
+            bullet_count = bullets_attrib as i32
+        }
+        dbg!(bullet_count);
+        let time = (o!().util.plat_float_time)() as f32;
+        let seed = self.get_seed(self.get_server_time(time));
+        let mut bullets = Vec::new();
+        for i in 0..bullet_count {
+            //RandomSeed(seed + i);
+            (o!().util.random_seed)(seed + i);
+            //float flX = RandomFloat(-0.5, 0.5) + RandomFloat(-0.5, 0.5);
+            let yaw = (o!().util.random_float)(-0.5, 0.5) + (o!().util.random_float)(-0.5, 0.5);
+            //float flY = RandomFloat(-0.5, 0.5) + RandomFloat(-0.5, 0.5);
+            let pitch = (o!().util.random_float)(-0.5, 0.5) + (o!().util.random_float)(-0.5, 0.5);
+            let directions = Angles::new(0.0, 0.0, 0.0).to_vectors();
+            bullets.push(directions[0] + (directions[1] * yaw + directions[2] * pitch))
+        }
+        dbg!(bullets);
     }
 }
 impl Cheat for SpreadReduction {}

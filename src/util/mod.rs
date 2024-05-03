@@ -1,8 +1,5 @@
 use std::{
-    error::Error,
-    ffi::{c_char, CStr, CString},
-    mem::{transmute, MaybeUninit},
-    usize,
+    error::Error, ffi::{c_char, CStr, CString}, fmt::Display, mem::{transmute, MaybeUninit}, usize
 };
 
 use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
@@ -670,4 +667,11 @@ pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
         screen_w as f32 / 2f32 * (1f32 + x / w),
         screen_h as f32 / 2f32 * (1f32 - y / w),
     ))
+}
+
+pub struct Padding (u8);
+impl Display for Padding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:0x}",self.0)
+    }
 }

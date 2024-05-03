@@ -109,7 +109,7 @@ pub enum WeaponType {
 }
 
 #[derive(Derivative, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub enum ItemDefiniitonIndex {
+pub enum WeaponId {
     ScoutMScattergun = 13,
     ScoutMScattergunR = 200,
     ScoutMForceANature = 45,

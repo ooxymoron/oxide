@@ -4,12 +4,14 @@ use crate::{o, vmt_call};
 
 use self::{
     entity::Entity,
-    ids::{ItemDefiniitonIndex, WeaponType},
+    ids::{WeaponId, WeaponType},
+    info::WeaponInfo,
 };
 
 use super::*;
 
 pub mod ids;
+pub mod info;
 
 #[repr(C)]
 #[derive(Derivative, Clone)]
@@ -72,7 +74,7 @@ impl Gun {
         if crit
             && matches!(
                 self.as_weapon().get_item_definition_index(),
-                ItemDefiniitonIndex::SniperMTheSydneySleeper
+                WeaponId::SniperMTheSydneySleeper
             )
         {
             mult = 1.35
@@ -107,8 +109,10 @@ impl Weapon {
             .as_ent()
             .as_networkable()
             .get_client_class()
-            .get_ingeritance_chain().contains(&"CTFWeaponBaseGun".to_string()) {
-            return Err(OxideError::new("this weapon is not a gun"))
+            .get_ingeritance_chain()
+            .contains(&"CTFWeaponBaseGun".to_string())
+        {
+            return Err(OxideError::new("this weapon is not a gun"));
         };
         return Ok(unsafe { transmute(self) });
     }
@@ -128,11 +132,23 @@ impl Weapon {
     pub fn is_ambassador(&mut self) -> bool {
         matches!(
             self.get_item_definition_index(),
-            ItemDefiniitonIndex::SpyMTheAmbassador | ItemDefiniitonIndex::SpyMFestiveAmbassador
+            WeaponId::SpyMTheAmbassador | WeaponId::SpyMFestiveAmbassador
         )
     }
     pub fn can_headshot(&mut self) -> bool {
         self.is_sniper_rifle() || self.is_ambassador()
+    }
+    pub fn get_info(&self) -> &WeaponInfo {
+        let name = (o!().util.get_weapon_alias)(vmt_call!(self, get_weapon_id));
+        let handle = (o!().util.get_weapon_info_handle)(name);
+        (o!().util.get_weapon_info)(handle)
+    }
+    pub fn get_mode(&self) -> i32 {
+        let netvar = self.get_netvar(["m_iReloadMode"]).unwrap();
+        unsafe {
+            transmute::<_, *const i32>((self as *const _ as *const u8).byte_add(netvar.offset - 8))
+                .read()
+        }
     }
 }
 impl HasNetvars for Weapon {
@@ -140,6 +156,8 @@ impl HasNetvars for Weapon {
         "CTFWeaponBase"
     }
 }
+
+pub type WeaponInfoHandle = i32;
 
 impl Weapon {
     define_netvar!(
@@ -151,7 +169,7 @@ impl Weapon {
             "m_Item",
             "m_iItemDefinitionIndex"
         ],
-        ItemDefiniitonIndex
+        WeaponId
     );
     define_netvar!(
         get_next_primary_attack,
