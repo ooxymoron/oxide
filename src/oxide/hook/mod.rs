@@ -49,6 +49,7 @@ pub mod should_draw_view_model;
 pub mod swap_window;
 pub mod write_user_cmd;
 pub mod add_to_tail_server;
+pub mod process_user_cmds;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -126,12 +127,17 @@ impl Hooks {
             CLIENT,
             "55 48 89 E5 41 56 41 55 41 54 53 48 89 D3 48 83 EC 20"
         );
+        InitPointerHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
         InitDetourHook!(
             add_to_tail_server,
             SERVER,
             "55 48 89 E5 41 56 49 89 FE 41 55 41 89 F5 41 54 49 89 D4"
         );
-        InitPointerHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
+        InitDetourHook!(
+            process_user_cmds,
+            SERVER,
+            "55 48 89 E5 41 57 41 56 45 89 CE 41 55 49 89 F5"
+        );
         //InitDetourHook!(
         //    cl_send_move,
         //    ENGINE,

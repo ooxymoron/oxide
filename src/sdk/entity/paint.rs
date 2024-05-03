@@ -19,7 +19,7 @@ impl Entity {
         let max = *vmt_call!(collidable, obb_maxs);
         let origin = *vmt_call!(collidable, get_origin);
         let angles = *vmt_call!(collidable, get_angles);
-        let corners = get_corners(&origin, &angles.to_vectors(), &min, &max);
+        let corners = get_corners(&origin, &angles, &min, &max);
         let corners = corners
             .iter()
             .filter_map(|corner| world_to_screen(corner))

@@ -130,10 +130,7 @@ impl Aimbot {
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
 
-            //INFO: this will cause jittering maybe a option for it
-            //FIXME: breaks on fan when reloading doesnt fire
-            let can_fire = *weapon.get_next_primary_attack() < o!().global_vars.curtime;
-            let target = if can_fire { self.find_target()? } else { None };
+            let target = if p_local.can_attack() { self.find_target()? } else { None };
 
             if let Some(target) = target {
                 let my_eyes = vmt_call!(p_local.as_ent(), eye_position);

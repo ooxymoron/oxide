@@ -11,9 +11,7 @@ fn hook(panel: &Panel, vpanel: VPanel, force_paint: bool, allow_force: bool, org
     let mut skip = false;
     match panel_name.to_str() {
         Ok("HudScope") => {
-            if setting!(visual, remove_scope) {
-                skip = true;
-            }         
+            skip = setting!(visual, remove_scope)
         }
         _ => (),
     }

@@ -26,16 +26,11 @@ pub struct Util {
     pub random_float: extern "C" fn(f32,f32) -> f32,
 }
 
-//get weapon alias
-//83 FF 6D 77
-//lookup weapon handle
-////get weapon info from handle
-//
 impl Util {
     pub fn init() -> Util {
         let plat_float_time = CString::new("Plat_FloatTime").unwrap();
         let random_seed = CString::new("RandomSeed").unwrap();
-        let random_float = CString::new("CGaussianRandomStream::RandomFloat(float, float)").unwrap();
+        let random_float = CString::new("RandomFloat").unwrap();
 
         //
         Util {

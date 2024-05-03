@@ -1,4 +1,4 @@
-use std::ops::Sub;
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use super::{dtr, vector::Vector3};
 
@@ -10,11 +10,20 @@ pub struct Angles {
     pub roll: f32,
 }
 
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct AngleVectors {
+    pub forward: Vector3,
+    pub right: Vector3,
+    pub up: Vector3,
+}
+
 impl Angles {
     pub fn new(yaw: f32, pitch: f32, roll: f32) -> Angles {
         Angles { pitch, yaw, roll }
     }
-    pub fn to_vectors(&self) -> [Vector3; 3] {
+    pub fn to_vectors(&self) -> AngleVectors {
         let sy = dtr(self.yaw).sin();
         let cy = dtr(self.yaw).cos();
         let sp = dtr(self.pitch).sin();
@@ -22,22 +31,22 @@ impl Angles {
         let sr = dtr(self.roll).sin();
         let cr = dtr(self.roll).cos();
 
-        let mut vecs = [Vector3::zeroed(), Vector3::zeroed(), Vector3::zeroed()];
-        vecs[0].x = cp * cy;
-        vecs[1].x = cp * sy;
-        vecs[2].x = -sp;
+        let mut vecs = AngleVectors{forward:Vector3::zeroed(), right:Vector3::zeroed(), up:Vector3::zeroed()};
+        vecs.forward.x = cp * cy;
+        vecs.right.x = cp * sy;
+        vecs.up.x = -sp;
 
         let crcy = cr * cy;
         let crsy = cr * sy;
         let srcy = sr * cy;
         let srsy = sr * sy;
-        vecs[0].y = sp * srcy - crsy;
-        vecs[1].y = sp * srsy + crcy;
-        vecs[2].y = sr * cp;
+        vecs.forward.y = sp * srcy - crsy;
+        vecs.right.y = sp * srsy + crcy;
+        vecs.up.y = sr * cp;
 
-        vecs[0].z = sp * crcy + srsy;
-        vecs[1].z = sp * crsy - srcy;
-        vecs[2].z = cr * cp;
+        vecs.forward.z = sp * crcy + srsy;
+        vecs.right.z = sp * crsy - srcy;
+        vecs.up.z = cr * cp;
 
         vecs
     }
@@ -52,5 +61,31 @@ impl Sub for Angles {
             self.yaw - rhs.yaw,
             self.roll - rhs.roll,
         )
+    }
+}
+impl SubAssign for Angles {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.pitch -= rhs.pitch;
+        self.yaw -= rhs.yaw;
+        self.roll -= rhs.roll;
+    }
+}
+
+impl Add for Angles {
+    type Output = Angles;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Angles::new(
+            self.pitch + rhs.pitch,
+            self.yaw + rhs.yaw,
+            self.roll + rhs.roll,
+        )
+    }
+}
+impl AddAssign for Angles {
+    fn add_assign(&mut self, rhs: Self) {
+        self.pitch += rhs.pitch;
+        self.yaw += rhs.yaw;
+        self.roll += rhs.roll;
     }
 }

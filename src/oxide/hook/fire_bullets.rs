@@ -1,7 +1,5 @@
 use crate::{
-    call_original, cfn,
-    math::{angles::Angles, vector::Vector3},
-    sdk::entity::weapon::Weapon,
+    call_original, cfn, get_cheat, math::{angles::Angles, vector::Vector3}, oxide::{cheat::spread_reduction::SpreadReduction, hook::process_user_cmds::LAST_SERVER_SEED}, sdk::entity::weapon::Weapon
 };
 
 pub const NAME: &str = "FireBullets";
@@ -14,12 +12,11 @@ pub type FireBullets = cfn!(
     &Angles,
     u32,
     u32,
-    u32,
+    i32,
     f32,
     f32,
     bool
 );
-
 pub extern "C" fn hook(
     weapon: &Weapon,
     player_id: u32,
@@ -27,23 +24,27 @@ pub extern "C" fn hook(
     angle: &Angles,
     weapon_id: u32,
     mode: u32,
-    seed: u32,
+    seed: i32,
     spread: f32,
     damage: f32,
     critical: bool,
 ) {
-    call_original!(
-        NAME,
-        FireBullets,
-        weapon,
-        player_id,
-        origin,
-        angle,
-        weapon_id,
-        mode,
-        seed,
-        spread,
-        damage,
-        critical
-    );
+    dbg!(seed,get_cheat!(SpreadReduction).last_seed);
+    unsafe{
+        dbg!(seed,LAST_SERVER_SEED);
+        call_original!(
+            NAME,
+            FireBullets,
+            weapon,
+            player_id,
+            origin,
+            angle,
+            weapon_id,
+            mode,
+            LAST_SERVER_SEED,
+            spread,
+            damage,
+            critical
+        );
+    }
 }

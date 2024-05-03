@@ -136,15 +136,15 @@ impl Visuals {
             let x = setting!(visual, tp_offset_x);
             let y = setting!(visual, tp_offset_y);
             let z = setting!(visual, tp_offset_z);
-            view_setup.origin.x += x * dirs[0].x;
-            view_setup.origin.y += x * dirs[1].x;
-            view_setup.origin.z += x * dirs[2].x;
-            view_setup.origin.x += y * dirs[0].y;
-            view_setup.origin.y += y * dirs[1].y;
-            view_setup.origin.z += y * dirs[2].y;
-            view_setup.origin.x += z * dirs[0].z;
-            view_setup.origin.y += z * dirs[1].z;
-            view_setup.origin.z += z * dirs[2].z;
+            view_setup.origin.x += x * dirs.forward.x;
+            view_setup.origin.y += x * dirs.right.x;
+            view_setup.origin.z += x * dirs.up.x;
+            view_setup.origin.x += y * dirs.forward.y;
+            view_setup.origin.y += y * dirs.right.y;
+            view_setup.origin.z += y * dirs.up.y;
+            view_setup.origin.x += z * dirs.forward.z;
+            view_setup.origin.y += z * dirs.right.z;
+            view_setup.origin.z += z * dirs.up.z;
         } else {
             *force_taunt_cam = false;
         }

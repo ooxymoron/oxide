@@ -50,7 +50,7 @@ pub struct Weapon {
 #[derivative(Debug)]
 pub struct VMTGun {
     #[derivative(Debug = "ignore")]
-    _pad: [usize; 547],
+    _pad: [usize; 537],
     pub get_projectile_spread: cfn!(f32, &Gun), //0x87c
     _pad1: [usize; 5],
     pub get_projectile_damage: cfn!(f32, &Gun), //0x87c
@@ -119,10 +119,6 @@ impl Weapon {
 }
 
 impl Weapon {
-    pub fn can_attack_primary(&mut self) -> bool {
-        let now = o!().global_vars.now();
-        *self.get_next_primary_attack() <= now
-    }
     pub fn is_sniper_rifle(&mut self) -> bool {
         matches!(
             vmt_call!(self, get_weapon_id),
@@ -170,15 +166,6 @@ impl Weapon {
             "m_iItemDefinitionIndex"
         ],
         WeaponId
-    );
-    define_netvar!(
-        get_next_primary_attack,
-        [
-            "baseclass",
-            "LocalActiveWeaponData",
-            "m_flNextPrimaryAttack"
-        ],
-        f32
     );
     define_netvar!(
         get_last_fire,

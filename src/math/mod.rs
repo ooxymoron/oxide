@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use self::vector::Vector3;
+use self::{angles::Angles, vector::Vector3};
 
 pub mod angles;
 pub mod vector;
@@ -11,7 +11,7 @@ pub fn dtr(deg: f32) -> f32 {
 
 pub fn get_corners(
     pos: &Vector3,
-    rotation: &[Vector3; 3],
+    rotation: &Angles,
     min: &Vector3,
     max: &Vector3,
 ) -> [Vector3; 8] {

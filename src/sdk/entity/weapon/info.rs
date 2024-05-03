@@ -65,7 +65,7 @@ pub struct WeaponInfo {
     pub icon_zoomed_autoaim: *const HudTexture,
     pub icon_small: *const HudTexture,
     pub show_usage_hint: bool,
-    pub weapon_dat: [WeaponData; 2],
+    pub weapon_data: [WeaponData; 2],
     pub weapon_type: i32,
     pub grenade: bool,
     pub damage_radius: f32,
