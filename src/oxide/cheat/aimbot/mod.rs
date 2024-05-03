@@ -2,7 +2,6 @@ use crate::{
     draw::event::EventType,
     error::OxideResult,
     math::vector::Vector3,
-    o,
     sdk::{
         condition::ConditionFlags,
         entity::{

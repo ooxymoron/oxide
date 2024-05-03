@@ -118,7 +118,22 @@ impl Weapon {
     }
 }
 
+static mut PREV_LAST_FIRE: f32 = 0.0;
+static mut PREV_NEXT_ATTACK: f32 = 0.0;
 impl Weapon {
+    pub fn can_attack(&mut self) -> bool {
+        let next_attack = *self.get_next_primary_attack();
+        let last_fire = *self.get_last_fire();
+        unsafe {
+            if PREV_LAST_FIRE != last_fire {
+                dbg!(next_attack);
+                PREV_NEXT_ATTACK = next_attack;
+                PREV_LAST_FIRE = last_fire;
+            };
+            dbg!(PREV_NEXT_ATTACK <= o!().global_vars.now());
+            PREV_NEXT_ATTACK <= o!().global_vars.now()
+        }
+    }
     pub fn is_sniper_rifle(&mut self) -> bool {
         matches!(
             vmt_call!(self, get_weapon_id),
@@ -139,12 +154,12 @@ impl Weapon {
         let handle = (o!().util.get_weapon_info_handle)(name);
         (o!().util.get_weapon_info)(handle)
     }
-    pub fn get_mode(&self) -> i32 {
+    pub fn get_mode(&self) -> usize {
         let netvar = self.get_netvar(["m_iReloadMode"]).unwrap();
-        unsafe {
+        (unsafe {
             transmute::<_, *const i32>((self as *const _ as *const u8).byte_add(netvar.offset - 8))
                 .read()
-        }
+        }) as usize
     }
 }
 impl HasNetvars for Weapon {
@@ -166,6 +181,15 @@ impl Weapon {
             "m_iItemDefinitionIndex"
         ],
         WeaponId
+    );
+    define_netvar!(
+        get_next_primary_attack,
+        [
+            "baseclass",
+            "LocalActiveWeaponData",
+            "m_flNextPrimaryAttack"
+        ],
+        f32
     );
     define_netvar!(
         get_last_fire,

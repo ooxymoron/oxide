@@ -1,5 +1,8 @@
 use crate::{
-    call_original, cfn, get_cheat, math::{angles::Angles, vector::Vector3}, oxide::{cheat::spread_reduction::SpreadReduction, hook::process_user_cmds::LAST_SERVER_SEED}, sdk::entity::weapon::Weapon
+    call_original, cfn, get_cheat,
+    math::{angles::Angles, vector::Vector3},
+    oxide::{cheat::spread_reduction::SpreadReduction, hook::process_user_cmds::LAST_SERVER_SEED},
+    sdk::entity::weapon::Weapon,
 };
 
 pub const NAME: &str = "FireBullets";
@@ -29,22 +32,18 @@ pub extern "C" fn hook(
     damage: f32,
     critical: bool,
 ) {
-    dbg!(seed,get_cheat!(SpreadReduction).last_seed);
-    unsafe{
-        dbg!(seed,LAST_SERVER_SEED);
-        call_original!(
-            NAME,
-            FireBullets,
-            weapon,
-            player_id,
-            origin,
-            angle,
-            weapon_id,
-            mode,
-            LAST_SERVER_SEED,
-            spread,
-            damage,
-            critical
-        );
-    }
+    call_original!(
+        NAME,
+        FireBullets,
+        weapon,
+        player_id,
+        origin,
+        angle,
+        weapon_id,
+        mode,
+        get_cheat!(SpreadReduction).last_seed,
+        spread,
+        damage,
+        critical
+    );
 }

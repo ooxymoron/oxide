@@ -1,5 +1,3 @@
-use std::mem::transmute;
-
 use crate::{
     call_original, cfn, get_cheat, o,
     oxide::cheat::spread_reduction::{SpreadReduction, MIN_MANTISA},

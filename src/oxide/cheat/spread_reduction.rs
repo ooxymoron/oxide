@@ -1,18 +1,23 @@
 use std::{ffi::CString, mem::transmute};
 
 use crate::{
-    interface, o, oxide::hook::process_user_cmds::LAST_SERVER_SEED, sdk::{
+    interface,
+    math::angles::Angles,
+    o,
+    oxide::hook::process_user_cmds::LAST_SERVER_SEED,
+    sdk::{
         bf_read::BfRead,
         entity::{player::Player, weapon::Gun},
         net_channel::{LatencyFlow, NetMessage, NetMessageTypeClient},
         user_cmd::{ButtonFlags, UserCmd},
-    }, vmt_call
+    },
+    vmt_call,
 };
 
 use super::Cheat;
 
-const PLAYERPERF_COOLDOWN: f32 = 60.0;
-pub const MIN_MANTISA: i32 = 14;
+const PLAYERPERF_COOLDOWN: f32 = 10.0;
+pub const MIN_MANTISA: i32 = 23;
 
 #[macro_export]
 macro_rules! spread_prediction_log {
@@ -95,8 +100,8 @@ impl SpreadReduction {
             server_time_records.push(float);
         }
         let Some(&server_time) = server_time_records.first() else {return false};
-        //FIXME: temporary for testing
-        let server_time = server_time + 2f32.powi(MIN_MANTISA);
+        //INFO: temporary for testing
+        //let server_time = server_time + 2f32.powi(MIN_MANTISA);
 
         self.update_delta(server_time);
         self.playerperf_send_data = None;
@@ -107,11 +112,11 @@ impl SpreadReduction {
     //    let mantisa = ((unsafe { transmute::<f32, i32>(time * 1000f32) } >> 23) & 0xff) - 127;
     //}
     pub fn update_delta(&mut self, server_time: f32) {
-        let mantisa = ((unsafe { transmute::<_, i32>(server_time * 1000.0) } >> 23) & 0xff) - 127;
-        if mantisa < MIN_MANTISA {
+        let mantissa = ((unsafe { transmute::<_, i32>(server_time * 1000.0) } >> 23) & 0xff) - 127;
+        if mantissa < MIN_MANTISA {
             spread_prediction_log!(
                 "server too young to accurately predict seed\tmantisa: {}, required {}",
-                mantisa,
+                mantissa,
                 MIN_MANTISA
             );
             return;
@@ -122,11 +127,12 @@ impl SpreadReduction {
         let error = guess - server_time;
 
         spread_prediction_log!(
-            "resyncing server_time: {}\tguess_delta: {}\terror: {}\tnew_delta: {}\t ",
+            "resyncing server_time: {}\n\tguess_delta: {}\n\terror: {}\n\tnew_delta: {}\n\tmantissa {}",
             server_time,
             self.delta,
             error,
-            self.delta - error
+            self.delta - error,
+            mantissa
         );
         self.delta -= error;
     }
@@ -149,23 +155,16 @@ impl SpreadReduction {
         let weapon = vmt_call!(plocal.as_ent(), get_weapon);
         if let Ok(gun) = weapon.as_gun() {
             let spread = self.calculate_spread(gun, cmd)[0];
-            dbg!(spread);
-            let angles = cmd.viewangles.to_vectors();
-            dbg!(angles);
-            let bullet_angle =
-                (angles.forward + angles.right * spread.0 + angles.up * spread.1).normalize();
-            dbg!(bullet_angle);
-            dbg!(angles.forward.angle());
-            dbg!(bullet_angle.angle());
-            let correction = bullet_angle.angle() - angles.forward.angle();
-            dbg!(correction);
-            dbg!(cmd.viewangles);
-            cmd.viewangles -= correction;
-            dbg!(cmd.viewangles);
+            let dirs = cmd.viewangles.to_vectors();
+            cmd.viewangles = (dirs.forward * -1.0 + dirs.right * spread.0  * -1.0+ dirs.up * spread.1)
+                .angle();
         }
     }
     pub fn calculate_spread(&mut self, gun: &mut Gun, cmd: &UserCmd) -> Vec<(f32, f32)> {
         let spread = vmt_call!(gun, get_projectile_spread);
+        if spread == 0.0 {
+            return vec![(0.0, 0.0)];
+        }
         let mode = gun.as_weapon().get_mode();
         let mut bullet_count =
             gun.as_weapon().get_info().weapon_data[mode as usize].bullets_per_shot;
@@ -177,12 +176,6 @@ impl SpreadReduction {
             bullet_count = bullets_attrib as i32
         }
         let last_shot = o!().global_vars.now() - *gun.as_weapon().get_last_fire();
-        if spread == 0.0
-            || (last_shot > 1.25 && bullet_count == 1)
-            || (last_shot > 0.25 && bullet_count > 1)
-        {
-            return vec![(0.0, 0.0)];
-        }
 
         let time = (o!().util.plat_float_time)() as f32;
         self.calculation_start = Some(time);
@@ -195,8 +188,14 @@ impl SpreadReduction {
         }
         self.last_seed = seed;
         let mut bullets = Vec::new();
-        spread_prediction_log!("predicted: {}|{}", seed, cmd.command_number);
+        //spread_prediction_log!("predicted: {}|{}", seed, cmd.command_number);
         for i in 0..bullet_count {
+            if i == 0
+                && ((last_shot > 1.25 && bullet_count == 1)
+                    || (last_shot > 0.25 && bullet_count > 1))
+            {
+                bullets.push((0.0, 0.0));
+            }
             (o!().util.random_seed)(seed + i);
             let yaw = (o!().util.random_float)(-0.5, 0.5) + (o!().util.random_float)(-0.5, 0.5);
             let pitch = (o!().util.random_float)(-0.5, 0.5) + (o!().util.random_float)(-0.5, 0.5);

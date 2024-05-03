@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
 use super::{dtr, vector::Vector3};
 
@@ -9,7 +9,6 @@ pub struct Angles {
     pub yaw: f32,
     pub roll: f32,
 }
-
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -31,21 +30,21 @@ impl Angles {
         let sr = dtr(self.roll).sin();
         let cr = dtr(self.roll).cos();
 
-        let mut vecs = AngleVectors{forward:Vector3::zeroed(), right:Vector3::zeroed(), up:Vector3::zeroed()};
+        let mut vecs = AngleVectors {
+            forward: Vector3::zeroed(),
+            right: Vector3::zeroed(),
+            up: Vector3::zeroed(),
+        };
         vecs.forward.x = cp * cy;
-        vecs.right.x = cp * sy;
-        vecs.up.x = -sp;
+        vecs.forward.y = cp * sy;
+        vecs.forward.z = -sp;
 
-        let crcy = cr * cy;
-        let crsy = cr * sy;
-        let srcy = sr * cy;
-        let srsy = sr * sy;
-        vecs.forward.y = sp * srcy - crsy;
-        vecs.right.y = sp * srsy + crcy;
-        vecs.up.y = sr * cp;
+        vecs.right.x = sr * sp * cy - cr * sy;
+        vecs.right.y = sr * sp * sy + cr * cy;
+        vecs.right.z = sr * cp;
 
-        vecs.forward.z = sp * crcy + srsy;
-        vecs.right.z = sp * crsy - srcy;
+        vecs.up.x = cr * sp * cy + sr * sy;
+        vecs.up.y = cr * sp * cy - sr * cy;
         vecs.up.z = cr * cp;
 
         vecs
@@ -87,5 +86,19 @@ impl AddAssign for Angles {
         self.pitch += rhs.pitch;
         self.yaw += rhs.yaw;
         self.roll += rhs.roll;
+    }
+}
+impl Mul<f32> for Angles {
+    type Output = Angles;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Angles::new(self.pitch * rhs, self.yaw * rhs, self.roll * rhs)
+    }
+}
+impl MulAssign<f32> for Angles {
+    fn mul_assign(&mut self, rhs: f32) {
+        self.pitch *= rhs;
+        self.yaw *= rhs;
+        self.roll *= rhs;
     }
 }
