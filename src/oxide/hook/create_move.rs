@@ -44,46 +44,42 @@ fn hook(
     }
 
     let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
-    aimbot.create_move(cmd).unwrap();
+    let target = aimbot.create_move(cmd).unwrap();
 
     if o!().engine_prediction.move_helper.is_some() {
         o!().engine_prediction.finish().unwrap();
     }
     let mut spread_reduction = get_cheat!(SpreadReduction);
-    spread_reduction.create_move(cmd);
+    spread_reduction.create_move(cmd,target);
 
-    //let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-    //if (setting!(visual, impacts) || setting!(visual, tracers))
-    //    && cmd.buttons.get(ButtonFlags::InAttack)
-    //    && weapon.can_attack()
-    //{
-    //    let dir = cmd.viewangles.to_vectors().forward * 1000.0;
-    //    let src = vmt_call!(p_local.as_ent(), eye_position);
-    //    let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
-    //    let color = WHITE;
-    //    let alpha = 10;
-    //    let time = 4.0;
-    //    if setting!(visual, impacts) {
-    //        interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
-    //    }
-    //    if setting!(visual, tracers) {
-    //        interface!(debug_overlay).line(
-    //            &trace.startpos,
-    //            &trace.endpos.clone(),
-    //            color,
-    //            alpha,
-    //            time,
-    //        );
-    //    }
-    //}
-    //remove_punch(cmd);
-    //movement.correct_movement(cmd, &org_cmd);
+    if (setting!(visual, impacts) || setting!(visual, tracers))
+        && cmd.buttons.get(ButtonFlags::InAttack)
+        && p_local.can_attack()
+    {
+        let dir = cmd.viewangles.to_vectors().forward * 1000000.0;
+        let src = vmt_call!(p_local.as_ent(), eye_position);
+        let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
+        let color = WHITE;
+        let alpha = 20;
+        let time = 0.5;
+        if setting!(visual, impacts) {
+            interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
+            interface!(debug_overlay).triangle(&src, 4.0, color, alpha, time);
 
-    //if let Some(calculation_start) = get_cheat!(SpreadReduction).calculation_start {
-    //    let time = (o!().util.plat_float_time)() as f32;
-    //    spread_reduction.calculation_delay = time - calculation_start;
-    //    spread_reduction.calculation_start = None;
-    //}
+        }
+        if setting!(visual, tracers) {
+            interface!(debug_overlay).line(
+                &trace.startpos,
+                &trace.endpos.clone(),
+                color,
+                alpha,
+                time,
+            );
+        }
+    }
+    remove_punch(cmd);
+    movement.correct_movement(cmd, &org_cmd);
+
     !setting!(aimbot, silent)
 }
 

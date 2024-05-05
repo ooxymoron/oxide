@@ -165,6 +165,16 @@ impl Entity {
     pub fn as_networkable(&self) -> &mut Networkable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
+    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<HitboxWrapper> {
+        Ok(self.get_hitboxes(vec![hitbox_id])?[0])
+    }
+    pub fn should_attack(&self) -> bool {
+        let p_local = Player::get_local().unwrap();
+        let team = vmt_call!(self, get_team_number);
+        let local_team = vmt_call!(p_local.as_ent(), get_team_number);
+        return local_team != team;
+
+    }
 
     pub fn get_hitboxes(&self, hitbox_ids: Vec<HitboxId>) -> OxideResult<Vec<HitboxWrapper>> {
         unsafe {

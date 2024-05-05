@@ -31,7 +31,7 @@ pub struct VMTBaseClient {
     pub in_activate_mouse: cfn!((), &BaseClient),
     _pad4: [usize; 20],
     pub frame_stage_notify: cfn!((), &BaseClient, FrameStage),
-    pub dispatch_user_message: cfn!(bool, *const u8, u32, &mut BfRead),
+    pub dispatch_user_message: cfn!(bool, &mut BaseClient, u32, &mut BfRead),
     _pad5: [usize; 22],
     pub get_player_view: cfn!(bool, &BaseClient, &ViewSetup),
 }

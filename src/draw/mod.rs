@@ -104,6 +104,7 @@ impl Draw {
             SDL_GL_MakeCurrent(window, self.ctx);
         }
 
+        self.update_window_size(window);
         let mut frame = Frame::new(window, self.renderer, &mut self.fonts);
         if let Err(e) = self.components.draw(&mut frame) {
             log!("error during drawing {}", e);

@@ -9,10 +9,7 @@ use libc::dlsym;
 use crate::{
     o,
     oxide::hook::{
-        create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook, paint::PaintHook,
-        paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook,
-        run_command::RunCommandHook, should_draw_view_model::ShouldDrawViewModelHook,
-        swap_window::SwapWindowHook,
+        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook, frame_stage_notify::FrameStageNotifyHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook, should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook
     },
     util::{
         get_handle,
@@ -31,6 +28,7 @@ pub mod dispatch_effect;
 pub mod dispatch_user_message;
 pub mod fire_bullet;
 pub mod fire_bullets;
+pub mod fire_bullets_server;
 pub mod fire_event;
 pub mod frame_stage_notify;
 pub mod level_shutdown;
@@ -115,18 +113,15 @@ impl Hooks {
             "55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60"
         );
         InitDetourHook!(fire_bullets, CLIENT, "55 48 89 E5 41 57 49 89 FF 44 89 C7");
+        //InitDetourHook!(fire_bullets_server, SERVER, "55 48 89 E5 41 57 49 89 FF 44 89 C7");
         InitDetourHook!(
             fire_bullet,
             CLIENT,
             "55 48 89 E5 41 57 49 89 D7 41 56 41 55 49 89 FD 41 54 49 89 F4"
         );
 
-        //INFO: PAINT HOOK NEEDS TO LOAD AFTER DISPATCH HOOK
-        InitDetourHook!(
-            dispatch_user_message,
-            CLIENT,
-            "55 48 89 E5 41 56 41 55 41 54 53 48 89 D3 48 83 EC 20"
-        );
+        //INFO: PAINT HOOK NEEDS TO LOAD AFTER DISPATCH USER MESSAGE HOOK
+        InitPointerHook!(DispatchUserMessageHook, &interfaces.base_client.get_vmt().dispatch_user_message);
         InitPointerHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
         InitDetourHook!(
             add_to_tail_server,

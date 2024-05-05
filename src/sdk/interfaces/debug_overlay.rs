@@ -26,6 +26,7 @@ pub struct VMTDebugOverlay {
         u8,
         f32
     ),
+	//virtual void AddTriangleOverlay(const Vector& p1, const Vector& p2, const Vector& p3, int r, int g, int b, int a, bool noDepthTest, float duration) = 0;
     pub add_triangle_overlay: cfn!(
         (),
         &DebugOverlay,
@@ -81,8 +82,8 @@ impl DebugOverlay {
             self,
             add_box_overlay,
             pos,
-            &Vector3::new(-size, -size, -size),
-            &Vector3::new(size, size, size),
+            &(Vector3::zeroed() - size),
+            &(Vector3::zeroed() + size),
             &Angles::new(0.0, 0.0, 0.0),
             r,
             g,
@@ -93,18 +94,17 @@ impl DebugOverlay {
     }
     pub fn triangle(&self, pos: &Vector3, size: f32, color: usize, alpha: u8, duration: f32) {
         let (r, g, b) = hex_to_rgb!(color);
-        let size = size / 2.0;
         vmt_call!(
             self,
             add_triangle_overlay,
-            &Vector3::new(pos.x - size, pos.y - size, pos.z - size),
-            &Vector3::new(pos.x + size, pos.y + size, pos.z + size),
-            &Vector3::new(pos.x, pos.y, pos.z),
+            &(Vector3::zeroed() + *pos + size),
+            &(Vector3::zeroed() + *pos - size),
+            &pos,
             r,
             g,
             b,
             alpha,
-            false,
+            true,
             duration
         );
     }

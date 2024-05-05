@@ -1,17 +1,31 @@
-use crate::{
-    call_original, cfn, get_cheat,  oxide::cheat::spread_reduction::SpreadReduction,
-    sdk::bf_read::BfRead,
-};
+use crate::define_hook;
+use crate::sdk::interfaces::base_client::BaseClient;
+use crate::{get_cheat, oxide::cheat::spread_reduction::SpreadReduction, sdk::bf_read::BfRead};
 
-pub const NAME: &str = "DispatchUserMessage";
-
-pub type DispatchUserMessage = cfn!(bool, *const u8, u32, &mut BfRead);
-
-pub extern "C" fn hook(this: *const u8, msg_type: u32, buffer: &mut BfRead) -> bool {
+pub extern "C" fn hook(
+    client: &mut BaseClient,
+    msg_type: u32,
+    buffer: &mut BfRead,
+    org: DispatchUserMessageHook::RawFn,
+) -> bool {
     buffer.reset();
     if get_cheat!(SpreadReduction).dispatch_user_message(msg_type, buffer) {
-        return true;
+        return false; 
     };
-    buffer.reset();
-    call_original!(NAME, DispatchUserMessage, this, msg_type, buffer)
+
+    (org)(client, msg_type, buffer)
 }
+
+define_hook!(
+    DispatchUserMessageHook,
+    "DispatchUserMessage",
+    hook,
+    bool,
+    false,
+    client,
+    &mut BaseClient,
+    msg_typ,
+    u32,
+    buffer,
+    &mut BfRead
+);

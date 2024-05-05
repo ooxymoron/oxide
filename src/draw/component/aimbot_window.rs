@@ -37,13 +37,15 @@ impl AimbotWindow {
             y,
         ));
         a!(FloatInput::new(
-            20,
+            10,
             y,
             "aimbot fov",
             s!().aimbot.fov.clone(),
             None
         ));
         a!(KeyInput::new(10, y, "aimbot key", s!().aimbot.key.clone()));
+
+        y+= 10;
         a!(Checkbox::new(
             "multipoint",
             s!().aimbot.multipoint.clone(),
@@ -51,12 +53,14 @@ impl AimbotWindow {
             y
         ));
         a!(FloatInput::new(
-            20,
+            10,
             y,
             "hitbox scale",
             s!().aimbot.hitbox_scale.clone(),
             Some(|val| { val <= 1.0 && val >= 0.0 })
         ));
+
+        y+= 20;
         a!(Checkbox::new(
             "autoshoot",
             s!().aimbot.autoshoot.clone(),
@@ -64,6 +68,8 @@ impl AimbotWindow {
             y
         ));
         a!(Checkbox::new("silent", s!().aimbot.silent.clone(), 10, y));
+        y+= 20;
+
         a!(Checkbox::new(
             "target sentries",
             s!().aimbot.target_sentries.clone(),
@@ -88,6 +94,8 @@ impl AimbotWindow {
             10,
             y
         ));
+        y+= 20;
+
         a!(Checkbox::new(
             "ambasador wait for hs",
             s!().aimbot.ambasador_wait_for_hs.clone(),
@@ -106,9 +114,30 @@ impl AimbotWindow {
             10,
             y
         ));
+        y+= 20;
+
         a!(Checkbox::new(
             "auto zoom",
-            s!().aimbot.auto_zoom.clone(),
+            s!().aimbot.auto_scope.clone(),
+            10,
+            y
+        ));
+        a!(Checkbox::new(
+            "auto unzoom",
+            s!().aimbot.auto_unscope.clone(),
+            10,
+            y
+        ));
+        y+= 20;
+        a!(Checkbox::new(
+            "spread reduction",
+            s!().aimbot.spread_reduciton.clone(),
+            10,
+            y
+        ));
+        a!(Checkbox::new(
+            "tapfire",
+            s!().aimbot.tapfire.clone(),
             10,
             y
         ));

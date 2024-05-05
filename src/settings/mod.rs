@@ -71,7 +71,10 @@ pub struct AimbotSettings {
     pub ambasador_wait_for_hs: Arcm<bool>,
     pub wait_for_charge: Arcm<bool>,
     pub baim_if_lethal: Arcm<bool>,
-    pub auto_zoom: Arcm<bool>,
+    pub auto_scope: Arcm<bool>,
+    pub auto_unscope: Arcm<bool>,
+    pub spread_reduciton: Arcm<bool>,
+    pub tapfire: Arcm<bool>,
 }
 
 impl AimbotSettings {
@@ -92,7 +95,10 @@ impl AimbotSettings {
             ambasador_wait_for_hs: Arcm::new(false),
             wait_for_charge: Arcm::new(false),
             baim_if_lethal: Arcm::new(false),
-            auto_zoom: Arcm::new(false),
+            auto_scope: Arcm::new(false),
+            auto_unscope: Arcm::new(false),
+            spread_reduciton: Arcm::new(false),
+            tapfire: Arcm::new(false),
         }
     }
 }

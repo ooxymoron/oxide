@@ -118,21 +118,12 @@ impl Weapon {
     }
 }
 
-static mut PREV_LAST_FIRE: f32 = 0.0;
-static mut PREV_NEXT_ATTACK: f32 = 0.0;
 impl Weapon {
     pub fn can_attack(&mut self) -> bool {
-        let next_attack = *self.get_next_primary_attack();
-        let last_fire = *self.get_last_fire();
-        unsafe {
-            if PREV_LAST_FIRE != last_fire {
-                dbg!(next_attack);
-                PREV_NEXT_ATTACK = next_attack;
-                PREV_LAST_FIRE = last_fire;
-            };
-            dbg!(PREV_NEXT_ATTACK <= o!().global_vars.now());
-            PREV_NEXT_ATTACK <= o!().global_vars.now()
-        }
+        let p_local = Player::get_local().unwrap();
+        *self.get_next_primary_attack() - 0.005
+            <= o!().global_vars.interval_per_tick * (*p_local.get_tick_base() as f32)
+            && *self.get_clip1() != 0
     }
     pub fn is_sniper_rifle(&mut self) -> bool {
         matches!(
@@ -196,6 +187,8 @@ impl Weapon {
         ["LocalActiveTFWeaponData", "m_flLastFireTime"],
         f32
     );
+
+    define_netvar!(get_clip1, ["baseclass", "LocalWeaponData", "m_iClip1"], i32);
 }
 
 impl_has_vmt!(Weapon, VMTWeapon);

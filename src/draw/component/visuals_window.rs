@@ -36,60 +36,62 @@ impl VisualsWindow {
             y,
         ));
         a!(KeyInput::new(
-            20,
+            10,
             y,
             "toggle key",
             s!().visual.tp_key.clone(),
         ));
         a!(KeyInput::new(
-            20,
+            10,
             y,
             "offset key",
             s!().visual.tp_offset_key.clone(),
         ));
         a!(FloatInput::new(
-            30,
+            10,
             y,
             "x offset",
             s!().visual.tp_offset_x.clone(),
             None,
         ));
         a!(FloatInput::new(
-            30,
+            10,
             y,
             "y offset",
             s!().visual.tp_offset_y.clone(),
             None,
         ));
         a!(FloatInput::new(
-            30,
+            10,
             y,
             "z offset",
             s!().visual.tp_offset_z.clone(),
             None,
         ));
-
+        y+= 20;
         a!(FloatInput::new(10, y, "fov", s!().visual.fov.clone(), None,));
+        y+= 20;
 
         a!(Checkbox::new("esp", s!().visual.esp.clone(), 10, y));
         a!(Checkbox::new(
             "friendlies",
             s!().visual.esp_friendlies.clone(),
-            20,
+            10,
             y
         ));
         a!(Checkbox::new(
             "sentries",
             s!().visual.esp_sentreis.clone(),
-            20,
+            10,
             y
         ));
         a!(Checkbox::new(
             "projectiles",
             s!().visual.esp_projectiles.clone(),
-            20,
+            10,
             y
         ));
+        y+= 20;
 
         a!(Checkbox::new(
             "hitboxes",
@@ -97,6 +99,7 @@ impl VisualsWindow {
             10,
             y,
         ));
+        y+= 20;
         a!(Checkbox::new(
             "remove scope",
             s!().visual.remove_scope.clone(),
@@ -115,18 +118,21 @@ impl VisualsWindow {
             10,
             y,
         ));
+        y+= 20;
         a!(Checkbox::new(
             "spectator list",
             s!().visual.spectator_list.clone(),
             10,
             y,
         ));
+        y+= 20;
         a!(Checkbox::new(
             "pure bypass",
             s!().visual.pure_bypass.clone(),
             10,
             y,
         ));
+        y+= 20;
         a!(Checkbox::new(
             "tracers",
             s!().visual.tracers.clone(),

@@ -1,4 +1,4 @@
-use std::{f32::consts::PI, ops::{Add, Div, Mul, Sub}};
+use std::{f32::consts::PI, ops::{Add, AddAssign, Div, DivAssign, Mul, Sub, SubAssign}};
 
 use crate::sdk::interfaces::engine_trace::VectorAligned;
 
@@ -39,7 +39,13 @@ impl Sub for Vector3 {
         Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
+impl Add<f32> for Vector3 {
+    type Output = Vector3;
+    fn add(self, rhs: f32) -> Vector3{
+        Vector3::new(self.x + rhs, self.y + rhs, self.z + rhs)
 
+    }
+}
 impl Sub<f32> for Vector3 {
     type Output = Vector3;
     fn sub(self, rhs: f32) -> Vector3 {
@@ -47,7 +53,19 @@ impl Sub<f32> for Vector3 {
     }
 }
 
-impl std::ops::AddAssign for Vector3 {
+
+
+impl AddAssign<f32> for Vector3 {
+    fn add_assign(&mut self, rhs: f32) {
+        *self =  *self + rhs;
+    }
+}
+impl SubAssign<f32> for Vector3 {
+    fn sub_assign(&mut self, rhs: f32) {
+        *self = *self - rhs;
+    }
+}
+impl AddAssign for Vector3 {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs;
     }
@@ -60,11 +78,6 @@ impl std::ops::SubAssign for Vector3 {
 impl std::ops::MulAssign<f32> for Vector3 {
     fn mul_assign(&mut self, rhs: f32) {
         *self = *self * rhs;
-    }
-}
-impl std::ops::SubAssign<f32> for Vector3 {
-    fn sub_assign(&mut self, rhs: f32) {
-        *self = *self - rhs;
     }
 }
 
@@ -109,7 +122,7 @@ impl Vector3 {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Vector2 {
     pub x: f32,
@@ -126,11 +139,54 @@ impl Vector2 {
     pub fn len(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
-    pub fn empty() -> Vector2 {
+    pub fn zeroed() -> Vector2 {
         Vector2::new(0.0, 0.0)
     }
 }
+impl Add<f32> for Vector2 {
+    type Output = Vector2;
+    fn add(self, rhs: f32) -> Vector2 {
+        Vector2::new(self.x + rhs, self.y + rhs)
+    }
+}
 
+impl AddAssign<f32> for Vector2 {
+    fn add_assign(&mut self, rhs: f32) {
+        *self =  *self + rhs;
+    }
+}
+
+impl Add for Vector2 {
+    type Output = Vector2;
+    fn add(self, rhs: Vector2) -> Vector2 {
+        Vector2::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+impl Sub for Vector2 {
+    type Output = Vector2;
+    fn sub(self, rhs: Vector2) -> Vector2 {
+        Vector2::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl AddAssign for Vector2 {
+    fn add_assign(&mut self, rhs: Vector2) {
+        *self =  *self + rhs;
+    }
+}
+
+impl Div<f32> for Vector2 {
+    type Output = Vector2;
+    fn div(self, rhs: f32) -> Vector2 {
+        Vector2::new(self.x / rhs, self.y / rhs)
+    }
+}
+
+impl DivAssign<f32> for Vector2 {
+    fn div_assign(&mut self, rhs: f32) {
+        *self =  *self / rhs;
+    }
+}
 
 impl Default for Vector3 {
     fn default() -> Self {

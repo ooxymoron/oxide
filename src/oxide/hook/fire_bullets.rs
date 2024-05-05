@@ -1,7 +1,7 @@
 use crate::{
     call_original, cfn, get_cheat,
     math::{angles::Angles, vector::Vector3},
-    oxide::{cheat::spread_reduction::SpreadReduction, hook::process_user_cmds::LAST_SERVER_SEED},
+    oxide::cheat::spread_reduction::{seed_prediction::State, SpreadReduction},
     sdk::entity::weapon::Weapon,
 };
 
@@ -32,6 +32,11 @@ pub extern "C" fn hook(
     damage: f32,
     critical: bool,
 ) {
+    let seed = if let State::SYNCED {last_seed,..} = get_cheat!(SpreadReduction).state {
+        if let Some(last_seed) = last_seed {
+            last_seed
+        } else {seed}
+    } else {seed};
     call_original!(
         NAME,
         FireBullets,
@@ -41,7 +46,7 @@ pub extern "C" fn hook(
         angle,
         weapon_id,
         mode,
-        get_cheat!(SpreadReduction).last_seed,
+        seed,
         spread,
         damage,
         critical

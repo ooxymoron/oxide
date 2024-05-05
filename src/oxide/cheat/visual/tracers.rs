@@ -44,7 +44,7 @@ impl Visuals {
                         time = 2.0;
                         color = LIGHT_RED;
                         alpha = 30;
-                        if trace.hitbox == HitboxId::Head && weapon.can_headshot() {
+                        if trace.hitbox_id == HitboxId::Head && weapon.can_headshot() {
                             color = GREEN;
                         }
                     }

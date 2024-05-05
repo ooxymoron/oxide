@@ -6,12 +6,7 @@ use std::{
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, define_offset,
-    error::{OxideError, OxideResult},
-    interface,
-    math::{angles::Angles, vector::Vector3},
-    netvars::HasNetvars,
-    o, vmt_call,
+    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, vector::Vector3}, netvars::HasNetvars, o, vmt_call
 };
 
 use self::anim_state::AnimState;
@@ -59,8 +54,9 @@ impl Player {
         unsafe { transmute_unchecked(self) }
     }
     pub fn can_attack(&self) -> bool {
-        let now = o!().global_vars.now();
-        *self.get_next_attack() <= now
+        let weapon = vmt_call!(self.as_ent(), get_weapon);
+        let now = o!().global_vars.interval_per_tick * (*self.get_tick_base() as f32);
+        *self.get_next_attack() <= now && weapon.can_attack()
     }
     pub fn info(&self) -> OxideResult<PlayerInfo> {
         let mut info = unsafe { MaybeUninit::zeroed().assume_init() };

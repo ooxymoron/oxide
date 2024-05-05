@@ -78,7 +78,7 @@ impl Aimbot {
             let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
 
             if trace.entity as *const _ != hitbox.owner
-                || (hitbox.id != HitboxId::Head && trace.hitbox != hitbox.id)
+                || (hitbox.id != HitboxId::Head && trace.hitbox_id != hitbox.id)
             {
                 continue;
             }
@@ -118,20 +118,27 @@ impl Aimbot {
             return false;
         }
 
+        if !p_local.can_attack() {
+            return false;
+        }
         true
     }
 
-    pub fn create_move(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
+    pub fn create_move(&mut self, cmd: &mut UserCmd) -> OxideResult<Option<Target>> {
+        let mut target = None;
         if !self.should_run() {
-            return Ok(());
+            return Ok(target);
         }
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
+            target = if p_local.can_attack() {
+                self.find_target()?
+            } else {
+                None
+            };
 
-            let target = if p_local.can_attack() { self.find_target()? } else { None };
-
-            if let Some(target) = target {
+            if let Some(target) = &target {
                 let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
                 let diff = my_eyes - target.point;
                 let angle = diff.angle();
@@ -147,23 +154,25 @@ impl Aimbot {
             }
         }
 
-        Ok(())
+        Ok(target)
     }
-    pub fn shoot_weapon(&mut self, cmd: &mut UserCmd, found: Option<Target>) -> bool {
+    pub fn shoot_weapon(&mut self, cmd: &mut UserCmd, found: Option<&Target>) -> bool {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let id = vmt_call!(weapon, get_weapon_id);
 
         let Some(found) = found else {
-            if matches!(id, WeaponType::SniperrifleClassic) && setting!(aimbot, auto_zoom){
-                cmd.buttons.set(ButtonFlags::InAttack, true);
+            if  weapon.is_sniper_rifle() && setting!(aimbot, auto_unscope) &&  p_local.get_condition().get(ConditionFlags::Zoomed) {
+                cmd.buttons.set(ButtonFlags::InAttack2, true);
+                return false;
+
             }
             return false;
         };
 
         if weapon.is_sniper_rifle() {
             let classic = matches!(id, WeaponType::SniperrifleClassic);
-            if setting!(aimbot, auto_zoom) {
+            if setting!(aimbot, auto_scope) {
                 let lethal = weapon.as_gun().unwrap().is_lethal(found.ent, false);
                 if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !lethal {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);

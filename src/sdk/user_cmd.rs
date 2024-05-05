@@ -24,6 +24,27 @@ pub struct UserCmd {
     pub hasbeenpredicted: bool,
 }
 
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct ServerUserCmd {
+    pub vmt: &'static c_void,
+    pub command_number: i32,
+    pub tick_count: i32,
+    pub viewangles: Angles,
+    pub forwardmove: f32,
+    pub sidemove: f32,
+    pub upmove: f32,
+    pub buttons: Buttons,
+    pub impulse: u8,
+    pub weaponselect: i32,
+    pub weaponsubtype: i32,
+    pub seed: i32,
+    pub server_seed: i32,
+    pub mousedx: i16,
+    pub mousedy: i16,
+    pub hasbeenpredicted: bool,
+}
+
 #[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Buttons(u32);

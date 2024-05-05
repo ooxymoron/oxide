@@ -8,14 +8,14 @@ use crate::{
 
 fn hook(panel: &Panel, vpanel: VPanel, force_paint: bool, allow_force: bool, org: PaintTraverseHook::RawFn){
     let panel_name = unsafe { CStr::from_ptr(vmt_call!(panel, get_name, vpanel)) };
-    let mut skip = false;
+    let mut draw = true;
     match panel_name.to_str() {
         Ok("HudScope") => {
-            skip = setting!(visual, remove_scope)
+            draw = !setting!(visual, remove_scope)
         }
         _ => (),
     }
-    if !skip {
+    if draw {
         (org)(panel,vpanel,force_paint,allow_force)
     }
 }
