@@ -64,6 +64,7 @@ pub struct AimbotSettings {
     pub hitbox_scale: Arcm<f32>,
     pub autoshoot: Arcm<bool>,
     pub silent: Arcm<bool>,
+    pub aim_while_on_delays: Arcm<bool>,
     pub target_sentries: Arcm<bool>,
     pub target_stickies: Arcm<bool>,
     pub target_invisible: Arcm<bool>,
@@ -73,8 +74,9 @@ pub struct AimbotSettings {
     pub baim_if_lethal: Arcm<bool>,
     pub auto_scope: Arcm<bool>,
     pub auto_unscope: Arcm<bool>,
-    pub spread_reduciton: Arcm<bool>,
+    pub spread_reduction: Arcm<bool>,
     pub tapfire: Arcm<bool>,
+    pub tapfire_only_minigun: Arcm<bool>,
 }
 
 impl AimbotSettings {
@@ -88,6 +90,7 @@ impl AimbotSettings {
             hitbox_scale: Arcm::new(0.8),
             autoshoot: Arcm::new(false),
             silent: Arcm::new(false),
+            aim_while_on_delays: Arcm::new(false),
             target_sentries: Arcm::new(false),
             target_invisible: Arcm::new(false),
             target_disguised: Arcm::new(false),
@@ -97,8 +100,9 @@ impl AimbotSettings {
             baim_if_lethal: Arcm::new(false),
             auto_scope: Arcm::new(false),
             auto_unscope: Arcm::new(false),
-            spread_reduciton: Arcm::new(false),
+            spread_reduction: Arcm::new(false),
             tapfire: Arcm::new(false),
+            tapfire_only_minigun: Arcm::new(false),
         }
     }
 }
@@ -156,6 +160,8 @@ impl VisualSettings {
 pub struct MovementSettings {
     pub bhop: Arcm<bool>,
     pub autostrafe: Arcm<bool>,
+    pub no_push: Arcm<bool>,
+    pub momentum_compensation: Arcm<bool>,
 }
 
 impl MovementSettings {
@@ -163,6 +169,8 @@ impl MovementSettings {
         MovementSettings {
             bhop: Arcm::new(false),
             autostrafe: Arcm::new(false),
+            no_push: Arcm::new(false),
+            momentum_compensation: Arcm::new(false),
         }
     }
 }

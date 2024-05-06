@@ -2,6 +2,7 @@ use crate::{
     define_hook,
     draw::colors::WHITE,
     get_cheat, interface,
+    math::angles::Angles,
     oxide::cheat::{aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction},
     sdk::{
         entity::player::Player,
@@ -50,7 +51,7 @@ fn hook(
         o!().engine_prediction.finish().unwrap();
     }
     let mut spread_reduction = get_cheat!(SpreadReduction);
-    spread_reduction.create_move(cmd,target);
+    spread_reduction.create_move(cmd, target);
 
     if (setting!(visual, impacts) || setting!(visual, tracers))
         && cmd.buttons.get(ButtonFlags::InAttack)
@@ -65,7 +66,6 @@ fn hook(
         if setting!(visual, impacts) {
             interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
             interface!(debug_overlay).triangle(&src, 4.0, color, alpha, time);
-
         }
         if setting!(visual, tracers) {
             interface!(debug_overlay).line(
@@ -77,9 +77,8 @@ fn hook(
             );
         }
     }
-    remove_punch(cmd);
-    movement.correct_movement(cmd, &org_cmd);
-
+    remove_punch();
+    movement.create_move_after(cmd, &org_cmd);
     !setting!(aimbot, silent)
 }
 
@@ -97,8 +96,8 @@ define_hook!(
     &mut UserCmd
 );
 
-pub fn remove_punch(cmd: &mut UserCmd) {
+pub fn remove_punch() {
     let p_local = Player::get_local().unwrap();
     let punch_angle = p_local.get_punch_angle();
-    cmd.viewangles -= *punch_angle;
+    *punch_angle = Angles::new(0.0, 0.0, 0.0);
 }

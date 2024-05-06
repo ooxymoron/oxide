@@ -6,6 +6,7 @@ use crate::{
     d,
     draw::{
         colors::*,
+        component::spectator_list::SpectatorListWindow,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
@@ -18,7 +19,8 @@ use crate::{
 
 use super::{
     aimbot_window::AimbotWindow, base::button::Button, movement_window::MovementWindow,
-    visuals_window::VisualsWindow, Component, ComponentBase, Components,
+    spread_reduction_info::SpreadReductionInfoWindow, visuals_window::VisualsWindow, Component,
+    ComponentBase, Components,
 };
 
 const LEFT_OVERLAY_WIDTH: isize = 300;
@@ -32,6 +34,8 @@ pub struct Overlay {
     pub visible: bool,
     pub components: Components,
     pub windows: Components,
+    pub spectator_list: SpectatorListWindow,
+    pub spread_reduction_info: SpreadReductionInfoWindow,
 }
 
 impl Overlay {
@@ -69,6 +73,8 @@ impl Overlay {
             visible: false,
             components,
             windows,
+            spectator_list: SpectatorListWindow::new(),
+            spread_reduction_info: SpreadReductionInfoWindow::new(),
             base: ComponentBase {
                 x: 0,
                 y: 0,
@@ -127,6 +133,9 @@ impl Component for Overlay {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         let size = d!().window_size;
 
+        self.spectator_list.draw_wrapper(frame, self.visible)?;
+        self.spread_reduction_info
+            .draw_wrapper(frame, self.visible)?;
         if !self.visible {
             self.draw_watermark(frame);
             return Ok(());
@@ -138,11 +147,19 @@ impl Component for Overlay {
             size.0,
             TOP_OVERLAY_HEIGHT,
             BACKGROUND,
-            220,
+            200,
         );
-        frame.filled_rect(0, 0, LEFT_OVERLAY_WIDTH, size.1, BACKGROUND, 255);
+        frame.filled_rect(0, 0, LEFT_OVERLAY_WIDTH, size.1, BACKGROUND, 200);
 
-        frame.outlined_rect(-1, -1, LEFT_OVERLAY_WIDTH, TOP_OVERLAY_HEIGHT, CURSOR, 255);
+        frame.filled_rect(
+            -1,
+            -1,
+            LEFT_OVERLAY_WIDTH,
+            TOP_OVERLAY_HEIGHT,
+            BACKGROUND,
+            255,
+        );
+        frame.outlined_rect(-1, -1, LEFT_OVERLAY_WIDTH, TOP_OVERLAY_HEIGHT, FOREGROUND3, 255);
         frame.logo(0, 0, TOP_OVERLAY_HEIGHT - 2, TOP_OVERLAY_HEIGHT - 2);
 
         let version = format!("V{}", VERSION);
@@ -189,6 +206,8 @@ impl Component for Overlay {
         }
         self.windows.handle_event(event);
         self.components.handle_event(event);
+        self.spectator_list.handle_event(event);
+        self.spread_reduction_info.handle_event(event);
     }
 
     fn get_base(&mut self) -> &mut ComponentBase {

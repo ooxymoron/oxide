@@ -9,7 +9,7 @@ use libc::dlsym;
 use crate::{
     o,
     oxide::hook::{
-        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook, frame_stage_notify::FrameStageNotifyHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook, should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook
+        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook, frame_stage_notify::FrameStageNotifyHook, level_shutdown::LevelShutdownHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook, should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook
     },
     util::{
         get_handle,
@@ -86,6 +86,7 @@ impl Hooks {
         }
 
         InitPointerHook!(PreRenderHook, &interfaces.client_mode.get_vmt().pre_render);
+        InitPointerHook!(LevelShutdownHook, &interfaces.base_client.get_vmt().level_shutdown);
         //InitVmtHook!(
         //    ShouldDrawLocalPlayerHook,
         //    &interfaces.client_mode.get_vmt().should_draw_local_player

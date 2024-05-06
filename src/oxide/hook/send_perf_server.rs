@@ -8,7 +8,6 @@ pub unsafe fn hook(
     max_records: u32,
     org: SendPerfServerHook::RawFn,
 ) {
-    log!("sending perf");
     (org)(this, recipient, max_records);
 }
 

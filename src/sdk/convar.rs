@@ -9,9 +9,9 @@ use crate::cfn;
 #[derive(Debug, Clone)]
 pub struct VMTConVar {
     _pad: [i64; 14],
-    pub internal_set_value: cfn!((), &'static ConVar, &CStr),
-    pub internal_set_float_value: cfn!((), &'static ConVar, f32, bool),
-    pub internal_set_int_value: cfn!((), &'static ConVar, i32),
+    pub set_value: cfn!((), &'static ConVar, &CStr),
+    pub set_float_value: cfn!((), &'static ConVar, f32, bool),
+    pub set_int_value: cfn!((), &'static ConVar, i32),
 }
 
 #[repr(C)]
@@ -19,7 +19,7 @@ pub struct VMTConVar {
 #[derivative(Debug)]
 pub struct ConVar {
     #[derivative(Debug = "ignore")]
-    pub vmt: &'static VMTConVar,
+    pub vmt: *const VMTConVar,
     #[derivative(Debug = "ignore")]
     _pad: [u8; 0x2c],
     #[derivative(Debug = "ignore")]

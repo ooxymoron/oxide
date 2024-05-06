@@ -1,10 +1,10 @@
 pub const BACKGROUND: usize = 0x000000;
+pub const BACKGROUND2: usize = 0x080808;
 pub const FOREGROUND: usize = 0xFFFFFF;
-pub const BOLD: usize = 0xeeeeee;
-pub const CURSOR: usize = 0x9e9e9e;
-pub const CURSOR_TEXT: usize = 0x080808;
-pub const SELECTION: usize = 0xb2ceee;
-pub const SELECTION_TEXT: usize = 0x080808;
+pub const FOREGROUND2: usize = 0xeeeeee;
+pub const FOREGROUND3: usize = 0x9e9e9e;
+pub const FOREGROUND4: usize = 0xb2ceee;
+
 pub const BLACK: usize = 0x323437;
 pub const RED: usize = 0xff5454;
 pub const GREEN: usize = 0x8cc85f;

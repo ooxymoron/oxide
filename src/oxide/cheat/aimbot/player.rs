@@ -83,7 +83,6 @@ impl Aimbot {
         }
         let mut ignore_flags = vec![
             ConditionFlags::Ubercharged,
-            ConditionFlags::UberchargeFading,
             ConditionFlags::Bonked,
         ];
         let spy_revealing_flags = vec![

@@ -17,13 +17,13 @@ pub struct VisualsWindow {
 
 impl VisualsWindow {
     pub fn new(visible: Arcm<bool>) -> VisualsWindow {
-        let mut window = Window::new("VISUALS".to_owned(), visible);
+        let mut window = Window::new("VISUALS".to_owned(), Some(visible));
         let mut y = 10;
         macro_rules! a {
             ($e:expr) => {
                 #[allow(unused_assignments)]
                 {
-                    window.add($e);
+                    window.add($e, 8);
                     y += $e.get_base().h + 8
                 }
             };

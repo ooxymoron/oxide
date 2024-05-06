@@ -22,6 +22,9 @@ impl Angles {
     pub fn new(yaw: f32, pitch: f32, roll: f32) -> Angles {
         Angles { pitch, yaw, roll }
     }
+    pub fn zeroed() -> Angles {
+        Angles::new(0.0, 0.0, 0.0)
+    }
     pub fn to_vectors(&self) -> AngleVectors {
         let sy = dtr(self.yaw).sin();
         let cy = dtr(self.yaw).cos();

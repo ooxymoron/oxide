@@ -6,7 +6,7 @@ use std::{
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, vector::Vector3}, netvars::HasNetvars, o, vmt_call
+    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, vector::Vector3}, netvars::HasNetvars, o, sdk::net_channel::LatencyFlow, vmt_call
 };
 
 use self::anim_state::AnimState;
@@ -55,7 +55,10 @@ impl Player {
     }
     pub fn can_attack(&self) -> bool {
         let weapon = vmt_call!(self.as_ent(), get_weapon);
-        let now = o!().global_vars.interval_per_tick * (*self.get_tick_base() as f32);
+        let net_channel = interface!(base_engine).get_net_channel().unwrap();
+        let now = o!().global_vars.interval_per_tick
+            * ((o!().global_vars.tick_count + 1) as f32
+                + vmt_call!(net_channel, get_latency, LatencyFlow::BOTH));
         *self.get_next_attack() <= now && weapon.can_attack()
     }
     pub fn info(&self) -> OxideResult<PlayerInfo> {
@@ -103,6 +106,11 @@ impl Player {
         get_water_level,
         ["baseclass", "localdata", "m_nWaterLevel"],
         WaterLevel
+    );
+    define_netvar!(
+        get_friction,
+        ["baseclass", "localdata", "m_flFriction"],
+        f32
     );
 }
 

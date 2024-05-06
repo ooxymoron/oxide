@@ -3,7 +3,7 @@ use std::borrow::BorrowMut;
 use crate::{
     d,
     draw::{
-        colors::{CURSOR, CURSOR_TEXT, FOREGROUND},
+        colors::{FOREGROUND3, BACKGROUND2, FOREGROUND},
         component::{Component, ComponentBase},
         event::{Event, EventType},
         fonts::FontSize,
@@ -35,8 +35,8 @@ impl Button {
 impl Component for Button {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         let ComponentBase { x, y, w, h } = self.base;
-        frame.filled_rect(x, y, w, h, CURSOR_TEXT, 255);
-        frame.outlined_rect(x, y, w, h, CURSOR, 255);
+        frame.filled_rect(x, y, w, h, BACKGROUND2, 255);
+        frame.outlined_rect(x, y, w, h, FOREGROUND3, 255);
         frame.text(
             &self.text,
             x + w / 2,

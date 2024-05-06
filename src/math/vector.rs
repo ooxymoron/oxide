@@ -143,6 +143,12 @@ impl Vector2 {
         Vector2::new(0.0, 0.0)
     }
 }
+impl Mul<f32> for Vector2 {
+    type Output = Vector2;
+    fn mul(self, rhs: f32) -> Vector2 {
+        Vector2::new(self.x * rhs, self.y * rhs)
+    }
+}
 impl Add<f32> for Vector2 {
     type Output = Vector2;
     fn add(self, rhs: f32) -> Vector2 {

@@ -4,7 +4,7 @@ use libc::c_void;
 use sdl2_sys::*;
 
 use crate::{
-    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay, spectator_list::SpectatorList},
+    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay},
     log, AUTHOR, NAME, VERSION,
 };
 
@@ -78,7 +78,6 @@ impl Draw {
     }
     pub fn load_components(&mut self) {
         self.components.add(AimbotFov::new());
-        self.components.add(SpectatorList::new());
         self.components.add(Overlay::new());
     }
 
@@ -89,7 +88,7 @@ impl Draw {
         }
         self.fonts.restore();
     }
-    pub fn update_window_size(&mut self,  window: *mut SDL_Window) {
+    pub fn update_window_size(&mut self, window: *mut SDL_Window) {
         let mut w = 0i32;
         let mut h = 0i32;
 

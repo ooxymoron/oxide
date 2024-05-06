@@ -68,7 +68,7 @@ pub struct VMTEntity {
     #[derivative(Debug = "ignore")]
     _pad2: [usize; 6],
     pub get_abs_origin: cfn!(*const Vector3, *const Entity),
-    pub get_abs_angles: cfn!(&'static Angles, *const Entity),
+    pub get_abs_angles: cfn!(&'static mut Angles, *const Entity),
 
     #[derivative(Debug = "ignore")]
     _pad3: [usize; 66],
@@ -216,7 +216,7 @@ impl Entity {
     }
     pub fn get_float_attrib(&self,name: &str) -> Option<f32> {
         let name = CString::new(name).unwrap();
-        let defualt_value = -10101010101.0;
+        let defualt_value = unsafe{transmute::<_,f32>(0b1111111111111111)};
         let val = (o!().util.get_float_attribute)(defualt_value,name.as_ptr(),self,null(),true);
         if val == defualt_value {
             return None;

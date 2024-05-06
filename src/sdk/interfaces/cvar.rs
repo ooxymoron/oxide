@@ -68,8 +68,8 @@ impl CVar {
     }
 }
 
-pub fn get_cvar(name: String) -> OxideResult<&'static mut ConVar> {
-    let name = CString::new(name).unwrap();
+pub fn get_cvar(name: &str) -> OxideResult<&'static mut ConVar> {
+    let name = CString::new(name.to_string()).unwrap();
     let cvar = vmt_call!(interface!(cvar), find_var, name.as_ptr());
     if cvar.is_null() {
         return Err(OxideError::new("invalid cvar"));

@@ -1,6 +1,7 @@
 use derivative::Derivative;
 
 
+#[derive(Debug)]
 pub enum WeaponType {
     None = 0,
     Bat,

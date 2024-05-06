@@ -1,6 +1,6 @@
 use crate::{
     vmt_call,
-    draw::colors::{BLUE, CURSOR, FOREGROUND, GREEN},
+    draw::colors::{BLUE, FOREGROUND3, FOREGROUND, GREEN},
     hex_to_rgb, interface,
     math::{get_corners, vector::Vector2},
     o,
@@ -129,7 +129,7 @@ impl Entity {
                 &text,
                 (maxx + PAD as f32) as i32,
                 y,
-                CURSOR,
+                FOREGROUND3,
                 false,
             );
             y += o!().paint.get_text_size(&text).1;

@@ -1,9 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{
-    error::OxideResult,
-    math::{angles::Angles, dtr},
-    sdk::{
+    draw::colors::RED, error::OxideResult, math::{angles::Angles, dtr, vector::{Vector2, Vector3}}, o, oxide::paint::DebugLine, sdk::{
         entity::{
             flags::Flag,
             player::{player_class::PlayerClass, Player},
@@ -11,8 +9,7 @@ use crate::{
         },
         interfaces::cvar::get_cvar,
         user_cmd::{ButtonFlags, UserCmd},
-    },
-    setting,
+    }, setting, vmt_call
 };
 
 use super::Cheat;
@@ -61,17 +58,60 @@ impl Movement {
 
         Ok(())
     }
-    pub fn correct_movement(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) {
+    pub fn momentum_compensation(&mut self, cmd: &mut UserCmd) {
+        if !setting!(movement, momentum_compensation) {
+            return;
+        }
+        let p_local = Player::get_local().unwrap();
+
+        if p_local.get_flags().get(Flag::ONGROUND) {}
+
+        let vel = p_local.get_velocity().clone();
+        if vel.len2d() == 0.0 {
+            return;
+        }
+        let mut normalized_angles = cmd.viewangles;
+        normalized_angles.yaw += 180.0;
+        normalized_angles.pitch = -normalized_angles.pitch;
+        let rotated_vel = self.rotate_movement(
+            normalized_angles,
+            &Angles::new(0.0, 0.0, 0.0),
+            Vector2::new(vel.x, vel.y),
+        );
+        let drop = rotated_vel * *p_local.get_friction() * o!().global_vars.frametime;
+        let start = *p_local.as_ent().get_origin();
+        o!().paint.debug_lines.insert("rotated_vel".to_string(), DebugLine {
+            start,end: start + Vector3::new(rotated_vel.x, rotated_vel.y,0.0),color: RED
+        });
+
+        if rotated_vel.len() < drop.len() {
+            return;
+        }
+        if cmd.forwardmove == 0.0 {
+            cmd.forwardmove = rotated_vel.x - drop.x
+        };
+        if cmd.sidemove == 0.0 {
+            cmd.sidemove = -rotated_vel.y + drop.y
+        }
+    }
+    pub fn no_push(&mut self) {
+        if setting!(movement, no_push) {
+            let cvar = get_cvar("tf_avoidteammates_pushaway").unwrap();
+            vmt_call!(cvar, set_int_value, 0);
+        }
+    }
+    pub fn create_move_after(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) {
+        self.no_push();
         if org_cmd.viewangles.yaw != cmd.viewangles.yaw {
-            let (corrected_forward, correct_side) = self.calculate_correct_movement(
+            let Vector2 { x, y } = self.rotate_movement(
                 org_cmd.viewangles,
                 &cmd.viewangles,
-                cmd.forwardmove,
-                cmd.sidemove,
+                Vector2::new(cmd.forwardmove, cmd.sidemove),
             );
-            cmd.forwardmove = corrected_forward;
-            cmd.sidemove = correct_side;
+            cmd.forwardmove = x;
+            cmd.sidemove = y;
         }
+        self.momentum_compensation(cmd);
     }
     pub fn bhop(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
         let p_local = Player::get_local()?;
@@ -93,7 +133,7 @@ impl Movement {
         let velocity = p_local.get_velocity();
         let speed = velocity.len2d();
 
-        let air_accelerate = get_cvar("sv_airaccelerate".to_owned()).unwrap().float_value;
+        let air_accelerate = get_cvar("sv_airaccelerate").unwrap().float_value;
 
         let term = WISH_SPEED / air_accelerate / SPEED_VAR * 100.0 / speed;
 
@@ -124,19 +164,18 @@ impl Movement {
         cmd.sidemove = -direction.sin() * 450.0;
         Ok(())
     }
-    pub fn calculate_correct_movement(
+    pub fn rotate_movement(
         &self,
-        org_view_angles: Angles,
-        new_view_angles: &Angles,
-        old_forward: f32,
-        old_side: f32,
-    ) -> (f32, f32) {
-        let alpha = (new_view_angles.yaw - org_view_angles.yaw) * PI / 180f32;
+        org_angles: Angles,
+        desired_angles: &Angles,
+        vec: Vector2,
+    ) -> Vector2 {
+        let alpha = (desired_angles.yaw - org_angles.yaw) * PI / 180f32;
 
-        let forward = old_forward * alpha.cos() - old_side * alpha.sin();
-        let side = old_side * alpha.cos() + old_forward * alpha.sin();
-
-        (forward, side)
+        Vector2::new(
+            vec.x * alpha.cos() - vec.y * alpha.sin(),
+            vec.y * alpha.cos() + vec.x * alpha.sin(),
+        )
     }
 }
 impl Cheat for Movement {

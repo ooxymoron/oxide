@@ -17,13 +17,13 @@ pub struct AimbotWindow {
 
 impl AimbotWindow {
     pub fn new(visible: Arcm<bool>) -> AimbotWindow {
-        let mut window = Window::new("AIMBOT".to_owned(), visible);
+        let mut window = Window::new("AIMBOT".to_owned(), Some(visible));
         let mut y = 10;
         macro_rules! a {
             ($e:expr) => {
                 #[allow(unused_assignments)]
                 {
-                    window.add($e);
+                    window.add($e, 8);
                     y += $e.get_base().h + 8
                 }
             };
@@ -68,6 +68,7 @@ impl AimbotWindow {
             y
         ));
         a!(Checkbox::new("silent", s!().aimbot.silent.clone(), 10, y));
+        a!(Checkbox::new("aim while on delays", s!().aimbot.aim_while_on_delays.clone(), 10, y));
         y+= 20;
 
         a!(Checkbox::new(
@@ -131,13 +132,19 @@ impl AimbotWindow {
         y+= 20;
         a!(Checkbox::new(
             "spread reduction",
-            s!().aimbot.spread_reduciton.clone(),
+            s!().aimbot.spread_reduction.clone(),
             10,
             y
         ));
         a!(Checkbox::new(
             "tapfire",
             s!().aimbot.tapfire.clone(),
+            10,
+            y
+        ));
+        a!(Checkbox::new(
+            "tapfire only minigun",
+            s!().aimbot.tapfire_only_minigun.clone(),
             10,
             y
         ));

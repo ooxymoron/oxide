@@ -1,5 +1,7 @@
 use std::{ffi::CStr, mem::transmute};
 
+use interfaces::net_channel::LatencyFlow;
+
 use crate::{o, vmt_call};
 
 use self::{
@@ -83,6 +85,19 @@ impl Gun {
         return vmt_call!(self, get_projectile_damage) * mult
             >= (vmt_call!(target, get_health)) as f32;
     }
+    pub fn get_bullets(&mut self) -> i32 {
+        let mode = self.as_weapon().get_mode();
+        let mut bullet_count =
+            self.as_weapon().get_info().weapon_data[mode as usize].bullets_per_shot;
+        if let Some(bullets_attrib) = self
+            .as_weapon()
+            .as_ent()
+            .get_float_attrib("mult_bullets_per_shot")
+        {
+            bullet_count = bullets_attrib as i32;
+        }
+        bullet_count
+    }
 }
 
 #[repr(C)]
@@ -120,10 +135,11 @@ impl Weapon {
 
 impl Weapon {
     pub fn can_attack(&mut self) -> bool {
-        let p_local = Player::get_local().unwrap();
-        *self.get_next_primary_attack() - 0.005
-            <= o!().global_vars.interval_per_tick * (*p_local.get_tick_base() as f32)
-            && *self.get_clip1() != 0
+        let net_channel = interface!(base_engine).get_net_channel().unwrap();
+        let now = o!().global_vars.interval_per_tick
+            * ((o!().global_vars.tick_count + 1) as f32
+                + vmt_call!(net_channel, get_latency, LatencyFlow::OUTGOING));
+        *self.get_next_primary_attack() <= now && *self.get_clip1() != 0
     }
     pub fn is_sniper_rifle(&mut self) -> bool {
         matches!(
