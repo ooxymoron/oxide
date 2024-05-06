@@ -6,18 +6,25 @@ use std::{
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, vector::Vector3}, netvars::HasNetvars, o, sdk::net_channel::LatencyFlow, vmt_call
+    define_netvar, define_offset,
+    error::{OxideError, OxideResult},
+    interface,
+    math::{angles::Angles, vector::Vector3},
+    netvars::HasNetvars,
+    o,
+    sdk::net_channel::LatencyFlow,
+    vmt_call,
 };
 
 use self::anim_state::AnimState;
 
 use super::{
-    interfaces::base_engine::PlayerInfo, condition::Condition, flags::Flags,
-    user_cmd::UserCmd, Entity, WaterLevel,
+    condition::Condition, flags::Flags, interfaces::base_engine::PlayerInfo, user_cmd::UserCmd,
+    Entity, WaterLevel,
 };
 
-pub mod player_class;
 pub mod anim_state;
+pub mod player_class;
 
 use player_class::PlayerClass;
 
@@ -121,7 +128,6 @@ impl Player {
     define_offset!(get_flags, 0x460, Flags);
     //"spyMask"
     define_offset!(get_anim_state, 0x2348, AnimState);
-    
 }
 
 //CTFPlayer{

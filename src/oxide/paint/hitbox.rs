@@ -112,14 +112,7 @@ impl Paint {
                 continue;
             };
             let (r, g, b) = hex_to_rgb!(color);
-            vmt_call!(
-                interface!(surface),
-                set_color,
-                r as i32,
-                g as i32,
-                b as i32,
-                alpha as i32
-            );
+            vmt_call!(interface!(surface), set_color, r, g, b, alpha);
 
             vmt_call!(
                 interface!(surface),

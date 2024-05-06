@@ -50,13 +50,13 @@ impl Display for State {
                 ..
             } => write!(
                 f,
-                "SYNCING\nseed quality: {}\nnext sync: {:.2}",
+                "SYNCING SEED\nseed quality: {}\nnext sync: {:.2}",
                 precision,
                 next_playerperf - time
             ),
             State::IMPOSSIBLE { precision } => write!(
                 f,
-                "IMPOSSIBLE:\nserver too young to sync\nquality: {}",
+                "SEED PREDICITON IMPOSSIBLE:\nserver too young to sync\nquality: {}",
                 precision
             ),
             State::SYNCED {
@@ -65,7 +65,7 @@ impl Display for State {
                 ..
             } => write!(
                 f,
-                "SYNCED\nseed quality: {}\nnext sync: {:.2}",
+                "SYNCED SEED\nseed quality: {}\nnext sync: {:.2}",
                 precision,
                 next_playerperf - time
             ),

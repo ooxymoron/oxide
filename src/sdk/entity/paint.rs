@@ -1,18 +1,24 @@
 use crate::{
-    vmt_call,
-    draw::colors::{BLUE, FOREGROUND3, FOREGROUND, GREEN},
+    draw::colors::{BLUE, FOREGROUND, FOREGROUND3, GREEN},
     hex_to_rgb, interface,
     math::{get_corners, vector::Vector2},
     o,
     util::world_to_screen,
+    vmt_call,
 };
 
 use super::Entity;
 
-const PAD:i32 = 5;
+const PAD: i32 = 5;
 
 impl Entity {
-    pub fn paint(&self, r#box: bool, draw_hp: bool, text_top: Option<&str>, text_right: Vec<String>) {
+    pub fn paint(
+        &self,
+        r#box: bool,
+        draw_hp: bool,
+        text_top: Option<&str>,
+        text_right: Vec<String>,
+    ) {
         let team = vmt_call!(self, get_team_number);
         let collidable = vmt_call!(self, get_collideable);
         let min = *vmt_call!(collidable, obb_mins);
@@ -52,14 +58,7 @@ impl Entity {
 
         if r#box {
             let (r, g, b) = hex_to_rgb!(team.color());
-            vmt_call!(
-                interface!(surface),
-                set_color,
-                r as i32,
-                g as i32,
-                b as i32,
-                50 as i32
-            );
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
             vmt_call!(
                 interface!(surface),
                 draw_rect,
@@ -72,20 +71,13 @@ impl Entity {
 
         if draw_hp {
             let (r, g, b) = hex_to_rgb!(GREEN);
-            vmt_call!(
-                interface!(surface),
-                set_color,
-                r as i32,
-                g as i32,
-                b as i32,
-                50 as i32
-            );
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
             let health = vmt_call!(self, get_health);
             let max_health = vmt_call!(self, get_max_health);
             vmt_call!(
                 interface!(surface),
                 draw_filled_rect,
-                minx as i32 - 2*PAD,
+                minx as i32 - 2 * PAD,
                 miny as i32
                     + ((1.0 - (health.min(max_health) as f32 / max_health as f32))
                         * (maxy as f32 - miny as f32)) as i32,
@@ -94,18 +86,11 @@ impl Entity {
             );
             if health > max_health {
                 let (r, g, b) = hex_to_rgb!(BLUE);
-                vmt_call!(
-                    interface!(surface),
-                    set_color,
-                    r as i32,
-                    g as i32,
-                    b as i32,
-                    50 as i32
-                );
+                vmt_call!(interface!(surface), set_color, r, g, b, 50);
                 vmt_call!(
                     interface!(surface),
                     draw_filled_rect,
-                    minx as i32 - 2*PAD,
+                    minx as i32 - 2 * PAD,
                     miny as i32
                         + ((1.0 - ((health - max_health) as f32 / max_health as f32))
                             * (maxy as f32 - miny as f32)) as i32,
@@ -125,13 +110,8 @@ impl Entity {
         }
         let mut y = miny as i32;
         for text in text_right {
-            o!().paint.paint_text(
-                &text,
-                (maxx + PAD as f32) as i32,
-                y,
-                FOREGROUND3,
-                false,
-            );
+            o!().paint
+                .paint_text(&text, (maxx + PAD as f32) as i32, y, FOREGROUND3, false);
             y += o!().paint.get_text_size(&text).1;
         }
     }

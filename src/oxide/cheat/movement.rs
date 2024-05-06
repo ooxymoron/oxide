@@ -79,10 +79,6 @@ impl Movement {
             Vector2::new(vel.x, vel.y),
         );
         let drop = rotated_vel * *p_local.get_friction() * o!().global_vars.frametime;
-        let start = *p_local.as_ent().get_origin();
-        o!().paint.debug_lines.insert("rotated_vel".to_string(), DebugLine {
-            start,end: start + Vector3::new(rotated_vel.x, rotated_vel.y,0.0),color: RED
-        });
 
         if rotated_vel.len() < drop.len() {
             return;

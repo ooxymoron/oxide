@@ -11,7 +11,7 @@ pub type Surface = WithVmt<VMTMatSurface>;
 #[derive(Debug, Clone)]
 pub struct VMTMatSurface {
     _pad1: [u64; 10],
-    pub set_color: cfn!((), &'static Surface, i32, i32, i32, i32),
+    pub set_color: cfn!((), &'static Surface, u8, u8, u8, u8),
     _pad2: [u64; 1],
     pub draw_filled_rect: cfn!((), &'static Surface, i32, i32, i32, i32),
     _pad3: [u64; 1],

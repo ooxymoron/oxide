@@ -53,11 +53,14 @@ fn hook(
     let mut spread_reduction = get_cheat!(SpreadReduction);
     spread_reduction.create_move(cmd, target);
 
+    //todo move this to visuals
     if (setting!(visual, impacts) || setting!(visual, tracers))
         && cmd.buttons.get(ButtonFlags::InAttack)
         && p_local.can_attack()
     {
-        let dir = cmd.viewangles.to_vectors().forward * 1000000.0;
+        let weapon = vmt_call!(p_local.as_ent(),get_weapon);
+        let range = weapon.get_info().weapon_data[weapon.get_mode()].range;
+        let dir = cmd.viewangles.to_vectors().forward * range;
         let src = vmt_call!(p_local.as_ent(), eye_position);
         let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
         let color = WHITE;

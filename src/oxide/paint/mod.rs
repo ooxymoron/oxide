@@ -1,7 +1,7 @@
 use std::{collections::HashMap, ffi::CString, fs::File, hash::Hash, io::Write};
 
 use crate::{
-    draw::{colors::FOREGROUND4, fonts::HACK_FONT},
+    draw::{fonts::HACK_FONT},
     error::OxideResult,
     hex_to_rgb, interface,
     math::vector::Vector3,
@@ -84,7 +84,7 @@ impl Paint {
             let Some(start) = world_to_screen(&line.start) else{return};
             let Some(end) = world_to_screen(&line.end) else {return};
             let (r, g, b) = hex_to_rgb!(line.color);
-            vmt_call!(interface!(surface), set_text_color, r, g, b, 255);
+            vmt_call!(interface!(surface), set_color, r, g, b, 255);
             vmt_call!(
                 interface!(surface),
                 draw_line,

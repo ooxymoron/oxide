@@ -118,7 +118,7 @@ impl Aimbot {
             return false;
         }
 
-        if !p_local.can_attack() {
+        if !p_local.can_attack() && !setting!(aimbot,aim_while_on_delays){
             return false;
         }
         true
