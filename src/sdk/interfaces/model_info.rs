@@ -9,7 +9,9 @@ use crate::{
     cfn,
     error::{OxideError, OxideResult},
     math::{
-        angles::Angles, get_corners, vector::{Vector3, Vector4}
+        angles::RotationVectors,
+        get_corners,
+        vector::{Vector3, Vector4},
     },
 };
 
@@ -64,9 +66,13 @@ impl HitboxWrapper {
         let corners = self.corners()?;
         Ok((corners[0] + corners[7]) / 2.0)
     }
-    pub fn get_pos(&self) -> OxideResult<(Vector3, Angles)> {
+    pub fn get_pos(&self) -> OxideResult<(Vector3, RotationVectors)> {
         let pos = Vector3::new(self.bone[0][3], self.bone[1][3], self.bone[2][3]);
-        let angle = Vector3::new(self.bone[0][0], self.bone[0][1], self.bone[0][2]).angle();
+        let angle = RotationVectors {
+            forward: Vector3::new(self.bone[0][0], self.bone[0][1], self.bone[0][2]),
+            right: Vector3::new(self.bone[1][0], self.bone[1][1], self.bone[1][2]),
+            up: Vector3::new(self.bone[2][0], self.bone[2][1], self.bone[2][2]),
+        };
 
         Ok((pos, angle))
     }

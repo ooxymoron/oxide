@@ -110,7 +110,7 @@ impl Aimbot {
 
     pub fn should_run(&self) -> bool {
         let p_local = Player::get_local().unwrap();
-        if !setting!(aimbot, enabled) || !self.shoot_key_pressed {
+        if !setting!(aimbot, enabled) || (!self.shoot_key_pressed && !setting!(aimbot, always_on)) {
             return false;
         }
 
@@ -118,7 +118,7 @@ impl Aimbot {
             return false;
         }
 
-        if !p_local.can_attack() && !setting!(aimbot,aim_while_on_delays){
+        if !p_local.can_attack() && !setting!(aimbot, aim_while_on_delays) {
             return false;
         }
         true

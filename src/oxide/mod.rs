@@ -13,9 +13,11 @@ use crate::{
     sdk::{
         client_state::ClientState,
         entity::Entity,
+        event_manager::GameEventManager,
         global_vars::GlobalVars,
         interfaces::{base_client::BaseClient, base_engine::BaseEngine},
     },
+    util::{handles::ENGINE, sigscanner::find_sig},
     DRAW,
 };
 
@@ -49,6 +51,7 @@ pub struct Oxide {
     pub unloading: bool,
     pub util: Util,
     pub client_state: &'static mut ClientState,
+    pub event_manager: &'static mut GameEventManager,
 }
 pub type GetBonePositionFn =
     unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
@@ -73,6 +76,7 @@ impl Oxide {
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
         let client_state =
             Oxide::get_client_state(unsafe { transmute(interfaces.base_engine.interface_ref()) });
+        let event_manager = Oxide::get_event_manager();
 
         let netvars = load_netvars(unsafe { transmute(interfaces.base_client.interface_ref()) });
         let paint = Paint::init(&interfaces);
@@ -93,6 +97,7 @@ impl Oxide {
             unloading: false,
             util: Util::init(),
             client_state,
+            event_manager,
         };
 
         Ok(oxide)
@@ -100,13 +105,20 @@ impl Oxide {
     fn get_client_state(base_engine: &BaseEngine) -> &'static mut ClientState {
         unsafe {
             let server_cmd_key_values = base_engine.vmt.read().server_cmd_key_values as *const u8;
-            let client_state: &'static mut ClientState = transmute(
+            transmute(
                 transmute::<_, *const u32>(server_cmd_key_values)
                     .byte_add(3)
                     .read() as u64
                     + transmute::<_, u64>(server_cmd_key_values),
-            );
-            client_state
+            )
+        }
+    }
+    fn get_event_manager() -> &'static mut GameEventManager {
+        unsafe {
+            let addr = find_sig::<u32>(ENGINE, "55 48 8D 3D ? ? ? ? 48 89 E5 E8 ? ? ? ? 48 8D 15 ? ? ? ? 48 8D 35 ? ? ? ? 48 8D 3D ? ? ? ? E8 ? ? ? ? 4C 8D 05").unwrap();
+            let game_event_manager =
+                transmute(addr.byte_add(4).read() as u64 + transmute::<_, u64>(addr) + 8);
+            game_event_manager
         }
     }
     fn get_global_vars(base_client: &BaseClient) -> &'static mut GlobalVars {

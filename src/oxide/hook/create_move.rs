@@ -1,17 +1,10 @@
 use crate::{
-    define_hook,
-    draw::colors::WHITE,
-    get_cheat, interface,
+    define_hook, get_cheat,
     math::angles::Angles,
-    oxide::cheat::{aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction},
-    sdk::{
-        entity::player::Player,
-        interfaces::{
-            client_mode::ClientMode,
-            engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-        },
-        user_cmd::{ButtonFlags, UserCmd},
+    oxide::cheat::{
+        aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction, visual::Visuals,
     },
+    sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
 };
 
@@ -53,33 +46,7 @@ fn hook(
     let mut spread_reduction = get_cheat!(SpreadReduction);
     spread_reduction.create_move(cmd, target);
 
-    //todo move this to visuals
-    if (setting!(visual, impacts) || setting!(visual, tracers))
-        && cmd.buttons.get(ButtonFlags::InAttack)
-        && p_local.can_attack()
-    {
-        let weapon = vmt_call!(p_local.as_ent(),get_weapon);
-        let range = weapon.get_info().weapon_data[weapon.get_mode()].range;
-        let dir = cmd.viewangles.to_vectors().forward * range;
-        let src = vmt_call!(p_local.as_ent(), eye_position);
-        let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
-        let color = WHITE;
-        let alpha = 20;
-        let time = 0.5;
-        if setting!(visual, impacts) {
-            interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
-            interface!(debug_overlay).triangle(&src, 4.0, color, alpha, time);
-        }
-        if setting!(visual, tracers) {
-            interface!(debug_overlay).line(
-                &trace.startpos,
-                &trace.endpos.clone(),
-                color,
-                alpha,
-                time,
-            );
-        }
-    }
+    get_cheat!(Visuals).draw_fire_tracer(cmd);
     remove_punch();
     movement.create_move_after(cmd, &org_cmd);
     !setting!(aimbot, silent)

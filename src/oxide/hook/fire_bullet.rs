@@ -22,7 +22,7 @@ pub extern "C" fn hook(
     damage_type: i32,
     custom_damage_typ: i32,
 ) {
-    get_cheat!(Visuals).draw_tracer(info, weapon);
+    get_cheat!(Visuals).draw_bullet_tracer(info, weapon);
 
     call_original!(
         NAME,

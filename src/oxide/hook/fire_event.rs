@@ -1,21 +1,24 @@
-use crate::{
-    c_str_to_str, call_original, cfn, log,
-    sdk::{
-        game_event::GameEvent,
-    },
-    vmt_call,
-};
+use std::ffi::CStr;
 
-pub const NAME: &str = "FireEvent";
+use crate::sdk::{event_manager::GameEventManager, game_event::GameEvent};
 
-pub type FireEvent = cfn!(bool, *const u8, &GameEvent, bool);
-
-pub extern "C" fn hook(
-    event_manager: *const u8,
-    event: &GameEvent,
-    no_boradcast: bool,
-) -> bool {
-    let event_name = c_str_to_str!(vmt_call!(event, get_name));
-    log!("{}", event_name);
-    call_original!(NAME, FireEvent, event_manager, event, no_boradcast)
+use crate::{define_hook, vmt_call};
+fn hook(event_manager: &GameEventManager, event: &GameEvent, org: FireEventHook::RawFn) -> bool {
+    let name = unsafe { CStr::from_ptr(vmt_call!(event, get_name)) }
+        .to_str()
+        .unwrap();
+    log!("{}", name);
+    (org)(event_manager, event)
 }
+
+define_hook!(
+    FireEventHook,
+    "FireEvent",
+    hook,
+    bool,
+    false,
+    event_manager,
+    &GameEventManager,
+    event,
+    &GameEvent
+);

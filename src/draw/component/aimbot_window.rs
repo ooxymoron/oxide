@@ -43,6 +43,7 @@ impl AimbotWindow {
             s!().aimbot.fov.clone(),
             None
         ));
+        a!(Checkbox::new("always_on", s!().aimbot.always_on.clone(), 10, y));
         a!(KeyInput::new(10, y, "aimbot key", s!().aimbot.key.clone()));
 
         y+= 10;

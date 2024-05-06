@@ -9,17 +9,15 @@ use libc::dlsym;
 use crate::{
     o,
     oxide::hook::{
-        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook, frame_stage_notify::FrameStageNotifyHook, level_shutdown::LevelShutdownHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook, should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook
+        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook, fire_event::FireEventHook, frame_stage_notify::FrameStageNotifyHook, level_shutdown::LevelShutdownHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook, should_draw_local_player::ShouldDrawLocalPlayerHook, should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook
     },
-    util::{
-        get_handle,
-        handles::*,
-        sigscanner::find_sig,
-    },
+    sdk::HasVmt,
+    util::{get_handle, handles::*, sigscanner::find_sig},
 };
 
 use self::detour::DetourHook;
 
+pub mod add_to_tail_server;
 pub mod base_interpolate_part1;
 pub mod cl_send_move;
 pub mod create_move;
@@ -39,6 +37,7 @@ pub mod plat_floattime;
 pub mod pointer_hook;
 pub mod poll_event;
 pub mod pre_render;
+pub mod process_user_cmds;
 pub mod run_command;
 pub mod send_perf_server;
 pub mod send_user_msg;
@@ -46,8 +45,6 @@ pub mod should_draw_local_player;
 pub mod should_draw_view_model;
 pub mod swap_window;
 pub mod write_user_cmd;
-pub mod add_to_tail_server;
-pub mod process_user_cmds;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -85,12 +82,16 @@ impl Hooks {
             };
         }
 
-        InitPointerHook!(PreRenderHook, &interfaces.client_mode.get_vmt().pre_render);
-        InitPointerHook!(LevelShutdownHook, &interfaces.base_client.get_vmt().level_shutdown);
-        //InitVmtHook!(
-        //    ShouldDrawLocalPlayerHook,
-        //    &interfaces.client_mode.get_vmt().should_draw_local_player
-        //);
+        InitPointerHook!(FireEventHook, &o!().event_manager.get_vmt().fire_event);
+        InitPointerHook!(PreRenderHook, &interfaces.client_mode.get_vmt().override_view);
+        InitPointerHook!(
+            LevelShutdownHook,
+            &interfaces.base_client.get_vmt().level_shutdown
+        );
+        InitPointerHook!(
+            ShouldDrawLocalPlayerHook,
+            &interfaces.client_mode.get_vmt().should_draw_entity
+        );
         InitPointerHook!(
             ShouldDrawViewModelHook,
             &interfaces.client_mode.get_vmt().should_draw_view_model
@@ -114,7 +115,6 @@ impl Hooks {
             "55 48 89 E5 41 55 41 54 49 89 FC 48 83 EC 60"
         );
         InitDetourHook!(fire_bullets, CLIENT, "55 48 89 E5 41 57 49 89 FF 44 89 C7");
-        //InitDetourHook!(fire_bullets_server, SERVER, "55 48 89 E5 41 57 49 89 FF 44 89 C7");
         InitDetourHook!(
             fire_bullet,
             CLIENT,
@@ -122,7 +122,10 @@ impl Hooks {
         );
 
         //INFO: PAINT HOOK NEEDS TO LOAD AFTER DISPATCH USER MESSAGE HOOK
-        InitPointerHook!(DispatchUserMessageHook, &interfaces.base_client.get_vmt().dispatch_user_message);
+        InitPointerHook!(
+            DispatchUserMessageHook,
+            &interfaces.base_client.get_vmt().dispatch_user_message
+        );
         InitPointerHook!(PaintHook, &interfaces.engine_vgui.get_vmt().paint);
         InitDetourHook!(
             add_to_tail_server,
@@ -134,6 +137,7 @@ impl Hooks {
             SERVER,
             "55 48 89 E5 41 57 41 56 45 89 CE 41 55 49 89 F5"
         );
+
         //InitDetourHook!(
         //    cl_send_move,
         //    ENGINE,
@@ -152,17 +156,6 @@ impl Hooks {
         //    "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC A8 01 00 00 48 85 F6 48 89 BD"
         //);
         //
-        //tramp_hooks.insert(
-        //    fire_event::NAME.to_string(),
-        //    DetourHook::hook(
-        //        find_sig(
-        //            "./bin/linux64/engine.so",
-        //            "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC 88 00 00 00 48 85 F6",
-        //        )
-        //        .unwrap(),
-        //        fire_event::fire_event as *const u8,
-        //    ),
-        //);
         //tramp_hooks.insert(
         //    dispatch_effect::NAME.to_string(),
         //    DetourHook::hook(

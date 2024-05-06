@@ -1,7 +1,10 @@
 use std::f32::consts::PI;
 
 use crate::{
-    draw::colors::RED, error::OxideResult, math::{angles::Angles, dtr, vector::{Vector2, Vector3}}, o, oxide::paint::DebugLine, sdk::{
+    error::OxideResult,
+    math::{angles::Angles, dtr, vector::Vector2},
+    o,
+    sdk::{
         entity::{
             flags::Flag,
             player::{player_class::PlayerClass, Player},
@@ -9,7 +12,8 @@ use crate::{
         },
         interfaces::cvar::get_cvar,
         user_cmd::{ButtonFlags, UserCmd},
-    }, setting, vmt_call
+    },
+    setting, vmt_call,
 };
 
 use super::Cheat;

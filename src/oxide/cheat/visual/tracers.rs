@@ -1,7 +1,7 @@
 use std::mem::transmute;
 
 use crate::{
-    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED},
+    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED, WHITE},
     interface,
     sdk::{
         entity::{player::Player, weapon::Weapon},
@@ -11,7 +11,7 @@ use crate::{
             entity::Entity,
             model_info::HitboxId,
         },
-        networkable::ClassId,
+        networkable::ClassId, user_cmd::{ButtonFlags, UserCmd},
     },
     setting, vmt_call,
 };
@@ -19,7 +19,39 @@ use crate::{
 use super::Visuals;
 
 impl Visuals {
-    pub fn draw_tracer(&self, info: &FireBulletsInfo, weapon: *mut Weapon) {
+    pub fn draw_fire_tracer(&self, cmd: &UserCmd) {
+    let p_local = Player::get_local().unwrap();
+    if (setting!(visual, impacts) || setting!(visual, tracers))
+        && cmd.buttons.get(ButtonFlags::InAttack)
+        && p_local.can_attack()
+    {
+        let weapon = vmt_call!(p_local.as_ent(),get_weapon);
+        let range = weapon.get_info().weapon_data[weapon.get_mode()].range;
+        let mut normalized_angles = cmd.viewangles;
+        normalized_angles.yaw += 180.0;
+        normalized_angles.pitch = -normalized_angles.pitch;
+        let dir = normalized_angles.to_vectors().forward * range;
+        let src = vmt_call!(p_local.as_ent(), eye_position);
+        let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
+        let color = WHITE;
+        let alpha = 20;
+        let time = 0.5;
+        if setting!(visual, impacts) {
+            interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
+            interface!(debug_overlay).triangle(&src, 4.0, color, alpha, time);
+        }
+        if setting!(visual, tracers) {
+            interface!(debug_overlay).line(
+                &trace.startpos,
+                &trace.endpos.clone(),
+                color,
+                alpha,
+                time,
+            );
+        }
+    }
+    }
+    pub fn draw_bullet_tracer(&self, info: &FireBulletsInfo, weapon: *mut Weapon) {
         if (!setting!(visual, tracers) && !setting!(visual, impacts)) || weapon.is_null(){
             return;
         }

@@ -12,7 +12,7 @@ pub struct Angles {
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct AngleVectors {
+pub struct RotationVectors {
     pub forward: Vector3,
     pub right: Vector3,
     pub up: Vector3,
@@ -25,32 +25,27 @@ impl Angles {
     pub fn zeroed() -> Angles {
         Angles::new(0.0, 0.0, 0.0)
     }
-    pub fn to_vectors(&self) -> AngleVectors {
-        let sy = dtr(self.yaw).sin();
-        let cy = dtr(self.yaw).cos();
-        let sp = dtr(self.pitch).sin();
-        let cp = dtr(self.pitch).cos();
-        let sr = dtr(self.roll).sin();
-        let cr = dtr(self.roll).cos();
-
-        let mut vecs = AngleVectors {
-            forward: Vector3::zeroed(),
-            right: Vector3::zeroed(),
-            up: Vector3::zeroed(),
-        };
-        vecs.forward.x = cp * cy;
-        vecs.forward.y = cp * sy;
-        vecs.forward.z = -sp;
-
-        vecs.right.x = sr * sp * cy - cr * sy;
-        vecs.right.y = sr * sp * sy + cr * cy;
-        vecs.right.z = sr * cp;
-
-        vecs.up.x = cr * sp * cy + sr * sy;
-        vecs.up.y = cr * sp * cy - sr * cy;
-        vecs.up.z = cr * cp;
-
-        vecs
+    pub fn to_vectors(&self) -> RotationVectors {
+        let (sy, cy) = dtr(self.yaw).sin_cos();
+        let (sp, cp) = dtr(self.pitch).sin_cos();
+        let (sr, cr) = dtr(self.roll).sin_cos();
+        RotationVectors {
+            forward: Vector3::new(
+                cp * cy,
+                cp * sy,
+                -sp
+            ),
+            right: Vector3::new(
+                sr * sp * cy - cr * sy,
+                sr * sp * sy + cr * cy,
+                sr * cp
+            ),
+            up: Vector3::new(
+                cr * sp * cy + sr * sy,
+                cr * sp * sy - sr * cy,
+                cr * cp
+            ),
+        }
     }
 }
 

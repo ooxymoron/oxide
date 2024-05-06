@@ -1,8 +1,11 @@
-use std::{f32::consts::PI, ops::{Add, AddAssign, Div, DivAssign, Mul, Sub, SubAssign}};
+use std::{
+    f32::consts::PI,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, Sub, SubAssign},
+};
 
 use crate::sdk::interfaces::engine_trace::VectorAligned;
 
-use super::angles::Angles;
+use super::angles::{RotationVectors, Angles};
 
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
@@ -16,6 +19,12 @@ impl Mul<f32> for Vector3 {
     type Output = Vector3;
     fn mul(self, rhs: f32) -> Vector3 {
         Vector3::new(self.x * rhs, self.y * rhs, self.z * rhs)
+    }
+}
+impl Mul for Vector3 {
+    type Output = Vector3;
+    fn mul(self, rhs: Vector3) -> Vector3 {
+        Vector3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 impl Div<f32> for Vector3 {
@@ -41,9 +50,8 @@ impl Sub for Vector3 {
 }
 impl Add<f32> for Vector3 {
     type Output = Vector3;
-    fn add(self, rhs: f32) -> Vector3{
+    fn add(self, rhs: f32) -> Vector3 {
         Vector3::new(self.x + rhs, self.y + rhs, self.z + rhs)
-
     }
 }
 impl Sub<f32> for Vector3 {
@@ -53,11 +61,9 @@ impl Sub<f32> for Vector3 {
     }
 }
 
-
-
 impl AddAssign<f32> for Vector3 {
     fn add_assign(&mut self, rhs: f32) {
-        *self =  *self + rhs;
+        *self = *self + rhs;
     }
 }
 impl SubAssign<f32> for Vector3 {
@@ -95,25 +101,24 @@ impl Vector3 {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
 
-    pub fn normalize(mut self) -> Vector3{
+    pub fn normalize(mut self) -> Vector3 {
         let len = self.len();
-        self.x/=len;
-        self.y/=len;
-        self.z/=len;
+        self.x /= len;
+        self.y /= len;
+        self.z /= len;
         self
     }
     pub fn angle(&self) -> Angles {
         Angles {
-            pitch: self.z.atan2(self.len2d()) / PI * 180f32,
-            yaw: self.y.atan2(self.x) / PI * 180f32 + 180f32,
+            pitch: (self.z/self.len2d()).asin() / PI * 180f32,
+            yaw: -(self.x.atan2(self.y) / PI * 180f32),
             roll: 0.0,
         }
     }
     pub fn zeroed() -> Vector3 {
         Vector3::new(0.0, 0.0, 0.0)
     }
-    pub fn rotate(&self, rotation: &Angles) -> Vector3 {
-        let rotation = rotation.to_vectors();
+    pub fn rotate(&self, rotation: &RotationVectors) -> Vector3 {
         Vector3::new(
             self.dot(&rotation.forward),
             self.dot(&rotation.right),
@@ -158,7 +163,7 @@ impl Add<f32> for Vector2 {
 
 impl AddAssign<f32> for Vector2 {
     fn add_assign(&mut self, rhs: f32) {
-        *self =  *self + rhs;
+        *self = *self + rhs;
     }
 }
 
@@ -177,7 +182,7 @@ impl Sub for Vector2 {
 
 impl AddAssign for Vector2 {
     fn add_assign(&mut self, rhs: Vector2) {
-        *self =  *self + rhs;
+        *self = *self + rhs;
     }
 }
 
@@ -190,7 +195,7 @@ impl Div<f32> for Vector2 {
 
 impl DivAssign<f32> for Vector2 {
     fn div_assign(&mut self, rhs: f32) {
-        *self =  *self / rhs;
+        *self = *self / rhs;
     }
 }
 

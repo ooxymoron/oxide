@@ -1,7 +1,7 @@
-use std::{collections::HashMap, ffi::CString, fs::File, hash::Hash, io::Write};
+use std::{collections::HashMap, ffi::CString, fs::File, io::Write};
 
 use crate::{
-    draw::{fonts::HACK_FONT},
+    draw::fonts::HACK_FONT,
     error::OxideResult,
     hex_to_rgb, interface,
     math::vector::Vector3,
