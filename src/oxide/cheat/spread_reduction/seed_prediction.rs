@@ -1,6 +1,5 @@
 use std::{
     ffi::CString,
-    fmt::{self, Display},
     mem::transmute,
 };
 
@@ -40,18 +39,6 @@ pub enum State {
     UNSYNCED,
 }
 
-impl Display for State {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            State::SYNCING { precision, .. } => write!(f, "SYNCING SEED {}", precision,),
-            State::IMPOSSIBLE { precision } => {
-                write!(f, "SEED PREDICITON IMPOSSIBLE {}", precision)
-            }
-            State::SYNCED { precision, .. } => write!(f, "SYNCED SEED {}", precision,),
-            State::UNSYNCED => write!(f, "UNSYNCED"),
-        }
-    }
-}
 
 impl State {}
 

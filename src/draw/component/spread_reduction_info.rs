@@ -34,7 +34,7 @@ impl SpreadReductionInfo {
         let base = ComponentBase {
             x: 0,
             y: 0,
-            w: 130,
+            w: 150,
             h: 30,
         };
         SpreadReductionInfo { base }

@@ -107,10 +107,7 @@ impl SpreadReduction {
 
         let spread_correction = self.calculate_spread_correction(bullets, hit_cone);
 
-        let mut normalized_angles = cmd.viewangles;
-        normalized_angles.yaw += 180.0;
-        normalized_angles.pitch = -normalized_angles.pitch;
-        let dirs = normalized_angles.to_vectors();
+        let dirs = cmd.viewangles.to_vectors();
 
         cmd.viewangles =
             (dirs.forward + dirs.right * spread_correction.x + dirs.up * spread_correction.y)

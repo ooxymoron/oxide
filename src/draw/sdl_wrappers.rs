@@ -109,7 +109,7 @@ impl Frame {
         if center_vertically || center_horizontaly{
             let text_size = d!().fonts.get_text_size(text, size.clone());
             if center_vertically {
-                y += (text_size.1 + text_size.2) / 2;
+                y += text_size.1 / 2;
             }
             if center_horizontaly {
                 x -= text_size.0 / 2;

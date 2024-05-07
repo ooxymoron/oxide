@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use crate::{
     error::OxideResult,
-    math::{angles::Angles, dtr, vector2::Vector2},
+    math::{dtr, vector2::Vector2},
     o,
     sdk::{
         entity::{
@@ -74,14 +74,7 @@ impl Movement {
         if vel.len2d() == 0.0 {
             return;
         }
-        let mut normalized_angles = cmd.viewangles;
-        normalized_angles.yaw += 180.0;
-        normalized_angles.pitch = -normalized_angles.pitch;
-        let rotated_vel = self.rotate_movement(
-            normalized_angles,
-            &Angles::new(0.0, 0.0, 0.0),
-            Vector2::new(vel.x, vel.y),
-        );
+        let rotated_vel = self.rotate_movement(-cmd.viewangles.yaw, Vector2::new(vel.x, vel.y));
         let drop = rotated_vel * *p_local.get_friction() * o!().global_vars.frametime;
 
         if rotated_vel.len() < drop.len() {
@@ -104,8 +97,7 @@ impl Movement {
         self.no_push();
         if org_cmd.viewangles.yaw != cmd.viewangles.yaw {
             let Vector2 { x, y } = self.rotate_movement(
-                org_cmd.viewangles,
-                &cmd.viewangles,
+                &org_cmd.viewangles.yaw - &cmd.viewangles.yaw,
                 Vector2::new(cmd.forwardmove, cmd.sidemove),
             );
             cmd.forwardmove = x;
@@ -164,13 +156,8 @@ impl Movement {
         cmd.sidemove = -direction.sin() * 450.0;
         Ok(())
     }
-    pub fn rotate_movement(
-        &self,
-        org_angles: Angles,
-        desired_angles: &Angles,
-        vec: Vector2,
-    ) -> Vector2 {
-        let alpha = (desired_angles.yaw - org_angles.yaw) * PI / 180f32;
+    pub fn rotate_movement(&self, yaw: f32, vec: Vector2) -> Vector2 {
+        let alpha = dtr(yaw);
 
         Vector2::new(
             vec.x * alpha.cos() - vec.y * alpha.sin(),

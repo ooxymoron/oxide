@@ -15,6 +15,8 @@ pub static HACK_FONT: &[u8; 2215536] = include_bytes!("./../../assets/HackNerdFo
 struct CacheKey {
     letter: char,
     size: FontSize,
+    color: usize,
+    alpha: u8,
 }
 
 #[derive(Debug, Clone)]
@@ -111,7 +113,7 @@ impl Fonts {
                 h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
             }
         }
-        (w, h_min , h_max )
+        (w, h_min, h_max)
     }
     pub fn get_glyph(&self, size: FontSize, char: char) -> FT_GlyphSlotRec {
         let face = self.get_face(&size);
@@ -132,13 +134,12 @@ impl Fonts {
         alpha: u8,
     ) -> (isize, isize) {
         unsafe {
-
             if letter == ' ' {
                 let size = self.get_text_size("a", FontSize::Small);
-                return (size.0,0);
+                return (size.0, 0);
             }
 
-            let cache_key = CacheKey { letter, size };
+            let cache_key = CacheKey { letter, size, color,alpha };
             if let Some(cached) = self.cache.get(&cache_key) {
                 let mut rect = SDL_Rect {
                     x: x as i32 + cached.left,
@@ -175,11 +176,11 @@ impl Fonts {
             let mut rgba = vec![0u8; len];
 
             let buffer = std::slice::from_raw_parts(bitmap.buffer, len);
-            let color = hex_to_rgb!(color);
+            let rgb = hex_to_rgb!(color);
             for i in (0..len).step_by(4) {
                 let val = buffer[i / 4];
 
-                (rgba[i], rgba[i + 1], rgba[i + 2]) = color;
+                (rgba[i], rgba[i + 1], rgba[i + 2]) = rgb;
                 rgba[i + 3] = (val as f32 * (alpha as f32 / 255f32)) as u8;
             }
 
