@@ -189,7 +189,8 @@ impl StudioHdr {
         Some(&*(((self as *const _ as i32) + self.boneindex + i) as *const Bone))
     }
 
-    pub unsafe fn get_hitbox_set(&self, i: i32) -> Option<&HitboxSet> {
+    pub fn get_hitbox_set(&self, i: i32) -> Option<&HitboxSet> {
+        unsafe{
         if i >= self.numhitboxsets {
             return None;
         }
@@ -199,6 +200,7 @@ impl StudioHdr {
                 + self.hitboxsetindex as i64
                 + i as i64 * size_of::<HitboxSet>() as i64) as *const HitboxSet),
         )
+        }
     }
 }
 

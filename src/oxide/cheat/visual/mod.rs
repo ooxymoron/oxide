@@ -91,8 +91,7 @@ impl Visuals {
 
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         for id in o!()
-            .last_entity_cache
-            .clone()
+            .last_entity_cache.as_ref()
             .unwrap()
             .get_ent(ClassId::CTFPlayer)
         {

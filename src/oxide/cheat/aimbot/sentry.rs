@@ -12,7 +12,7 @@ impl Aimbot {
         let mut best_target: Option<Target> = None;
         for id in o!()
             .last_entity_cache
-            .clone()
+            .as_ref()
             .unwrap()
             .get_ent(ClassId::CObjectSentrygun)
         {
@@ -29,13 +29,7 @@ impl Aimbot {
                 }
             }
 
-            let hitboxes = sentry
-                .as_object()
-                .unwrap()
-                .as_sentry()
-                .unwrap()
-                .get_hitbox_ids();
-            for hitbox in sentry.get_hitboxes(hitboxes)? {
+            for hitbox in sentry.get_hitboxes()? {
                 let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                     continue;
                 };

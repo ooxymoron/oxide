@@ -35,7 +35,7 @@ impl Paint {
                 g as f32 * COLOR_SCALE,
                 b as f32 * COLOR_SCALE
             );
-            let hitboxes = player.get_hitboxes(HitboxId::all())?;
+            let hitboxes = player.get_hitboxes()?;
             for hitbox in hitboxes {
                 self.draw_hitbox(hitbox, color, 30)?;
             }
@@ -56,8 +56,7 @@ impl Paint {
                 g as f32 * COLOR_SCALE,
                 b as f32 * COLOR_SCALE
             );
-            let hitboxes = sentry.as_object()?.as_sentry()?.get_hitbox_ids();
-            let hitboxes = sentry.get_hitboxes(hitboxes)?;
+            let hitboxes = sentry.get_hitboxes()?;
             for hitbox in hitboxes {
                 self.draw_hitbox(hitbox, color, 50)?;
             }
@@ -72,14 +71,14 @@ impl Paint {
             }
             let team = vmt_call!(pipe, get_team_number);
 
-            let hitbox = pipe.get_hitboxes(vec![HitboxId::Head])?[0];
+            let hitbox = pipe.get_hitbox(HitboxId::Head)?;
             self.draw_hitbox(hitbox, team.color(), 10)?;
         }
         Ok(())
     }
     pub fn draw_hitbox(
         &mut self,
-        hitbox: HitboxWrapper,
+        hitbox: &HitboxWrapper,
         color: usize,
         alpha: u8,
     ) -> OxideResult<()> {

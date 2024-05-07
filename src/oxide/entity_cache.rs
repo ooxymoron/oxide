@@ -1,20 +1,16 @@
-use std::{collections::HashMap, mem::MaybeUninit};
+use std::collections::HashMap;
 
 use crate::{
-    vmt_call,
     error::{OxideError, OxideResult},
     interface, o,
-    sdk::{
-        entity::{BoneMask, Bones, Entity, MAX_STUDIO_BONES},
-        interfaces::model_render::BoneMatrix,
-        networkable::ClassId,
-    },
+    sdk::{entity::Entity, interfaces::model_info::HitboxWrapper, networkable::ClassId},
+    vmt_call,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct EntityCache {
     pub entities: HashMap<ClassId, Vec<u32>>,
-    bones: HashMap<u32, [BoneMatrix; MAX_STUDIO_BONES]>,
+    hitboxes: HashMap<u32, Vec<HitboxWrapper>>,
 }
 
 impl EntityCache {
@@ -36,29 +32,21 @@ impl EntityCache {
             };
         }
 
-        Ok(EntityCache { entities, bones: HashMap::new() })
+        Ok(EntityCache {
+            entities,
+            hitboxes: HashMap::new(),
+        })
     }
-    pub fn get_bones(&mut self, id: u32) -> OxideResult<Bones> {
-        if let Some(bones) = self.bones.get(&id) {
-            return Ok(bones.clone())
+    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&Vec<HitboxWrapper>> {
+        if self.hitboxes.contains_key(&id) {
+            return Ok(self.hitboxes.get(&id).unwrap());
         }
-        
-        let Some(ent) = Entity::get_ent(id) else {
-            return Err(OxideError::new("null ent"));
-        };
-        let renderable = ent.as_renderable();
 
-        let bones = unsafe { MaybeUninit::zeroed().assume_init() };
-        vmt_call!(
-            renderable,
-            setup_bones,
-            &bones,
-            MAX_STUDIO_BONES as u32,
-            BoneMask::Hitbox,
-            o!().global_vars.curtime
-        );
-        self.bones.insert(id, bones.clone());
-        Ok(bones)
+        let Some(ent) = Entity::get_ent(id) else {
+                return Err(OxideError::new("null ent"));
+            };
+        self.hitboxes.insert(id, ent.calculate_hitboxes().unwrap());
+        return Ok(self.hitboxes.get(&id).unwrap());
     }
     pub fn get_ent(&self, id: ClassId) -> Vec<u32> {
         self.entities.get(&id).cloned().unwrap_or(vec![])

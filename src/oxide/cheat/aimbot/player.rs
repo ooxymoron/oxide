@@ -4,7 +4,7 @@ use crate::{
     sdk::{
         condition::ConditionFlags,
         entity::{player::Player, Entity},
-        interfaces::model_info::{HitboxId, HitboxWrapper},
+        interfaces::model_info::HitboxWrapper,
         networkable::ClassId,
     },
     setting, vmt_call,
@@ -28,15 +28,7 @@ impl Aimbot {
             return true;
         })();
 
-        let hitboxes = player
-            .as_ent()
-            .get_hitboxes(vec![
-                HitboxId::Pelvis,
-                HitboxId::Head,
-                HitboxId::LeftFoot,
-                HitboxId::RightFoot,
-            ])
-            .unwrap();
+        let hitboxes = player.as_ent().get_hitboxes().unwrap();
         if baim {
             if weapon.is_sniper_rifle()
                 && setting!(aimbot, wait_for_charge)
@@ -81,10 +73,7 @@ impl Aimbot {
         {
             return Ok(None);
         }
-        let mut ignore_flags = vec![
-            ConditionFlags::Ubercharged,
-            ConditionFlags::Bonked,
-        ];
+        let mut ignore_flags = vec![ConditionFlags::Ubercharged, ConditionFlags::Bonked];
         let spy_revealing_flags = vec![
             ConditionFlags::Jarated,
             ConditionFlags::Milked,
@@ -116,7 +105,7 @@ impl Aimbot {
         let mut best_target: Option<Target> = None;
         for id in o!()
             .last_entity_cache
-            .clone()
+            .as_ref()
             .unwrap()
             .get_ent(ClassId::CTFPlayer)
         {

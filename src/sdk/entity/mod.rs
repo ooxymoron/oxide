@@ -1,7 +1,8 @@
+use std::mem::MaybeUninit;
 use std::{mem::transmute, ptr::null};
 
-use std::ffi::CString;
 use derivative::Derivative;
+use std::ffi::CString;
 
 use crate::{
     define_netvar,
@@ -165,64 +166,68 @@ impl Entity {
     pub fn as_networkable(&self) -> &mut Networkable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
-    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<HitboxWrapper> {
-        Ok(self.get_hitboxes(vec![hitbox_id])?[0])
+    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&HitboxWrapper> {
+        Ok(&self.get_hitboxes()?[hitbox_id as usize])
     }
     pub fn should_attack(&self) -> bool {
         let p_local = Player::get_local().unwrap();
         let team = vmt_call!(self, get_team_number);
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         return local_team != team;
-
     }
+    pub fn calculate_hitboxes(&self) -> OxideResult<Vec<HitboxWrapper>> {
+        let rend = self.as_renderable();
 
-    pub fn get_hitboxes(&self, hitbox_ids: Vec<HitboxId>) -> OxideResult<Vec<HitboxWrapper>> {
-        unsafe {
-            let rend = self.as_renderable();
-
-            let model = vmt_call!(rend, get_model);
-            let studio_model = transmute::<_, &StudioHdr>(vmt_call!(
-                interface!(model_info),
-                get_studio_model,
-                model
-            ));
-
-            let bones = o!()
-                .last_entity_cache
-                .as_mut()
-                .unwrap()
-                .get_bones(vmt_call!(self, get_index))?
-                .clone();
-
-            let hitbox_set = studio_model
-                .get_hitbox_set(HITBOX_SET)
-                .ok_or(OxideError::new("could not get hitboxes"))?;
-            hitbox_ids
-                .into_iter()
-                .map(|id| {
-                    let hitbox = hitbox_set.get_hitbox(id)?;
-                    Ok(HitboxWrapper {
-                        id,
-                        bone: bones[hitbox.bone as usize].clone(),
-                        group: hitbox.group,
-                        min: hitbox.min,
-                        max: hitbox.max,
-                        nameindex: hitbox.nameindex,
-                        owner: transmute(self),
-                    })
+        let bones = unsafe { MaybeUninit::zeroed().assume_init() };
+        vmt_call!(
+            rend,
+            setup_bones,
+            &bones,
+            MAX_STUDIO_BONES as u32,
+            BoneMask::Hitbox,
+            o!().global_vars.curtime
+        );
+        let model = vmt_call!(rend, get_model);
+        let studio_model = unsafe {
+            transmute::<_, &StudioHdr>(vmt_call!(interface!(model_info), get_studio_model, model))
+        };
+        let hitbox_set = studio_model
+            .get_hitbox_set(HITBOX_SET)
+            .ok_or(OxideError::new("could not get hitboxes"))?;
+        HitboxId::all()
+            .into_iter()
+            .map(|id| {
+                let hitbox = hitbox_set.get_hitbox(id)?;
+                Ok(HitboxWrapper {
+                    id,
+                    bone: bones[hitbox.bone as usize].clone(),
+                    group: hitbox.group,
+                    min: hitbox.min,
+                    max: hitbox.max,
+                    nameindex: hitbox.nameindex,
+                    owner: unsafe{transmute(self)},
                 })
-                .collect()
-        }
+            })
+            .collect()
     }
-    pub fn get_float_attrib(&self,name: &str) -> Option<f32> {
+
+    pub fn get_hitboxes(&self) -> OxideResult<&Vec<HitboxWrapper>> {
+
+        Ok(o!()
+            .last_entity_cache
+            .as_mut()
+            .unwrap()
+            .get_hitboxes(vmt_call!(self, get_index))?)
+
+    }
+    pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
         let name = CString::new(name).unwrap();
-        let defualt_value = unsafe{transmute::<_,f32>(0b1111111111111111)};
-        let val = (o!().util.get_float_attribute)(defualt_value,name.as_ptr(),self,null(),true);
+        let defualt_value = unsafe { transmute::<_, f32>(0b1111111111111111) };
+        let val = (o!().util.get_float_attribute)(defualt_value, name.as_ptr(), self, null(), true);
         if val == defualt_value {
             return None;
         }
         Some(val)
-            
     }
 }
 
@@ -235,7 +240,11 @@ impl Entity {
         unsafe { Some(&mut *ent) }
     }
     pub fn get_ent_from_handle(handle: EntHandle) -> Option<&'static mut Entity> {
-        let ent = vmt_call!(interface!(entity_list), get_client_entity_from_handle, handle);
+        let ent = vmt_call!(
+            interface!(entity_list),
+            get_client_entity_from_handle,
+            handle
+        );
         if ent.is_null() {
             return None;
         }
