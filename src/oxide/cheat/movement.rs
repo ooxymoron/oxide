@@ -74,7 +74,7 @@ impl Movement {
         if vel.len2d() == 0.0 {
             return;
         }
-        let rotated_vel = self.rotate_movement(-cmd.viewangles.yaw, Vector2::new(vel.x, vel.y));
+        let rotated_vel = self.rotate_movement(-cmd.viewangles.yaw + 180.0, Vector2::new(vel.x, vel.y));
         let drop = rotated_vel * *p_local.get_friction() * o!().global_vars.frametime;
 
         if rotated_vel.len() < drop.len() {

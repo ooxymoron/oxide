@@ -34,7 +34,7 @@ impl SpreadReductionInfo {
         let base = ComponentBase {
             x: 0,
             y: 0,
-            w: 150,
+            w: 200,
             h: 30,
         };
         SpreadReductionInfo { base }
@@ -71,10 +71,10 @@ impl Component for SpreadReductionInfo {
 
         frame.text(
             &text,
-            self.base.x + PAD,
+            self.base.x + self.base.w / 2,
             self.base.y + self.base.h / 2,
             FontSize::Small,
-            false,
+            true,
             true,
             color,
             255,
