@@ -140,7 +140,6 @@ impl Aimbot {
             if let Some(target) = &target {
                 let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
                 let diff = target.point - my_eyes;
-                interface!(debug_overlay).line(&my_eyes, &target.point, RED, 100, 1.0);
 
                 let angle = diff.angle();
                 if setting!(aimbot, autoshoot) {
