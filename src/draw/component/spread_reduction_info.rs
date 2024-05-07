@@ -34,8 +34,8 @@ impl SpreadReductionInfo {
         let base = ComponentBase {
             x: 0,
             y: 0,
-            w: 300,
-            h: 70,
+            w: 130,
+            h: 30,
         };
         SpreadReductionInfo { base }
     }
@@ -62,20 +62,20 @@ impl Component for SpreadReductionInfo {
             FOREGROUND,
             200,
         );
-        let (text,color) = match get_cheat!(SpreadReduction).state {
-            State::SYNCING { precision, .. } => (format!("syncing {}", precision), YELLOW),
-            State::IMPOSSIBLE { precision } => (format!("impossible {}", precision), RED),
-            State::SYNCED { precision, .. } => (format!("impossible {}", precision),GREEN),
-            State::UNSYNCED => (format!("UNSYNCED"), FOREGROUND),
+        let (text, color) = match get_cheat!(SpreadReduction).state {
+            State::SYNCING { precision, .. } => (format!("syncing[{}]", precision), YELLOW),
+            State::IMPOSSIBLE { precision } => (format!("impossible[{}]", precision), RED),
+            State::SYNCED { precision, .. } => (format!("synced[{}]", precision), GREEN),
+            State::UNSYNCED => (format!("unsynced"), FOREGROUND),
         };
 
         frame.text(
             &text,
             self.base.x + PAD,
-            self.base.y + PAD,
+            self.base.y + self.base.h / 2,
             FontSize::Small,
             false,
-            false,
+            true,
             color,
             255,
         );
