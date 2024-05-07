@@ -43,6 +43,7 @@ impl Component for Button {
             y + h / 2,
             self.size.clone(),
             true,
+            true,
             FOREGROUND,
             255,
         );

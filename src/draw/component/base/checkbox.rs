@@ -46,6 +46,7 @@ impl Component for Checkbox {
             y + SIZE / 2,
             FontSize::Small,
             false,
+            true,
             FOREGROUND,
             255,
         );

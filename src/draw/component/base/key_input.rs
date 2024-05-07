@@ -56,6 +56,7 @@ impl Component for KeyInput {
             y + h / 2,
             FontSize::Small,
             true,
+            true,
             FOREGROUND,
             255,
         );
@@ -65,6 +66,7 @@ impl Component for KeyInput {
             y + h / 2,
             FontSize::Small,
             false,
+            true,
             FOREGROUND,
             255,
         );

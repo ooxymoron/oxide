@@ -112,6 +112,7 @@ impl Overlay {
             y + h / 2,
             FontSize::Small,
             true,
+            true,
             FOREGROUND,
             230,
         );
@@ -170,6 +171,7 @@ impl Component for Overlay {
             TOP_OVERLAY_HEIGHT / 2,
             FontSize::Small,
             false,
+            true,
             FOREGROUND,
             255,
         );
@@ -178,6 +180,7 @@ impl Component for Overlay {
             LEFT_OVERLAY_WIDTH / 2,
             TOP_OVERLAY_HEIGHT / 2,
             FontSize::Large,
+            true,
             true,
             FOREGROUND,
             255,

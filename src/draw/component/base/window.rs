@@ -118,6 +118,7 @@ impl Component for Window {
             y + HEADER_HEIGHT / 2,
             FontSize::Small,
             true,
+            true,
             FOREGROUND,
             255,
         );

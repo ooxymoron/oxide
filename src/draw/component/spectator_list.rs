@@ -49,6 +49,7 @@ impl Component for SpectatorList {
                 y,
                 FontSize::Small,
                 true,
+                true,
                 FOREGROUND,
                 255,
             );

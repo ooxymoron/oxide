@@ -1,14 +1,14 @@
 use crate::{
     d,
     draw::{
-        colors::{BACKGROUND, FOREGROUND},
+        colors::{BACKGROUND, FOREGROUND, GREEN, RED, YELLOW},
         event::Event,
         fonts::FontSize,
         frame::Frame,
     },
     error::OxideResult,
     get_cheat,
-    oxide::cheat::spread_reduction::SpreadReduction,
+    oxide::cheat::spread_reduction::{seed_prediction::State, SpreadReduction},
     sdk::entity::player::Player,
     setting,
 };
@@ -46,7 +46,6 @@ impl Component for SpreadReductionInfo {
         &mut self.base
     }
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
-        let text = get_cheat!(SpreadReduction).state.to_string();
         frame.filled_rect(
             self.base.x,
             self.base.y,
@@ -63,21 +62,23 @@ impl Component for SpreadReductionInfo {
             FOREGROUND,
             200,
         );
+        let (text,color) = match get_cheat!(SpreadReduction).state {
+            State::SYNCING { precision, .. } => (format!("syncing {}", precision), YELLOW),
+            State::IMPOSSIBLE { precision } => (format!("impossible {}", precision), RED),
+            State::SYNCED { precision, .. } => (format!("impossible {}", precision),GREEN),
+            State::UNSYNCED => (format!("UNSYNCED"), FOREGROUND),
+        };
 
-        let mut y = self.base.y + PAD + 8;
-        for line in text.split("\n") {
-            frame.text(
-                &line,
-                self.base.x + PAD,
-                y,
-                FontSize::Small,
-                false,
-                FOREGROUND,
-                255,
-            );
-            let text_size = frame.fonts.get_text_size(&line, FontSize::Small);
-            y += text_size.1 + text_size.2 + 3;
-        }
+        frame.text(
+            &text,
+            self.base.x + PAD,
+            self.base.y + PAD,
+            FontSize::Small,
+            false,
+            false,
+            color,
+            255,
+        );
 
         Ok(())
     }

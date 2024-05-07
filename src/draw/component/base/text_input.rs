@@ -56,6 +56,7 @@ impl Component for TextInput {
             y + h / 2,
             FontSize::Small,
             true,
+            true,
             FOREGROUND,
             255,
         );
@@ -66,6 +67,7 @@ impl Component for TextInput {
             y + h / 2,
             FontSize::Small,
             false,
+            true,
             FOREGROUND,
             255,
         );

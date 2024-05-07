@@ -42,33 +42,12 @@ pub enum State {
 
 impl Display for State {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let time = (o!().util.plat_float_time)() as f32;
         match self {
-            State::SYNCING {
-                next_playerperf,
-                precision,
-                ..
-            } => write!(
-                f,
-                "SYNCING SEED\nseed quality: {}\nnext sync: {:.2}",
-                precision,
-                next_playerperf - time
-            ),
-            State::IMPOSSIBLE { precision } => write!(
-                f,
-                "SEED PREDICITON IMPOSSIBLE:\nserver too young to sync\nquality: {}",
-                precision
-            ),
-            State::SYNCED {
-                next_playerperf,
-                precision,
-                ..
-            } => write!(
-                f,
-                "SYNCED SEED\nseed quality: {}\nnext sync: {:.2}",
-                precision,
-                next_playerperf - time
-            ),
+            State::SYNCING { precision, .. } => write!(f, "SYNCING SEED {}", precision,),
+            State::IMPOSSIBLE { precision } => {
+                write!(f, "SEED PREDICITON IMPOSSIBLE {}", precision)
+            }
+            State::SYNCED { precision, .. } => write!(f, "SYNCED SEED {}", precision,),
             State::UNSYNCED => write!(f, "UNSYNCED"),
         }
     }

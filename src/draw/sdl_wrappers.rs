@@ -98,6 +98,7 @@ impl Frame {
         mut y: isize,
         size: FontSize,
         center_horizontaly: bool,
+        center_vertically: bool,
         color: usize,
         alpha: u8,
     ) {
@@ -105,10 +106,14 @@ impl Frame {
             return;
         }
 
-        let text_size = d!().fonts.get_text_size(text, size.clone());
-        y += (text_size.1 + text_size.2) / 2;
-        if center_horizontaly {
-            x -= text_size.0 / 2;
+        if center_vertically || center_horizontaly{
+            let text_size = d!().fonts.get_text_size(text, size.clone());
+            if center_vertically {
+                y += (text_size.1 + text_size.2) / 2;
+            }
+            if center_horizontaly {
+                x -= text_size.0 / 2;
+            }
         }
         let face = self.fonts.get_face(&size);
 
