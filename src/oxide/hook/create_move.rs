@@ -2,7 +2,7 @@ use crate::{
     define_hook, get_cheat,
     math::angles::Angles,
     oxide::cheat::{
-        aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction, visual::Visuals,
+        aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction, 
     },
     sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
@@ -46,7 +46,6 @@ fn hook(
     let mut spread_reduction = get_cheat!(SpreadReduction);
     spread_reduction.create_move(cmd, target);
 
-    get_cheat!(Visuals).draw_fire_tracer(cmd);
     remove_punch();
     movement.create_move_after(cmd, &org_cmd);
     !setting!(aimbot, silent)

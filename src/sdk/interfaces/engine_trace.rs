@@ -7,8 +7,7 @@ use std::{
 use crate::{cfn, interface, math::vector3::Vector3, vmt_call};
 
 use super::{
-    entity::{player::Player, Entity},
-    model_info::HitboxId,
+    entity::{player::Player, Entity, hitbox::HitboxId},
     networkable::ClassId,
     WithVmt,
 };

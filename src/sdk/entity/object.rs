@@ -4,7 +4,7 @@ use derivative::Derivative;
 
 use crate::{define_netvar, error::OxideResult, netvars::HasNetvars};
 
-use super::interfaces::model_info::HitboxId;
+use super::entity::hitbox::HitboxId;
 
 #[repr(C)]
 #[derive(Derivative, Clone, Copy)]

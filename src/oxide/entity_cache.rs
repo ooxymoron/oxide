@@ -3,14 +3,20 @@ use std::collections::HashMap;
 use crate::{
     error::{OxideError, OxideResult},
     interface, o,
-    sdk::{entity::Entity, interfaces::model_info::HitboxWrapper, networkable::ClassId},
+    sdk::{
+        entity::{
+            hitbox::{HitboxId, HitboxWrapper},
+            Entity,
+        },
+        networkable::ClassId,
+    },
     vmt_call,
 };
 
 #[derive(Debug)]
 pub struct EntityCache {
     pub entities: HashMap<ClassId, Vec<u32>>,
-    hitboxes: HashMap<u32, Vec<HitboxWrapper>>,
+    hitboxes: HashMap<u32, HashMap<HitboxId, HitboxWrapper>>,
 }
 
 impl EntityCache {
@@ -37,7 +43,7 @@ impl EntityCache {
             hitboxes: HashMap::new(),
         })
     }
-    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&mut Vec<HitboxWrapper>> {
+    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&mut HashMap<HitboxId, HitboxWrapper>> {
         if self.hitboxes.contains_key(&id) {
             return Ok(self.hitboxes.get_mut(&id).unwrap());
         }

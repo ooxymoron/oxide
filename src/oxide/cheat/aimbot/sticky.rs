@@ -1,9 +1,11 @@
 use crate::{
-    error::OxideResult, o, sdk::{
-        entity::{pipe::PipeType, player::Player, Entity},
-        interfaces::model_info::HitboxId,
+    error::OxideResult,
+    o,
+    sdk::{
+        entity::{hitbox::HitboxId, pipe::PipeType, player::Player, Entity},
         networkable::ClassId,
-    }, vmt_call
+    },
+    vmt_call,
 };
 
 use super::{priority::Priority, Aimbot, Target};
@@ -42,12 +44,21 @@ impl Aimbot {
             };
 
             if let Some(best_target) = &best_target {
-                if best_target.prio.point > point_prio{
+                if best_target.prio.point > point_prio {
                     continue;
                 }
             }
-            let prio = Priority{ ent: ent_prio, hitbox: 0, point: point_prio };
-            let target = Target{ point, ent: pipe, hitbox_id:hitbox.id, prio };
+            let prio = Priority {
+                ent: ent_prio,
+                hitbox: 0,
+                point: point_prio,
+            };
+            let target = Target {
+                point,
+                ent: pipe,
+                hitbox_id: hitbox.id,
+                prio,
+            };
             best_target = Some(target);
         }
         Ok(best_target)

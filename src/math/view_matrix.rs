@@ -4,30 +4,32 @@ use crate::{interface, math::vector2::Vector2, vmt_call};
 
 use super::vector3::Vector3;
 
+#[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMatrix(pub [[f32; 4]; 4]);
 
 impl VMatrix {
     pub fn default() -> VMatrix {
+        let mut w2v = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut v2pr = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut w2px = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut w2s = unsafe { MaybeUninit::zeroed().assume_init() };
-        let mut void = unsafe { MaybeUninit::zeroed().assume_init() };
-        unsafe {
-            let player_view = MaybeUninit::zeroed().assume_init();
-            vmt_call!(interface!(base_client), get_player_view, &player_view);
 
-            vmt_call!(
-                interface!(render_view),
-                get_matrices_for_view,
-                &player_view,
-                &mut void,
-                &mut void,
-                &mut w2s,
-                &mut void
-            );
-        }
+        let player_view = unsafe { MaybeUninit::zeroed().assume_init() };
+        vmt_call!(interface!(base_client), get_player_view, &player_view);
+
+        vmt_call!(
+            interface!(render_view),
+            get_matrices_for_view,
+            &player_view,
+            &mut w2v,
+            &mut v2pr,
+            &mut w2s,
+            &mut w2px
+        ); 
         w2s
     }
-    pub fn w2s(&self, vec: &Vector3) -> Option<Vector2> {
+    pub fn world_to_screen(&self, vec: &Vector3) -> Option<Vector2> {
         let screen_w = 0;
         let screen_h = 0;
 

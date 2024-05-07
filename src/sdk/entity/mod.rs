@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::mem::MaybeUninit;
 use std::{mem::transmute, ptr::null};
 
@@ -14,14 +15,10 @@ use crate::{
     o, vmt_call,
 };
 
+use self::hitbox::{HitboxId, HitboxWrapper};
 use self::{
-    interfaces::model_info::{HitboxId, HitboxWrapper, StudioHdr},
-    interfaces::model_render::BoneMatrix,
-    networkable::ClassId,
-    object::Object,
-    pipe::PipeBomb,
-    player::Player,
-    weapon::Weapon,
+    interfaces::model_info::StudioHdr, interfaces::model_render::BoneMatrix, networkable::ClassId,
+    object::Object, pipe::PipeBomb, player::Player, weapon::Weapon,
 };
 
 use super::*;
@@ -31,8 +28,8 @@ use super::{
 };
 
 pub mod flags;
+pub mod hitbox;
 pub mod object;
-pub mod paint;
 pub mod pipe;
 pub mod player;
 pub mod weapon;
@@ -167,7 +164,7 @@ impl Entity {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
     pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&mut HitboxWrapper> {
-        Ok(&mut self.get_hitboxes()?[hitbox_id as usize])
+        Ok(self.get_hitboxes()?.get_mut(&hitbox_id).unwrap())
     }
     pub fn should_attack(&self) -> bool {
         let p_local = Player::get_local().unwrap();
@@ -175,7 +172,7 @@ impl Entity {
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         return local_team != team;
     }
-    pub fn calculate_hitboxes(&self) -> OxideResult<Vec<HitboxWrapper>> {
+    pub fn calculate_hitboxes(&self) -> OxideResult<HashMap<HitboxId, HitboxWrapper>> {
         let rend = self.as_renderable();
 
         let bones = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -198,28 +195,29 @@ impl Entity {
             .into_iter()
             .map(|id| {
                 let hitbox = hitbox_set.get_hitbox(id)?;
-                Ok(HitboxWrapper {
+                Ok((
                     id,
-                    bone: bones[hitbox.bone as usize].clone(),
-                    group: hitbox.group,
-                    min: hitbox.min,
-                    max: hitbox.max,
-                    nameindex: hitbox.nameindex,
-                    owner: unsafe{transmute(self)},
-                    corner_cache: None
-                })
+                    HitboxWrapper {
+                        id,
+                        bone: bones[hitbox.bone as usize].clone(),
+                        group: hitbox.group,
+                        min: hitbox.min,
+                        max: hitbox.max,
+                        nameindex: hitbox.nameindex,
+                        owner: unsafe { transmute(self) },
+                        corner_cache: None,
+                    },
+                ))
             })
             .collect()
     }
 
-    pub fn get_hitboxes(&self) -> OxideResult<&mut Vec<HitboxWrapper>> {
-
+    pub fn get_hitboxes(&self) -> OxideResult<&mut HashMap<HitboxId, HitboxWrapper>> {
         Ok(o!()
             .last_entity_cache
             .as_mut()
             .unwrap()
             .get_hitboxes(vmt_call!(self, get_index))?)
-
     }
     pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
         let name = CString::new(name).unwrap();

@@ -43,12 +43,13 @@ impl Aimbot {
 
         let diff = target_point - my_eyes;
         let angle = diff.angle();
-        let my_angle = vmt_call!(p_local.as_ent(),get_abs_angles);
+        let my_angle = vmt_call!(p_local.as_ent(), get_abs_angles);
 
         let target_forward = angle.to_vectors().forward;
         let my_forward = my_angle.to_vectors().forward;
-        let angle =
-            rtd((target_forward.dot(&my_forward) / (target_forward.len() * my_forward.len())).acos()) ;
+        let angle = rtd((target_forward.dot(&my_forward)
+            / (target_forward.len() * my_forward.len()))
+        .acos());
 
         if angle > setting!(aimbot, fov) {
             return None;

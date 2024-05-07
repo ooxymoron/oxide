@@ -29,7 +29,7 @@ impl Aimbot {
                 }
             }
 
-            for hitbox in sentry.get_hitboxes()? {
+            for hitbox in sentry.get_hitboxes()?.values_mut() {
                 let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                     continue;
                 };

@@ -1,5 +1,10 @@
 use crate::{
-    draw::{colors::RED, event::EventType}, error::OxideResult, interface, math::vector3::Vector3, sdk::{
+    draw::{colors::RED, event::EventType},
+    error::OxideResult,
+    interface,
+    math::vector3::Vector3,
+    o,
+    sdk::{
         condition::ConditionFlags,
         entity::{
             player::Player,
@@ -8,10 +13,11 @@ use crate::{
         },
         interfaces::{
             engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-            model_info::{HitboxId, HitboxWrapper},
+            entity::hitbox::{HitboxId, HitboxWrapper},
         },
         user_cmd::{ButtonFlags, UserCmd},
-    }, setting, vmt_call
+    },
+    setting, vmt_call,
 };
 
 use self::priority::Priority;
@@ -73,8 +79,8 @@ impl Aimbot {
             };
             let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
 
-            if trace.entity as *const _ != hitbox.owner
-                || (hitbox.id != HitboxId::Head && trace.hitbox_id != hitbox.id)
+            if trace.entity != hitbox.owner
+                || (hitbox.id == HitboxId::Head && trace.hitbox_id != hitbox.id)
             {
                 continue;
             }
@@ -114,9 +120,6 @@ impl Aimbot {
             return false;
         }
 
-        if !p_local.can_attack() && !setting!(aimbot, aim_while_on_delays) {
-            return false;
-        }
         true
     }
 
@@ -128,7 +131,7 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
-            target = if p_local.can_attack() {
+            target = if setting!(aimbot, aim_while_on_delays) || p_local.can_attack() {
                 self.find_target()?
             } else {
                 None

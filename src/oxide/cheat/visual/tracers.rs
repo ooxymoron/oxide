@@ -1,33 +1,25 @@
 use std::mem::transmute;
 
 use crate::{
-    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED, WHITE},
-    interface,
-    sdk::{
+    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED, WHITE}, interface, math::angles::Angles, sdk::{
         entity::{player::Player, weapon::Weapon},
         fire_bullets_info::FireBulletsInfo,
         interfaces::{
             engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-            entity::Entity,
-            model_info::HitboxId,
+            entity::{hitbox::HitboxId, Entity},
         },
-        networkable::ClassId, user_cmd::{ButtonFlags, UserCmd},
-    },
-    setting, vmt_call,
+        networkable::ClassId,
+    }, setting, vmt_call
 };
 
 use super::Visuals;
 
 impl Visuals {
-    pub fn draw_fire_tracer(&self, cmd: &UserCmd) {
-    let p_local = Player::get_local().unwrap();
-    if (setting!(visual, impacts) || setting!(visual, tracers))
-        && cmd.buttons.get(ButtonFlags::InAttack)
-        && p_local.can_attack()
-    {
-        let weapon = vmt_call!(p_local.as_ent(),get_weapon);
+    pub fn draw_fire_tracer(&self, angles: &Angles) {
+        let p_local = Player::get_local().unwrap();
+        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let range = weapon.get_info().weapon_data[weapon.get_mode()].range;
-        let dir = cmd.viewangles.to_vectors().forward * range;
+        let dir = angles.to_vectors().forward * range;
         let src = vmt_call!(p_local.as_ent(), eye_position);
         let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
         let color = WHITE;
@@ -47,12 +39,11 @@ impl Visuals {
             );
         }
     }
-    }
     pub fn draw_bullet_tracer(&self, info: &FireBulletsInfo, weapon: *mut Weapon) {
-        if (!setting!(visual, tracers) && !setting!(visual, impacts)) || weapon.is_null(){
+        if (!setting!(visual, tracers) && !setting!(visual, impacts)) || weapon.is_null() {
             return;
         }
-        let weapon = unsafe{transmute::<_,&mut Weapon>(weapon)};
+        let weapon = unsafe { transmute::<_, &mut Weapon>(weapon) };
         let Ok(plocal) = Player::get_local() else { return };
         let end = info.src + info.dir_shooting * info.distance;
         let trace = trace(info.src, end, MASK_SHOT | CONTENTS_GRATE);
@@ -85,7 +76,13 @@ impl Visuals {
             interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
         }
         if setting!(visual, tracers) {
-            interface!(debug_overlay).line(&trace.startpos, &trace.endpos.clone(), color, alpha, time);
+            interface!(debug_overlay).line(
+                &trace.startpos,
+                &trace.endpos.clone(),
+                color,
+                alpha,
+                time,
+            );
         }
     }
 }

@@ -1,13 +1,20 @@
 use crate::{
+    draw::colors::{BLUE, FOREGROUND, FOREGROUND3, GREEN},
     error::OxideResult,
-    interface,
+    hex_to_rgb, interface,
+    math::{get_corners, vector2::Vector2, view_matrix::VMatrix},
+    o,
     oxide::entity_cache::EntityCache,
-    sdk::{condition::ConditionFlags, entity::{player::Player, Entity}, networkable::ClassId},
-    setting,
-    vmt_call,
+    sdk::{
+        condition::ConditionFlags,
+        entity::{player::Player, Entity},
+        networkable::ClassId,
+    },
+    setting, vmt_call,
 };
 
 use super::Paint;
+const PAD: i32 = 5;
 
 impl Paint {
     pub fn esp(&mut self, cache: &EntityCache) -> OxideResult<()> {
@@ -66,7 +73,7 @@ impl Paint {
 
             let info = player.info()?;
             let name = info.name;
-            ent.paint(true, true, Some(&name), conditions);
+            self.paint_esp_box(ent, true, true, Some(&name), conditions);
         }
         if setting!(visual, esp_sentreis) {
             for id in cache.get_ent(ClassId::CObjectSentrygun) {
@@ -75,7 +82,8 @@ impl Paint {
                 };
                 let obj = ent.as_object()?;
                 if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
-                    && !setting!(visual, esp_friendlies) || *obj.get_carried()
+                    && !setting!(visual, esp_friendlies)
+                    || *obj.get_carried()
                 {
                     continue;
                 }
@@ -84,7 +92,7 @@ impl Paint {
                 } else {
                     vec![format!("LEVEL: {:?}", obj.get_level())]
                 };
-                ent.paint(true, true, Some("sentry"), text);
+                self.paint_esp_box(ent, true, true, Some("sentry"), text);
             }
         }
 
@@ -98,7 +106,7 @@ impl Paint {
                 {
                     continue;
                 }
-                ent.paint(false, false, Some("rocket"), vec![]);
+                self.paint_esp_box(ent, false, false, Some("rocket"), vec![]);
             }
             for id in cache.get_ent(ClassId::CTFGrenadePipebombProjectile) {
                 let Some(ent) = Entity::get_ent(id) else{
@@ -110,7 +118,7 @@ impl Paint {
                     continue;
                 }
                 let text = ent.as_pipe()?.get_type().to_str();
-                ent.paint(false, false, Some(text), vec![]);
+                self.paint_esp_box(ent, false, false, Some(text), vec![]);
             }
         }
         //for (name,ents) in cache.entities.clone().iter() {
@@ -124,5 +132,111 @@ impl Paint {
         //}
 
         Ok(())
+    }
+    pub fn paint_esp_box(
+        &self,
+        ent: &Entity,
+        r#box: bool,
+        draw_hp: bool,
+        text_top: Option<&str>,
+        text_right: Vec<String>,
+    ) {
+        let team = vmt_call!(ent, get_team_number);
+        let collidable = vmt_call!(ent, get_collideable);
+        let min = *vmt_call!(collidable, obb_mins);
+        let max = *vmt_call!(collidable, obb_maxs);
+        let origin = *vmt_call!(collidable, get_origin);
+        let angles = *vmt_call!(collidable, get_angles);
+        let corners = get_corners(&origin, &angles.to_vectors(), &min, &max);
+        let v_matrix = VMatrix::default();
+
+        let corners = corners
+            .iter()
+            .filter_map(|corner| v_matrix.world_to_screen(corner))
+            .collect::<Vec<_>>();
+        if corners.is_empty() {
+            return;
+        }
+        let mut minx = None;
+        let mut maxx = None;
+        let mut miny = None;
+        let mut maxy = None;
+        for Vector2 { x, y } in corners {
+            if if let Some(val) = minx { val > x } else { true } {
+                minx = Some(x)
+            }
+            if if let Some(val) = maxx { val < x } else { true } {
+                maxx = Some(x)
+            }
+            if if let Some(val) = miny { val > y } else { true } {
+                miny = Some(y)
+            }
+            if if let Some(val) = maxy { val < y } else { true } {
+                maxy = Some(y)
+            }
+        }
+        let minx = minx.unwrap();
+        let maxx = maxx.unwrap();
+        let miny = miny.unwrap();
+        let maxy = maxy.unwrap();
+
+        if r#box {
+            let (r, g, b) = hex_to_rgb!(team.color());
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
+            vmt_call!(
+                interface!(surface),
+                draw_rect,
+                minx as i32,
+                miny as i32,
+                maxx as i32,
+                maxy as i32
+            );
+        }
+
+        if draw_hp {
+            let (r, g, b) = hex_to_rgb!(GREEN);
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
+            let health = vmt_call!(ent, get_health);
+            let max_health = vmt_call!(ent, get_max_health);
+            vmt_call!(
+                interface!(surface),
+                draw_filled_rect,
+                minx as i32 - 2 * PAD,
+                miny as i32
+                    + ((1.0 - (health.min(max_health) as f32 / max_health as f32))
+                        * (maxy as f32 - miny as f32)) as i32,
+                minx as i32 - PAD,
+                maxy as i32
+            );
+            if health > max_health {
+                let (r, g, b) = hex_to_rgb!(BLUE);
+                vmt_call!(interface!(surface), set_color, r, g, b, 50);
+                vmt_call!(
+                    interface!(surface),
+                    draw_filled_rect,
+                    minx as i32 - 2 * PAD,
+                    miny as i32
+                        + ((1.0 - ((health - max_health) as f32 / max_health as f32))
+                            * (maxy as f32 - miny as f32)) as i32,
+                    minx as i32 - PAD,
+                    maxy as i32
+                );
+            }
+        }
+        if let Some(text) = text_top {
+            o!().paint.paint_text(
+                &text,
+                ((minx + maxx) / 2.0) as i32,
+                (miny - PAD as f32) as i32,
+                FOREGROUND,
+                true,
+            );
+        }
+        let mut y = miny as i32;
+        for text in text_right {
+            o!().paint
+                .paint_text(&text, (maxx + PAD as f32) as i32, y, FOREGROUND3, false);
+            y += o!().paint.get_text_size(&text).1;
+        }
     }
 }

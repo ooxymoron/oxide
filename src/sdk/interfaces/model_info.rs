@@ -8,14 +8,14 @@ use libc::c_void;
 use crate::{
     cfn,
     error::{OxideError, OxideResult},
-    math::{
-        angles::RotationVectors,
-        get_corners,
-        vector3::Vector3, vector4::Vector4,
-    },
+    math::{vector3::Vector3, vector4::Vector4},
 };
 
-use super::{entity::Entity, model_render::BoneMatrix, WithVmt};
+use super::{
+    entity::hitbox::{Hitbox, HitboxId},
+    model_render::BoneMatrix,
+    WithVmt,
+};
 
 pub type ModelInfo = WithVmt<VMTModelInfo>;
 
@@ -36,96 +36,6 @@ impl HitboxSet {
             return Err(OxideError::new("could not get hitbox"));
         }
         return Ok(unsafe { transmute(ptr) });
-    }
-}
-
-#[repr(C)]
-#[derive(Debug, Clone)]
-pub struct Hitbox {
-    pub bone: u32,
-    pub group: i32,
-    pub min: Vector3,
-    pub max: Vector3,
-    pub nameindex: i32,
-    unused: [i32; 8],
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct HitboxWrapper {
-    pub bone: BoneMatrix,
-    pub id: HitboxId,
-    pub group: i32,
-    pub min: Vector3,
-    pub max: Vector3,
-    pub nameindex: i32,
-    pub owner: &'static Entity,
-    pub corner_cache: Option<[Vector3;8]>
-}
-
-impl HitboxWrapper {
-    pub fn center(&mut self) -> OxideResult<Vector3> {
-        let corners = self.corners()?;
-        Ok((corners[0] + corners[7]) / 2.0)
-    }
-    pub fn get_pos(&self) -> OxideResult<(Vector3, RotationVectors)> {
-        let pos = Vector3::new(self.bone[0][3], self.bone[1][3], self.bone[2][3]);
-        let angle = RotationVectors {
-            forward: Vector3::new(self.bone[0][0], self.bone[0][1], self.bone[0][2]),
-            right: Vector3::new(self.bone[1][0], self.bone[1][1], self.bone[1][2]),
-            up: Vector3::new(self.bone[2][0], self.bone[2][1], self.bone[2][2]),
-        };
-
-        Ok((pos, angle))
-    }
-    pub fn corners(&mut self) -> OxideResult<[Vector3; 8]> {
-        if let Some(corners) = self.corner_cache {
-            return Ok(corners)
-        }
-        let (pos, rotation) = self.get_pos()?;
-        let corners = get_corners(&pos, &rotation, &self.min, &self.max);
-        self.corner_cache = Some(corners);
-        Ok(corners)
-
-    }
-    pub fn scaled(&self, scale: f32) -> HitboxWrapper {
-        let mut hitbox = self.clone();
-        hitbox.min *= scale;
-        hitbox.max *= scale;
-        hitbox
-    }
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HitboxId {
-    Head,
-    Pelvis,
-    Spine0,
-    Spine1,
-    Spine2,
-    Spine3,
-    LeftUpperArm,
-    LeftLowerArm,
-    LeftHand,
-    RightUpperArm,
-    RightLowerArm,
-    RightHand,
-    LeftHip,
-    LeftKnee,
-    LeftFoot,
-    RightHip,
-    RightKnee,
-    RightFoot,
-}
-
-impl HitboxId {
-    pub fn body() -> Vec<HitboxId> {
-        Self::all()[1..].to_vec()
-    }
-    pub fn all() -> Vec<HitboxId> {
-        (0..=17)
-            .map(|x| unsafe { transmute(x) })
-            .collect::<Vec<HitboxId>>()
     }
 }
 
@@ -197,16 +107,17 @@ impl StudioHdr {
     }
 
     pub fn get_hitbox_set(&self, i: i32) -> Option<&HitboxSet> {
-        unsafe{
-        if i >= self.numhitboxsets {
-            return None;
-        }
+        unsafe {
+            if i >= self.numhitboxsets {
+                return None;
+            }
 
-        Some(
-            &*((self as *const _ as i64
-                + self.hitboxsetindex as i64
-                + i as i64 * size_of::<HitboxSet>() as i64) as *const HitboxSet),
-        )
+            Some(
+                &*((self as *const _ as i64
+                    + self.hitboxsetindex as i64
+                    + i as i64 * size_of::<HitboxSet>() as i64)
+                    as *const HitboxSet),
+            )
         }
     }
 }

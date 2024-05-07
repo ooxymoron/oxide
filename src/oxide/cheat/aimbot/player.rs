@@ -3,8 +3,11 @@ use crate::{
     o,
     sdk::{
         condition::ConditionFlags,
-        entity::{player::Player, Entity},
-        interfaces::model_info::HitboxWrapper,
+        entity::{
+            hitbox::{HitboxId, HitboxWrapper},
+            player::Player,
+            Entity,
+        },
         networkable::ClassId,
     },
     setting, vmt_call,
@@ -12,8 +15,8 @@ use crate::{
 
 use super::{priority::Priority, Aimbot, Target};
 
-impl Aimbot {
-    pub fn player_hitbox_order(&self, player: &Player) -> Vec<(isize, HitboxWrapper)> {
+impl<'player> Aimbot {
+    pub fn player_hitbox_order(&self, player: &'player Player) -> Vec<(isize, &'player HitboxWrapper)> {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let baim = (|| {
@@ -38,10 +41,7 @@ impl Aimbot {
                 return vec![];
             }
             vec![
-                (2, hitboxes[0]),
-                (0, hitboxes[1]),
-                (0, hitboxes[2]),
-                (0, hitboxes[3]),
+                (0, hitboxes.get(&HitboxId::Pelvis).unwrap()),
             ]
         } else {
             if weapon.is_sniper_rifle()
@@ -52,10 +52,8 @@ impl Aimbot {
                 return vec![];
             }
             vec![
-                (2, hitboxes[1]),
-                (1, hitboxes[0]),
-                (0, hitboxes[2]),
-                (0, hitboxes[3]),
+                (1, hitboxes.get(&HitboxId::Head).unwrap()),
+                (0, hitboxes.get(&HitboxId::Pelvis).unwrap()),
             ]
         }
     }

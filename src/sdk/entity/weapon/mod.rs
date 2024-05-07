@@ -1,7 +1,5 @@
 use std::{ffi::CStr, mem::transmute};
 
-use interfaces::net_channel::LatencyFlow;
-
 use crate::{o, vmt_call};
 
 use self::{
@@ -135,10 +133,7 @@ impl Weapon {
 
 impl Weapon {
     pub fn can_attack(&mut self) -> bool {
-        let net_channel = interface!(base_engine).get_net_channel().unwrap();
-        let now = o!().global_vars.interval_per_tick
-            * ((o!().global_vars.tick_count + 1) as f32
-                + vmt_call!(net_channel, get_latency, LatencyFlow::OUTGOING));
+        let now = o!().global_vars.interval_per_tick * ((o!().global_vars.tick_count + 1) as f32);
         *self.get_next_primary_attack() <= now && *self.get_clip1() != 0
     }
     pub fn is_sniper_rifle(&mut self) -> bool {

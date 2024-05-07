@@ -1,9 +1,19 @@
 use crate::{
-    error::OxideResult, hex_to_rgb, interface, math::view_matrix::VMatrix, o, oxide::entity_cache::EntityCache, rgb_to_hex, sdk::{
-        entity::{player::Player, Entity},
-        interfaces::model_info::{HitboxId, HitboxWrapper},
+    error::OxideResult,
+    hex_to_rgb, interface,
+    math::view_matrix::VMatrix,
+    o,
+    oxide::entity_cache::EntityCache,
+    rgb_to_hex,
+    sdk::{
+        entity::{
+            hitbox::{HitboxId, HitboxWrapper},
+            player::Player,
+            Entity,
+        },
         networkable::ClassId,
-    }, setting, vmt_call
+    },
+    setting, vmt_call,
 };
 
 use super::Paint;
@@ -23,7 +33,7 @@ impl Paint {
             let (r, g, b) = hex_to_rgb!(team.color());
             let color = rgb_to_hex!(r as f32, g as f32, b as f32);
             let hitboxes = player.get_hitboxes()?;
-            for hitbox in hitboxes {
+            for hitbox in hitboxes.values_mut() {
                 self.draw_hitbox(hitbox, color, 30)?;
             }
         }
@@ -40,7 +50,7 @@ impl Paint {
             let (r, g, b) = hex_to_rgb!(team.color());
             let color = rgb_to_hex!(r as f32, g as f32, b as f32);
             let hitboxes = sentry.get_hitboxes()?;
-            for hitbox in hitboxes {
+            for hitbox in hitboxes.values_mut() {
                 self.draw_hitbox(hitbox, color, 50)?;
             }
         }
@@ -67,10 +77,7 @@ impl Paint {
     ) -> OxideResult<()> {
         let corners = hitbox.corners()?;
         let v_matrix = VMatrix::default();
-        let corners = corners
-            .iter()
-            .map(|x| v_matrix.w2s(x))
-            .collect::<Vec<_>>();
+        let corners = corners.iter().map(|x| v_matrix.world_to_screen(x)).collect::<Vec<_>>();
 
         let pairs = [
             (&corners[0], &corners[1]),
