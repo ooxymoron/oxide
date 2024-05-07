@@ -1,7 +1,7 @@
 
 use crate::{
     call_original, cfn,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
 };
 
 pub const NAME: &str = "BaseInterpolatePart1Hook";

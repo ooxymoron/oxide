@@ -2,7 +2,7 @@
 
 use crate::{
     cfn, hex_to_rgb,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
     vmt_call,
 };
 

@@ -1,5 +1,5 @@
 use crate::{
-    math::vector::Vector2,
+    math::vector2::Vector2,
     o,
     sdk::{
         entity::{player::Player, weapon::Gun},

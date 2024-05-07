@@ -4,7 +4,7 @@ use std::{
     ops::Sub,
 };
 
-use crate::{cfn, interface, math::vector::Vector3, vmt_call};
+use crate::{cfn, interface, math::vector3::Vector3, vmt_call};
 
 use super::{
     entity::{player::Player, Entity},

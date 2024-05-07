@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 
-use super::{dtr, vector::Vector3};
+use super::{dtr, vector3::Vector3};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq)]

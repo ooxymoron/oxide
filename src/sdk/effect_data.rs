@@ -2,7 +2,7 @@ use std::ffi::c_char;
 
 use libc::c_short;
 
-use crate::math::{angles::Angles, vector::Vector3};
+use crate::math::{angles::Angles, vector3::Vector3};
 
 use super::EntHandle;
 

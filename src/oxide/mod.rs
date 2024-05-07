@@ -7,7 +7,7 @@ use crate::{
     d,
     draw::event::Event,
     error::OxideResult,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
     netvars::{netvar_dumper::load_netvars, Netvar},
     oxide::{cheat::cheats::Cheats, hook::Hooks, interfaces::Interfaces},
     sdk::{

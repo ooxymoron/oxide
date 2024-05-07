@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use crate::{
     error::OxideResult,
-    math::{angles::Angles, dtr, vector::Vector2},
+    math::{angles::Angles, dtr, vector2::Vector2},
     o,
     sdk::{
         entity::{

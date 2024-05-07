@@ -3,7 +3,7 @@ use std::ffi::c_ushort;
 use libc::c_void;
 
 use crate::{
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
     sdk::*,
 };
 

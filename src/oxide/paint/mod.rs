@@ -4,10 +4,9 @@ use crate::{
     draw::fonts::HACK_FONT,
     error::OxideResult,
     hex_to_rgb, interface,
-    math::vector::Vector3,
+    math::{vector3::Vector3, view_matrix::VMatrix},
     o,
     sdk::font::{Font, FontDrawType, FontFlags},
-    util::world_to_screen,
     vmt_call,
 };
 
@@ -81,8 +80,9 @@ impl Paint {
     }
     pub fn draw_debug(&mut self) {
         for line in self.debug_lines.values() {
-            let Some(start) = world_to_screen(&line.start) else{return};
-            let Some(end) = world_to_screen(&line.end) else {return};
+            let v_matrix = VMatrix::default();
+            let Some(start) = v_matrix.w2s(&line.start) else{return};
+            let Some(end) = v_matrix.w2s(&line.end) else {return};
             let (r, g, b) = hex_to_rgb!(line.color);
             vmt_call!(interface!(surface), set_color, r, g, b, 255);
             vmt_call!(

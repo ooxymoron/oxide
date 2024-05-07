@@ -1,9 +1,8 @@
 use crate::{
     draw::colors::{BLUE, FOREGROUND, FOREGROUND3, GREEN},
     hex_to_rgb, interface,
-    math::{get_corners, vector::Vector2},
+    math::{get_corners, vector2::Vector2,view_matrix::VMatrix},
     o,
-    util::world_to_screen,
     vmt_call,
 };
 
@@ -26,9 +25,12 @@ impl Entity {
         let origin = *vmt_call!(collidable, get_origin);
         let angles = *vmt_call!(collidable, get_angles);
         let corners = get_corners(&origin, &angles.to_vectors(), &min, &max);
+        let v_matrix = VMatrix::default();
+
+
         let corners = corners
             .iter()
-            .filter_map(|corner| world_to_screen(corner))
+            .filter_map(|corner| v_matrix.w2s(corner))
             .collect::<Vec<_>>();
         if corners.is_empty() {
             return;

@@ -1,17 +1,16 @@
 use std::{
-    error::Error, ffi::{c_char, CStr, CString}, fmt::Display, mem::{transmute, MaybeUninit}, usize
+    error::Error,
+    ffi::{c_char, CStr, CString},
+    fmt::Display,
+    mem::transmute,
+    usize,
 };
 
 use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
 use libc::{c_void, dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Scancode;
 
-use crate::{
-    error::OxideError,
-    interface,
-    math::vector::{Vector2, Vector3},
-    vmt_call,
-};
+use crate::error::OxideError;
 
 pub mod arcm;
 pub mod debug;
@@ -626,52 +625,9 @@ pub fn point_in_bounds(
     bound_x <= x && x <= bound_x + w && bound_y <= y && y <= bound_y + h
 }
 
-pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
-    let w2v = unsafe { MaybeUninit::zeroed().assume_init() };
-    let v2pr = unsafe { MaybeUninit::zeroed().assume_init() };
-    let w2px = unsafe { MaybeUninit::zeroed().assume_init() };
-    let w2s = unsafe { MaybeUninit::zeroed().assume_init() };
-
-    let player_view = unsafe { MaybeUninit::zeroed().assume_init() };
-    vmt_call!(interface!(base_client), get_player_view, &player_view);
-
-    vmt_call!(
-        interface!(render_view),
-        get_matrices_for_view,
-        &player_view,
-        &w2v,
-        &v2pr,
-        &w2s,
-        &w2px
-    );
-    let w = w2s[3][0] * vec.x + w2s[3][1] * vec.y + w2s[3][2] * vec.z + w2s[3][3];
-
-    if w < 0.01 {
-        return None;
-    }
-
-    let screen_w = 0;
-    let screen_h = 0;
-
-    vmt_call!(
-        interface!(base_engine),
-        get_screen_size,
-        &screen_w,
-        &screen_h
-    );
-
-    let x = w2s[0][0] * vec.x + w2s[0][1] * vec.y + w2s[0][2] * vec.z + w2s[0][3];
-    let y = w2s[1][0] * vec.x + w2s[1][1] * vec.y + w2s[1][2] * vec.z + w2s[1][3];
-
-    Some(Vector2::new(
-        screen_w as f32 / 2f32 * (1f32 + x / w),
-        screen_h as f32 / 2f32 * (1f32 - y / w),
-    ))
-}
-
-pub struct Padding (u8);
+pub struct Padding(u8);
 impl Display for Padding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:0x}",self.0)
+        write!(f, "{:0x}", self.0)
     }
 }

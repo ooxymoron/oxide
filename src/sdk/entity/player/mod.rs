@@ -9,7 +9,7 @@ use crate::{
     define_netvar, define_offset,
     error::{OxideError, OxideResult},
     interface,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
     netvars::HasNetvars,
     o,
     sdk::net_channel::LatencyFlow,

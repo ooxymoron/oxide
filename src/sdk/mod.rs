@@ -43,7 +43,6 @@ impl EntHandle {
 }
 pub type ConCommand = *const u8;
 
-pub type VMatrix = [[f32; 4]; 4];
 
 #[repr(C)]
 #[derive(Debug, Clone)]

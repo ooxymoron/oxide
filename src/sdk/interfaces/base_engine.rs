@@ -1,6 +1,6 @@
 use std::ffi::c_char;
 
-use crate::{math::angles::Angles, vmt_call};
+use crate::{math::{angles::Angles, view_matrix::VMatrix}, vmt_call};
 
 use self::net_channel::NetChannel;
 

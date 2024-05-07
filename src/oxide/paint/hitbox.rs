@@ -1,21 +1,12 @@
 use crate::{
-    error::OxideResult,
-    hex_to_rgb, interface, o,
-    oxide::entity_cache::EntityCache,
-    rgb_to_hex,
-    sdk::{
+    error::OxideResult, hex_to_rgb, interface, math::view_matrix::VMatrix, o, oxide::entity_cache::EntityCache, rgb_to_hex, sdk::{
         entity::{player::Player, Entity},
         interfaces::model_info::{HitboxId, HitboxWrapper},
         networkable::ClassId,
-    },
-    setting,
-    util::world_to_screen,
-    vmt_call,
+    }, setting, vmt_call
 };
 
 use super::Paint;
-
-const COLOR_SCALE: f32 = 1.0 / 2.0;
 
 impl Paint {
     pub fn draw_hitboxes(&mut self, cache: &EntityCache) -> OxideResult<()> {
@@ -30,11 +21,7 @@ impl Paint {
             }
             let team = vmt_call!(player, get_team_number);
             let (r, g, b) = hex_to_rgb!(team.color());
-            let color = rgb_to_hex!(
-                r as f32 * COLOR_SCALE,
-                g as f32 * COLOR_SCALE,
-                b as f32 * COLOR_SCALE
-            );
+            let color = rgb_to_hex!(r as f32, g as f32, b as f32);
             let hitboxes = player.get_hitboxes()?;
             for hitbox in hitboxes {
                 self.draw_hitbox(hitbox, color, 30)?;
@@ -51,11 +38,7 @@ impl Paint {
             let team = vmt_call!(sentry, get_team_number);
 
             let (r, g, b) = hex_to_rgb!(team.color());
-            let color = rgb_to_hex!(
-                r as f32 * COLOR_SCALE,
-                g as f32 * COLOR_SCALE,
-                b as f32 * COLOR_SCALE
-            );
+            let color = rgb_to_hex!(r as f32, g as f32, b as f32);
             let hitboxes = sentry.get_hitboxes()?;
             for hitbox in hitboxes {
                 self.draw_hitbox(hitbox, color, 50)?;
@@ -78,14 +61,15 @@ impl Paint {
     }
     pub fn draw_hitbox(
         &mut self,
-        hitbox: &HitboxWrapper,
+        hitbox: &mut HitboxWrapper,
         color: usize,
         alpha: u8,
     ) -> OxideResult<()> {
         let corners = hitbox.corners()?;
+        let v_matrix = VMatrix::default();
         let corners = corners
             .iter()
-            .map(|x| world_to_screen(x))
+            .map(|x| v_matrix.w2s(x))
             .collect::<Vec<_>>();
 
         let pairs = [

@@ -1,4 +1,4 @@
-use crate::math::vector::Vector3;
+use crate::math::vector3::Vector3;
 
 use super::interfaces::Entity;
 

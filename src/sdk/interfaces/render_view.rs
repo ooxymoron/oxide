@@ -1,3 +1,5 @@
+use crate::math::view_matrix::VMatrix;
+
 use self::view_setup::ViewSetup;
 
 use super::*;
@@ -21,9 +23,9 @@ pub struct VMTRenderView {
         (),
         &RenderView,
         &ViewSetup,
-        &VMatrix,
-        &VMatrix,
-        &VMatrix,
-        &VMatrix
+        *mut VMatrix,
+        *mut VMatrix,
+        *mut VMatrix,
+        *mut VMatrix
     ),
 }

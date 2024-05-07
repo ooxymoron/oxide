@@ -1,8 +1,5 @@
 use crate::{
-    draw::event::EventType,
-    error::OxideResult,
-    math::vector::Vector3,
-    sdk::{
+    draw::{colors::RED, event::EventType}, error::OxideResult, interface, math::vector3::Vector3, sdk::{
         condition::ConditionFlags,
         entity::{
             player::Player,
@@ -14,8 +11,7 @@ use crate::{
             model_info::{HitboxId, HitboxWrapper},
         },
         user_cmd::{ButtonFlags, UserCmd},
-    },
-    setting, vmt_call,
+    }, setting, vmt_call
 };
 
 use self::priority::Priority;
@@ -53,7 +49,7 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
 
-        let scaled_hitbox = hitbox.scaled(setting!(aimbot, hitbox_scale));
+        let mut scaled_hitbox = hitbox.scaled(setting!(aimbot, hitbox_scale));
 
         let mut points = vec![scaled_hitbox.center()?];
         if setting!(aimbot, multipoint) {
@@ -140,7 +136,9 @@ impl Aimbot {
 
             if let Some(target) = &target {
                 let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
-                let diff = my_eyes - target.point;
+                let diff = target.point - my_eyes;
+                interface!(debug_overlay).line(&my_eyes, &target.point, RED, 100, 1.0);
+
                 let angle = diff.angle();
                 if setting!(aimbot, autoshoot) {
                     if self.shoot_weapon(cmd, Some(target)) {

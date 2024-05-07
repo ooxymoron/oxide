@@ -9,7 +9,7 @@ use crate::{
     draw::colors::{BLUE, RED},
     error::{OxideError, OxideResult},
     interface,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
     netvars::HasNetvars,
     o, vmt_call,
 };
@@ -166,8 +166,8 @@ impl Entity {
     pub fn as_networkable(&self) -> &mut Networkable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
-    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&HitboxWrapper> {
-        Ok(&self.get_hitboxes()?[hitbox_id as usize])
+    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&mut HitboxWrapper> {
+        Ok(&mut self.get_hitboxes()?[hitbox_id as usize])
     }
     pub fn should_attack(&self) -> bool {
         let p_local = Player::get_local().unwrap();
@@ -206,12 +206,13 @@ impl Entity {
                     max: hitbox.max,
                     nameindex: hitbox.nameindex,
                     owner: unsafe{transmute(self)},
+                    corner_cache: None
                 })
             })
             .collect()
     }
 
-    pub fn get_hitboxes(&self) -> OxideResult<&Vec<HitboxWrapper>> {
+    pub fn get_hitboxes(&self) -> OxideResult<&mut Vec<HitboxWrapper>> {
 
         Ok(o!()
             .last_entity_cache

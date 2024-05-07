@@ -37,16 +37,16 @@ impl EntityCache {
             hitboxes: HashMap::new(),
         })
     }
-    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&Vec<HitboxWrapper>> {
+    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&mut Vec<HitboxWrapper>> {
         if self.hitboxes.contains_key(&id) {
-            return Ok(self.hitboxes.get(&id).unwrap());
+            return Ok(self.hitboxes.get_mut(&id).unwrap());
         }
 
         let Some(ent) = Entity::get_ent(id) else {
                 return Err(OxideError::new("null ent"));
             };
         self.hitboxes.insert(id, ent.calculate_hitboxes().unwrap());
-        return Ok(self.hitboxes.get(&id).unwrap());
+        return Ok(self.hitboxes.get_mut(&id).unwrap());
     }
     pub fn get_ent(&self, id: ClassId) -> Vec<u32> {
         self.entities.get(&id).cloned().unwrap_or(vec![])

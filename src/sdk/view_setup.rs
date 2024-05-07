@@ -1,10 +1,7 @@
-
-use crate::math::{angles::Angles, vector::Vector3};
-
-use super::VMatrix;
+use crate::math::{angles::Angles, vector3::Vector3, view_matrix::VMatrix};
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ViewSetup {
     pub x: i32,
     pub unscaled_x: i32,

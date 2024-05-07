@@ -27,10 +27,7 @@ impl Visuals {
     {
         let weapon = vmt_call!(p_local.as_ent(),get_weapon);
         let range = weapon.get_info().weapon_data[weapon.get_mode()].range;
-        let mut normalized_angles = cmd.viewangles;
-        normalized_angles.yaw += 180.0;
-        normalized_angles.pitch = -normalized_angles.pitch;
-        let dir = normalized_angles.to_vectors().forward * range;
+        let dir = cmd.viewangles.to_vectors().forward * range;
         let src = vmt_call!(p_local.as_ent(), eye_position);
         let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
         let color = WHITE;

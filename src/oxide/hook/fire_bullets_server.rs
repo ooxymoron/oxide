@@ -1,6 +1,6 @@
 use crate::{
     call_original, cfn, get_cheat,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
     oxide::cheat::spread_reduction::{seed_prediction::State, SpreadReduction},
     sdk::entity::weapon::Weapon,
 };

@@ -11,7 +11,7 @@ use crate::{
     math::{
         angles::RotationVectors,
         get_corners,
-        vector::{Vector3, Vector4},
+        vector3::Vector3, vector4::Vector4,
     },
 };
 
@@ -59,10 +59,11 @@ pub struct HitboxWrapper {
     pub max: Vector3,
     pub nameindex: i32,
     pub owner: &'static Entity,
+    pub corner_cache: Option<[Vector3;8]>
 }
 
 impl HitboxWrapper {
-    pub fn center(&self) -> OxideResult<Vector3> {
+    pub fn center(&mut self) -> OxideResult<Vector3> {
         let corners = self.corners()?;
         Ok((corners[0] + corners[7]) / 2.0)
     }
@@ -76,9 +77,15 @@ impl HitboxWrapper {
 
         Ok((pos, angle))
     }
-    pub fn corners(&self) -> OxideResult<[Vector3; 8]> {
+    pub fn corners(&mut self) -> OxideResult<[Vector3; 8]> {
+        if let Some(corners) = self.corner_cache {
+            return Ok(corners)
+        }
         let (pos, rotation) = self.get_pos()?;
-        Ok(get_corners(&pos, &rotation, &self.min, &self.max))
+        let corners = get_corners(&pos, &rotation, &self.min, &self.max);
+        self.corner_cache = Some(corners);
+        Ok(corners)
+
     }
     pub fn scaled(&self, scale: f32) -> HitboxWrapper {
         let mut hitbox = self.clone();

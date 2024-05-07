@@ -1,6 +1,6 @@
 use crate::{
     cfn,
-    math::{angles::Angles, vector::Vector3},
+    math::{angles::Angles, vector3::Vector3},
 };
 
 use super::{
