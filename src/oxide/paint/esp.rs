@@ -73,7 +73,7 @@ impl Paint {
 
             let info = player.info()?;
             let name = info.name;
-            self.paint_esp_box(frame, ent, false, true, Some(&name), conditions);
+            self.paint_esp_box(frame, ent, true, true, Some(&name), conditions);
         }
         if setting!(visual, esp_sentreis) {
             for id in cache.get_ent(ClassId::CObjectSentrygun) {
