@@ -1,9 +1,7 @@
 use crate::{
     define_hook, get_cheat,
     math::angles::Angles,
-    oxide::cheat::{
-        aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction, 
-    },
+    oxide::cheat::{aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction},
     sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
 };

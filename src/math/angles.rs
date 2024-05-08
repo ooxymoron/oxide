@@ -11,6 +11,23 @@ pub struct Angles {
 }
 
 #[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ViewAngles {
+    pub pitch: f32,
+    pub yaw: f32,
+    pub roll: f32,
+}
+impl ViewAngles {
+    pub fn to_angles(&self) -> Angles {
+        Angles {
+            pitch: self.pitch,
+            yaw: self.yaw,
+            roll: self.roll,
+        }
+    }
+}
+
+#[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct RotationVectors {
     pub forward: Vector3,
@@ -30,21 +47,16 @@ impl Angles {
         let (sp, cp) = dtr(self.pitch).sin_cos();
         let (sr, cr) = dtr(self.roll).sin_cos();
         RotationVectors {
-            forward: Vector3::new(
-                cp * cy,
-                cp * sy,
-                -sp
-            ),
-            right: Vector3::new(
-                sr * sp * cy - cr * sy,
-                sr * sp * sy + cr * cy,
-                sr * cp
-            ),
-            up: Vector3::new(
-                cr * sp * cy + sr * sy,
-                cr * sp * sy - sr * cy,
-                cr * cp
-            ),
+            forward: Vector3::new(cp * cy, cp * sy, -sp),
+            right: Vector3::new(sr * sp * cy - cr * sy, sr * sp * sy + cr * cy, sr * cp),
+            up: Vector3::new(cr * sp * cy + sr * sy, cr * sp * sy - sr * cy, cr * cp),
+        }
+    }
+    pub fn to_view_angles(&self) -> ViewAngles {
+        ViewAngles {
+            pitch: self.pitch.clamp(-89.0, 89.0),
+            yaw: ((self.yaw + 180.0) % 360.0 - 180.0),
+            roll: self.roll,
         }
     }
 }

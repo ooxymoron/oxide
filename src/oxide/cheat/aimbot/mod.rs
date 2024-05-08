@@ -1,9 +1,7 @@
 use crate::{
-    draw::{colors::RED, event::EventType},
+    draw::event::EventType,
     error::OxideResult,
-    interface,
     math::vector3::Vector3,
-    o,
     sdk::{
         condition::ConditionFlags,
         entity::{
@@ -144,10 +142,10 @@ impl Aimbot {
                 let angle = diff.angle();
                 if setting!(aimbot, autoshoot) {
                     if self.shoot_weapon(cmd, Some(target)) {
-                        cmd.viewangles = angle;
+                        cmd.viewangles = angle.to_view_angles();
                     }
                 } else {
-                    cmd.viewangles = angle;
+                    cmd.viewangles = angle.to_view_angles();
                 }
             } else {
                 self.shoot_weapon(cmd, None);

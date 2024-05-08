@@ -45,7 +45,7 @@ impl SpreadReduction {
         let dist = if let Some(target) = target {
             (target.point - src).len()
         } else {
-            let dir = cmd.viewangles.to_vectors().forward * 1000000.0;
+            let dir = cmd.viewangles.to_angles().to_vectors().forward * 1000000.0;
             let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
             let dist = (trace.endpos - trace.startpos).len();
             dist
@@ -107,11 +107,11 @@ impl SpreadReduction {
 
         let spread_correction = self.calculate_spread_correction(bullets, hit_cone);
 
-        let dirs = cmd.viewangles.to_vectors();
-
+        let dirs = cmd.viewangles.to_angles().to_vectors();
+        cmd.viewangles = dirs.forward.angle().to_view_angles();
         cmd.viewangles =
-            (dirs.forward + dirs.right * spread_correction.x + dirs.up * spread_correction.y)
-                .angle()
+            (dirs.forward + dirs.right * spread_correction.x - dirs.up * spread_correction.y)
+                .angle().to_view_angles()
     }
     pub fn calculate_spread_correction(&self, mut bullets: Vec<Vector2>, hit_cone: f32) -> Vector2 {
         let mut best = (vec![], Vector2::zeroed());

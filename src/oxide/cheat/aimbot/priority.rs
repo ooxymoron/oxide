@@ -43,6 +43,9 @@ impl Aimbot {
 
         let diff = target_point - my_eyes;
         let angle = diff.angle();
+        if angle.pitch.abs() > 89.0 {
+            return None;
+        }
         let my_angle = vmt_call!(p_local.as_ent(), get_abs_angles);
 
         let target_forward = angle.to_vectors().forward;

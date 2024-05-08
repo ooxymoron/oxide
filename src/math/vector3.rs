@@ -110,7 +110,7 @@ impl Vector3 {
     }
     pub fn angle(&self) -> Angles {
         Angles {
-            pitch: -(self.z/self.len2d()).asin() / PI * 180f32,
+            pitch: -self.z.atan2(self.len2d()) / PI * 180f32,
             yaw: -(self.x.atan2(self.y) / PI * 180f32) + 90.0,
             roll: 0.0,
         }

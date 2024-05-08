@@ -18,8 +18,6 @@ use super::{
     Component, ComponentBase,
 };
 
-const PAD: isize = 6;
-
 #[derive(Debug)]
 pub struct SpreadReductionInfoWindow {
     visible_window: VisibleWindow,

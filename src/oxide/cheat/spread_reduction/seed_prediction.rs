@@ -105,7 +105,7 @@ impl SpreadReduction {
         }
         let Some(&server_time) = server_time_records.first() else {return false};
         //INFO: temporary for testing
-        //let server_time = server_time + 2f32.powi(SERVER_SPOOF_EXPONENT);
+        let server_time = server_time + 2f32.powi(SERVER_SPOOF_EXPONENT);
         let send_data = &self.playerperf_send_data.unwrap();
         self.state = self.calculate_state(server_time, *send_data);
         self.playerperf_send_data = None;

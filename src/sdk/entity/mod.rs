@@ -163,14 +163,26 @@ impl Entity {
     pub fn as_networkable(&self) -> &mut Networkable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
-    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&mut HitboxWrapper> {
-        Ok(self.get_hitboxes()?.get_mut(&hitbox_id).unwrap())
-    }
     pub fn should_attack(&self) -> bool {
         let p_local = Player::get_local().unwrap();
         let team = vmt_call!(self, get_team_number);
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         return local_team != team;
+    }
+    pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
+        let name = CString::new(name).unwrap();
+        let defualt_value = unsafe { transmute::<_, f32>(0b1111111111111111) };
+        let val = (o!().util.get_float_attribute)(defualt_value, name.as_ptr(), self, null(), true);
+        if val == defualt_value {
+            return None;
+        }
+        Some(val)
+    }
+}
+
+impl Entity {
+    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&mut HitboxWrapper> {
+        Ok(self.get_hitboxes()?.get_mut(&hitbox_id).unwrap())
     }
     pub fn calculate_hitboxes(&self) -> OxideResult<HashMap<HitboxId, HitboxWrapper>> {
         let rend = self.as_renderable();
@@ -218,15 +230,6 @@ impl Entity {
             .as_mut()
             .unwrap()
             .get_hitboxes(vmt_call!(self, get_index))?)
-    }
-    pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
-        let name = CString::new(name).unwrap();
-        let defualt_value = unsafe { transmute::<_, f32>(0b1111111111111111) };
-        let val = (o!().util.get_float_attribute)(defualt_value, name.as_ptr(), self, null(), true);
-        if val == defualt_value {
-            return None;
-        }
-        Some(val)
     }
 }
 
