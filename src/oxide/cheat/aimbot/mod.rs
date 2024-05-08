@@ -168,7 +168,7 @@ impl Aimbot {
             {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
             }
-            if weapon.is_minigun() {
+            if setting!(aimbot,auto_rev) && weapon.is_minigun() {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
                 return false;
             }
