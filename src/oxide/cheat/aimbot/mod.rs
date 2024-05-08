@@ -13,7 +13,7 @@ use crate::{
         },
         interfaces::{
             engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-            entity::hitbox::{HitboxId, HitboxWrapper},
+            entity::hitbox::{PlayerHitboxId, HitboxWrapper},
         },
         user_cmd::{ButtonFlags, UserCmd},
     },
@@ -80,7 +80,7 @@ impl Aimbot {
             let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
 
             if trace.entity != hitbox.owner
-                || (hitbox.id == HitboxId::Head as usize && trace.hitbox_id != hitbox.id)
+                || (hitbox.id == PlayerHitboxId::Head as usize && trace.hitbox_id != hitbox.id)
             {
                 continue;
             }
@@ -89,7 +89,7 @@ impl Aimbot {
         Ok(None)
     }
 
-    pub fn find_target(&self) -> OxideResult<Option<Target>> {
+    pub fn find_targets(&self) -> OxideResult<Option<Target>> {
         let mut target = self.find_player()?;
 
         if setting!(aimbot, target_sentries) {
@@ -131,8 +131,8 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
-            target = if setting!(aimbot, aim_while_on_delays) || p_local.can_attack() {
-                self.find_target()?
+            target = if setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
+                self.find_targets()?
             } else {
                 None
             };
@@ -161,11 +161,16 @@ impl Aimbot {
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let id = vmt_call!(weapon, get_weapon_id);
 
-        let Some(found) = found else {
-            if  weapon.is_sniper_rifle() && setting!(aimbot, auto_unscope) &&  p_local.get_condition().get(ConditionFlags::Zoomed) {
+        if found.is_none() {
+            if weapon.is_sniper_rifle()
+                && setting!(aimbot, auto_unscope)
+                && p_local.get_condition().get(ConditionFlags::Zoomed)
+            {
+                cmd.buttons.set(ButtonFlags::InAttack2, true);
+            }
+            if weapon.is_minigun() {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
                 return false;
-
             }
             return false;
         };
@@ -173,8 +178,7 @@ impl Aimbot {
         if weapon.is_sniper_rifle() {
             let classic = matches!(id, WeaponType::SniperrifleClassic);
             if setting!(aimbot, auto_scope) {
-                let lethal = weapon.as_gun().unwrap().is_lethal(found.ent, false);
-                if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic && !lethal {
+                if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;
                 }

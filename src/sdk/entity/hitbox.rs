@@ -32,7 +32,8 @@ pub struct HitboxWrapper {
 
 impl HitboxWrapper {
     pub fn center(&mut self) -> OxideResult<Vector3> {
-        Ok(self.get_pos()?.0)
+        let corners = self.corners().unwrap();
+        Ok((corners[0] + corners[7]) / 2.0)
     }
     pub fn get_pos(&self) -> OxideResult<(Vector3, RotationVectors)> {
         let pos = Vector3::new(self.bone[0][3], self.bone[1][3], self.bone[2][3]);
@@ -63,7 +64,7 @@ impl HitboxWrapper {
 
 #[repr(u32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum HitboxId {
+pub enum PlayerHitboxId {
     Head,
     Pelvis,
     Spine0,
@@ -84,13 +85,23 @@ pub enum HitboxId {
     RightFoot,
 }
 
-impl HitboxId {
-    pub fn body() -> Vec<HitboxId> {
+impl PlayerHitboxId {
+    pub fn body() -> Vec<PlayerHitboxId> {
         Self::all()[1..].to_vec()
     }
-    pub fn all() -> Vec<HitboxId> {
+    pub fn all() -> Vec<PlayerHitboxId> {
         (0..=17)
             .map(|x| unsafe { transmute(x) })
-            .collect::<Vec<HitboxId>>()
+            .collect::<Vec<PlayerHitboxId>>()
+    }
+}
+impl From<usize> for PlayerHitboxId {
+    fn from(value: usize) -> Self {
+        unsafe { transmute(value as u32) }
+    }
+}
+impl Into<usize> for PlayerHitboxId {
+    fn into(self) -> usize {
+        (unsafe { transmute::<_, u32>(self) }) as usize
     }
 }

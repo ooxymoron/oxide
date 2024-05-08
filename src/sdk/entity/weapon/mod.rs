@@ -6,6 +6,7 @@ use self::{
     entity::Entity,
     ids::{WeaponId, WeaponType},
     info::WeaponInfo,
+    interfaces::condition::ConditionFlags,
 };
 
 use super::*;
@@ -69,7 +70,7 @@ impl Gun {
         return unsafe { transmute(self) };
     }
 
-    pub fn is_lethal(&mut self, target: &Entity, crit: bool) -> bool {
+    pub fn get_damage(&mut self, crit: bool) -> f32 {
         let mut mult = if crit { 3.0 } else { 1.0 };
         if crit
             && matches!(
@@ -79,9 +80,10 @@ impl Gun {
         {
             mult = 1.35
         }
-
-        return vmt_call!(self, get_projectile_damage) * mult
-            >= (vmt_call!(target, get_health)) as f32;
+        vmt_call!(self, get_projectile_damage) * mult
+    }
+    pub fn sniper_charge(&mut self) -> f32 {
+        (vmt_call!(self, get_projectile_damage) - 50.0) / 100.0
     }
     pub fn get_bullets(&mut self) -> i32 {
         let mode = self.as_weapon().get_mode();
@@ -142,6 +144,9 @@ impl Weapon {
             WeaponType::Sniperrifle | WeaponType::SniperrifleClassic | WeaponType::SniperrifleDecap
         )
     }
+    pub fn is_minigun(&mut self) -> bool {
+        matches!(vmt_call!(self, get_weapon_id), WeaponType::Minigun)
+    }
     pub fn is_ambassador(&mut self) -> bool {
         matches!(
             self.get_item_definition_index(),
@@ -149,7 +154,9 @@ impl Weapon {
         )
     }
     pub fn can_headshot(&mut self) -> bool {
-        self.is_sniper_rifle() || self.is_ambassador()
+        let p_local = Player::get_local().unwrap();
+        (self.is_sniper_rifle() && p_local.get_condition().get(ConditionFlags::Zoomed))
+            || (self.is_ambassador() && o!().global_vars.curtime - *self.get_last_fire() > 1.0)
     }
     pub fn get_info(&self) -> &WeaponInfo {
         let name = (o!().util.get_weapon_alias)(vmt_call!(self, get_weapon_id));

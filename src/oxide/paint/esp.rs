@@ -1,5 +1,5 @@
 use crate::{
-    draw::colors::{BLUE, FOREGROUND, FOREGROUND3, GREEN},
+    draw::colors::{BACKGROUND, BACKGROUND2, BLUE, FOREGROUND, FOREGROUND3, GREEN},
     error::OxideResult,
     hex_to_rgb, interface,
     math::{get_corners, vector2::Vector2},
@@ -73,7 +73,7 @@ impl Paint {
 
             let info = player.info()?;
             let name = info.name;
-            self.paint_esp_box(frame, ent, true, true, Some(&name), conditions);
+            self.paint_esp_box(frame, ent, false, true, Some(&name), conditions);
         }
         if setting!(visual, esp_sentreis) {
             for id in cache.get_ent(ClassId::CObjectSentrygun) {
@@ -185,10 +185,20 @@ impl Paint {
         }
 
         if draw_hp {
-            let (r, g, b) = hex_to_rgb!(GREEN);
-            vmt_call!(interface!(surface), set_color, r, g, b, 50);
             let health = vmt_call!(ent, get_health);
             let max_health = vmt_call!(ent, get_max_health);
+            let (r, g, b) = hex_to_rgb!(BACKGROUND);
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
+            vmt_call!(
+                interface!(surface),
+                draw_filled_rect,
+                minx as i32 - 2 * PAD,
+                miny as i32,
+                minx as i32 - PAD,
+                maxy as i32
+            );
+            let (r, g, b) = hex_to_rgb!(GREEN);
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
             vmt_call!(
                 interface!(surface),
                 draw_filled_rect,
@@ -213,6 +223,16 @@ impl Paint {
                     maxy as i32
                 );
             }
+            let (r, g, b) = hex_to_rgb!(BACKGROUND2);
+            vmt_call!(interface!(surface), set_color, r, g, b, 50);
+            vmt_call!(
+                interface!(surface),
+                draw_rect,
+                minx as i32 - 2 * PAD,
+                miny as i32,
+                minx as i32 - PAD,
+                maxy as i32
+            );
         }
         if let Some(text) = text_top {
             frame.paint_text(

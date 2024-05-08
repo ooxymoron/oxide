@@ -3,7 +3,7 @@ use crate::{
     hex_to_rgb, interface, o, rgb_to_hex,
     sdk::{
         entity::{
-            hitbox::{HitboxId, HitboxWrapper},
+            hitbox::{PlayerHitboxId, HitboxWrapper},
             player::Player,
             Entity,
         },
@@ -61,7 +61,7 @@ impl Paint {
             }
             let team = vmt_call!(pipe, get_team_number);
 
-            let hitbox = pipe.get_hitbox(HitboxId::Head as usize)?;
+            let hitbox = pipe.get_hitbox(PlayerHitboxId::Head as usize)?;
             self.draw_hitbox(frame, hitbox, team.color(), 10)?;
         }
         Ok(())

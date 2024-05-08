@@ -19,8 +19,7 @@ use crate::{
 use self::anim_state::AnimState;
 
 use super::{
-    condition::Condition, flags::Flags, interfaces::base_engine::PlayerInfo, user_cmd::UserCmd,
-    Entity, WaterLevel,
+    condition::Condition, flags::Flags, interfaces::base_engine::PlayerInfo, user_cmd::UserCmd, weapon::Weapon, Entity, WaterLevel
 };
 
 pub mod anim_state;
@@ -76,6 +75,9 @@ impl Player {
             return Err(OxideError::new("failed to get player info"));
         }
         Ok(info.into())
+    }
+    pub fn weapon(&self) -> &mut Weapon {
+        vmt_call!(self.as_ent(), get_weapon)
     }
 }
 

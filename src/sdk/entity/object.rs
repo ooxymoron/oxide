@@ -4,7 +4,7 @@ use derivative::Derivative;
 
 use crate::{define_netvar, error::OxideResult, netvars::HasNetvars};
 
-use super::entity::hitbox::HitboxId;
+use super::entity::hitbox::PlayerHitboxId;
 
 #[repr(C)]
 #[derive(Derivative, Clone, Copy)]
@@ -37,25 +37,25 @@ impl Sentry {
     pub fn as_object(&mut self) -> OxideResult<&'static mut Object> {
         return Ok(unsafe { transmute(self) });
     }
-    pub fn get_hitbox_ids(&mut self) -> Vec<HitboxId> {
+    pub fn get_hitbox_ids(&mut self) -> Vec<PlayerHitboxId> {
         let obj = self.as_object().unwrap();
         if *obj.get_mini() {
-            return vec![HitboxId::Head]
+            return vec![PlayerHitboxId::Head]
         }
         match *obj.get_level() {
-            ObjectLevel::BUILDING | ObjectLevel::ONE=> vec![HitboxId::Head, HitboxId::Spine1],
+            ObjectLevel::BUILDING | ObjectLevel::ONE=> vec![PlayerHitboxId::Head, PlayerHitboxId::Spine1],
             ObjectLevel::TWO => vec![
-                HitboxId::Head,
-                HitboxId::Spine0,
-                HitboxId::LeftHand,
-                HitboxId::LeftLowerArm,
+                PlayerHitboxId::Head,
+                PlayerHitboxId::Spine0,
+                PlayerHitboxId::LeftHand,
+                PlayerHitboxId::LeftLowerArm,
             ],
             ObjectLevel::THREE => vec![
-                HitboxId::Head,
-                HitboxId::Spine0,
-                HitboxId::Spine3,
-                HitboxId::LeftHip,
-                HitboxId::RightUpperArm,
+                PlayerHitboxId::Head,
+                PlayerHitboxId::Spine0,
+                PlayerHitboxId::Spine3,
+                PlayerHitboxId::LeftHip,
+                PlayerHitboxId::RightUpperArm,
             ],
         }
     }

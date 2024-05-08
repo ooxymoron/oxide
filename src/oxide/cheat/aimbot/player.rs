@@ -1,12 +1,10 @@
-use std::usize;
-
 use crate::{
     error::OxideResult,
     o,
     sdk::{
         condition::ConditionFlags,
         entity::{
-            hitbox::{HitboxId, HitboxWrapper},
+            hitbox::{HitboxWrapper, PlayerHitboxId},
             player::Player,
             Entity,
         },
@@ -17,76 +15,56 @@ use crate::{
 
 use super::{priority::Priority, Aimbot, Target};
 
+#[derive(Debug, Clone, Copy)]
+pub enum HitboxPriority {
+    HeadOnly,
+    PrioHead,
+    BodyOnly,
+    All,
+}
+
 impl<'player> Aimbot {
     pub fn player_hitbox_order(
         &self,
         player: &'player Player,
+        prio: HitboxPriority,
     ) -> Vec<(isize, &'player HitboxWrapper)> {
-        let p_local = Player::get_local().unwrap();
-        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-        let baim = (|| {
-            if weapon.can_headshot() {
-                if weapon.is_sniper_rifle() && !p_local.get_condition().get(ConditionFlags::Zoomed)
-                {
-                    return true;
-                }
-                return setting!(aimbot, baim_if_lethal)
-                    && weapon.as_gun().unwrap().is_lethal(player.as_ent(), false);
-            }
-            return true;
-        })();
+        if matches!(prio, HitboxPriority::HeadOnly) {
+            return vec![(
+                3,
+                player
+                    .as_ent()
+                    .get_hitbox(PlayerHitboxId::Head.into())
+                    .unwrap(),
+            )];
+        }
 
         let hitboxes = player.as_ent().get_hitboxes().unwrap();
-        if baim {
-            if weapon.is_sniper_rifle()
-                && setting!(aimbot, wait_for_charge)
-                && p_local.get_condition().get(ConditionFlags::Zoomed)
-                && !weapon.as_gun().unwrap().is_lethal(player.as_ent(), false)
-            {
-                return vec![];
-            }
-            hitboxes
-                .values()
-                .map(|hitbox| {
-                    if hitbox.id == HitboxId::Pelvis as usize {
-                        (1, hitbox)
+        hitboxes
+            .values()
+            .map(|hitbox| match PlayerHitboxId::from(hitbox.id) {
+                PlayerHitboxId::Head => {
+                    if matches!(prio, HitboxPriority::PrioHead) {
+                        (3, hitbox)
                     } else {
-                        (0, hitbox)
-                    }
-                })
-                .collect()
-        } else {
-            if weapon.is_sniper_rifle()
-                && setting!(aimbot, wait_for_charge)
-                && p_local.get_condition().get(ConditionFlags::Zoomed)
-                && !weapon.as_gun().unwrap().is_lethal(player.as_ent(), true)
-            {
-                return vec![];
-            }
-            hitboxes
-                .values()
-                .map(|hitbox| {
-                    if hitbox.id == HitboxId::Head as usize {
                         (1, hitbox)
-                    } else {
-                        (0, hitbox)
                     }
-                })
-                .collect()
-        }
+                }
+                PlayerHitboxId::Pelvis
+                | PlayerHitboxId::Spine0
+                | PlayerHitboxId::Spine1
+                | PlayerHitboxId::Spine2
+                | PlayerHitboxId::Spine3 => (2, hitbox),
+                PlayerHitboxId::LeftHip
+                | PlayerHitboxId::RightHip
+                | PlayerHitboxId::LeftKnee
+                | PlayerHitboxId::RightKnee => (1, hitbox),
+                _ => (0, hitbox),
+            })
+            .collect()
     }
     pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {
         if self.ent_priority(player.as_ent())?.is_none() {
-            return Ok(None);
-        }
-        let p_local = Player::get_local().unwrap();
-        let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-
-        if weapon.is_ambassador()
-            && setting!(aimbot, ambasador_wait_for_hs)
-            && o!().global_vars.curtime - *weapon.get_last_fire() < 1.0
-            && !weapon.as_gun().unwrap().is_lethal(player.as_ent(), false)
-        {
             return Ok(None);
         }
         let mut ignore_flags = vec![ConditionFlags::Ubercharged, ConditionFlags::Bonked];
@@ -119,6 +97,13 @@ impl<'player> Aimbot {
 
     pub fn find_player(&self) -> OxideResult<Option<Target>> {
         let mut best_target: Option<Target> = None;
+
+        let p_local = Player::get_local().unwrap();
+        let weapon = p_local.weapon();
+        let mut hitbox_order_prio = HitboxPriority::All;
+        if weapon.can_headshot() {
+            hitbox_order_prio = HitboxPriority::PrioHead;
+        }
         for id in o!()
             .last_entity_cache
             .as_ref()
@@ -138,11 +123,23 @@ impl<'player> Aimbot {
                     continue;
                 }
             }
-
-            for (hitbox_prio, hitbox) in self.player_hitbox_order(player.as_player()?) {
+            let hp = vmt_call!(player, get_health) as f32;
+            if matches!(hitbox_order_prio, HitboxPriority::PrioHead) {
+                if let Ok(gun) = weapon.as_gun() {
+                    if setting!(aimbot, wait_for_charge) && hp > gun.get_damage(true) {
+                        continue;
+                    }
+                    if gun.get_damage(false) >= hp && setting!(aimbot, baim_if_lethal) {
+                        hitbox_order_prio = HitboxPriority::BodyOnly;
+                    }
+                }
+            }
+            for (hitbox_prio, hitbox) in
+                self.player_hitbox_order(player.as_player()?, hitbox_order_prio)
+            {
                 if let Some(target) = &best_target {
                     if target.prio.hitbox > hitbox_prio {
-                        break;
+                        continue;
                     }
                 }
 
@@ -151,20 +148,19 @@ impl<'player> Aimbot {
                 };
 
                 if let Some(target) = &best_target {
-                    if target.prio.point > point_prio {
+                    if target.prio.point > point_prio && target.prio.hitbox == hitbox_prio{
                         continue;
                     }
                 }
-                let prio = Priority {
-                    ent: player_prioroty,
-                    hitbox: hitbox_prio,
-                    point: point_prio,
-                };
                 let target = Target {
                     point,
                     ent: player,
                     hitbox_id: hitbox.id,
-                    prio,
+                    prio: Priority {
+                        ent: player_prioroty,
+                        hitbox: hitbox_prio,
+                        point: point_prio,
+                    },
                 };
                 best_target = Some(target);
             }

@@ -97,7 +97,7 @@ impl Movement {
         self.no_push();
         if org_cmd.viewangles.yaw != cmd.viewangles.yaw {
             let Vector2 { x, y } = self.rotate_movement(
-                &org_cmd.viewangles.yaw - &cmd.viewangles.yaw,
+                &cmd.viewangles.yaw - &org_cmd.viewangles.yaw,
                 Vector2::new(cmd.forwardmove, cmd.sidemove),
             );
             cmd.forwardmove = x;

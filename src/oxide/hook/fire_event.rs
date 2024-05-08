@@ -7,7 +7,9 @@ fn hook(event_manager: &GameEventManager, event: &GameEvent, org: FireEventHook:
     let name = unsafe { CStr::from_ptr(vmt_call!(event, get_name)) }
         .to_str()
         .unwrap();
-    log!("{}", name);
+    if name == "player_hurt"{
+
+    }
     (org)(event_manager, event)
 }
 

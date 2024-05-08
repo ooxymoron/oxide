@@ -17,7 +17,7 @@ use super::SpreadReduction;
 
 const PLAYERPERF_COOLDOWN: f32 = 1.0;
 const PLAYERPERF_RESYNC_COOLDOWN: f32 = 10.0;
-pub const SERVER_SPOOF_EXPONENT: i32 = 15;
+pub const SERVER_SPOOF_EXPONENT: i32 = 20;
 const MIN_MANTISA: f32 = 1.0 / 8388608.0;
 
 #[derive(Debug)]
@@ -118,7 +118,7 @@ impl SpreadReduction {
     }
     pub fn calculate_state(&mut self, server_time: f32, send_data: (f32, f32)) -> State {
         let precision = self.get_precision(server_time * 1000f32);
-        if precision < 1 {
+        if precision < 5 {
             return State::IMPOSSIBLE { precision };
         }
 

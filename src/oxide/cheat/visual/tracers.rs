@@ -6,7 +6,7 @@ use crate::{
         fire_bullets_info::FireBulletsInfo,
         interfaces::{
             engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-            entity::{hitbox::HitboxId, Entity},
+            entity::{hitbox::PlayerHitboxId, Entity},
         },
         networkable::ClassId,
     }, setting, vmt_call
@@ -64,7 +64,7 @@ impl Visuals {
                         time = 2.0;
                         color = LIGHT_RED;
                         alpha = 30;
-                        if trace.hitbox_id == HitboxId::Head as usize&& weapon.can_headshot() {
+                        if trace.hitbox_id == PlayerHitboxId::Head as usize&& weapon.can_headshot() {
                             color = GREEN;
                         }
                     }

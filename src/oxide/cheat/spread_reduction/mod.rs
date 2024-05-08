@@ -59,7 +59,7 @@ impl SpreadReduction {
             gun.as_weapon().get_info().weapon_data[gun.as_weapon().get_mode()].time_fire_delay;
 
         let accuracy_delay = if bullet_count == 1 { 1.25 } else { 0.25 };
-        if last_shot > accuracy_delay {
+        if last_shot >= accuracy_delay {
             return true;
         }
         if (hit_cone.powi(2) / spread_cone.powi(2))

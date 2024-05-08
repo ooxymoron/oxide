@@ -69,7 +69,7 @@ impl AimbotWindow {
             y
         ));
         a!(Checkbox::new("silent", s!().aimbot.silent.clone(), 10, y));
-        a!(Checkbox::new("aim while on delays", s!().aimbot.aim_while_on_delays.clone(), 10, y));
+        a!(Checkbox::new("fire only when able", s!().aimbot.fire_only_when_able.clone(), 10, y));
         y+= 20;
 
         a!(Checkbox::new(
@@ -99,12 +99,6 @@ impl AimbotWindow {
         y+= 20;
 
         a!(Checkbox::new(
-            "ambasador wait for hs",
-            s!().aimbot.ambasador_wait_for_hs.clone(),
-            10,
-            y
-        ));
-        a!(Checkbox::new(
             "wait for charge",
             s!().aimbot.wait_for_charge.clone(),
             10,
@@ -127,6 +121,12 @@ impl AimbotWindow {
         a!(Checkbox::new(
             "auto unzoom",
             s!().aimbot.auto_unscope.clone(),
+            10,
+            y
+        ));
+        a!(Checkbox::new(
+            "auto rev",
+            s!().aimbot.auto_rev.clone(),
             10,
             y
         ));
