@@ -61,7 +61,7 @@ impl PaintFrame {
                 &mut h
             );
             if center_vertically {
-                y += h / 2;
+                y -= h / 2;
             }
             if center_horizontaly {
                 x -= w / 2;

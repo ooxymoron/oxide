@@ -7,7 +7,7 @@ use std::{
 use crate::{cfn, interface, math::vector3::Vector3, vmt_call};
 
 use super::{
-    entity::{player::Player, Entity, hitbox::HitboxId},
+    entity::{player::Player, Entity},
     networkable::ClassId,
     WithVmt,
 };
@@ -156,7 +156,7 @@ pub struct Trace {
     pub hit_group: i32,
     pub physics_bone: i16,
     pub entity: *const Entity,
-    pub hitbox_id: HitboxId,
+    pub hitbox_id: usize,
 }
 
 #[repr(C)]

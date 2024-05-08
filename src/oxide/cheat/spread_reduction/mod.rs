@@ -34,8 +34,7 @@ impl SpreadReduction {
         }
     }
     pub fn should_run(&self) -> bool {
-        let Ok(player) = Player::get_local() else {return false };
-        setting!(aimbot, spread_reduction) && player.can_attack()
+        setting!(aimbot, spread_reduction) && Player::get_local().is_ok()
     }
 }
 
@@ -74,10 +73,10 @@ impl SpreadReduction {
         false
     }
     pub fn create_move(&mut self, cmd: &mut UserCmd, target: Option<Target>) {
+        let p_local = Player::get_local().unwrap();
         if !cmd.buttons.get(ButtonFlags::InAttack) {
             return;
         }
-        let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let Ok(gun) = weapon.as_gun() else { return };
         let spread_cone = vmt_call!(gun, get_projectile_spread);
@@ -110,9 +109,10 @@ impl SpreadReduction {
 
         let dirs = cmd.viewangles.to_angles().to_vectors();
         cmd.viewangles = dirs.forward.angle().to_view_angles();
-        cmd.viewangles =
-            (dirs.forward + dirs.right * spread_correction.x - dirs.up * spread_correction.y)
-                .angle().to_view_angles()
+        cmd.viewangles = (dirs.forward + dirs.right * spread_correction.x
+            - dirs.up * spread_correction.y)
+            .angle()
+            .to_view_angles()
     }
     pub fn calculate_spread_correction(&self, mut bullets: Vec<Vector2>, hit_cone: f32) -> Vector2 {
         let mut best = (vec![], Vector2::zeroed());

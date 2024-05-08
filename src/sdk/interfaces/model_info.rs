@@ -1,3 +1,4 @@
+use std::usize;
 pub use std::{
     ffi::{c_char, CStr},
     mem::{size_of, transmute},
@@ -11,11 +12,7 @@ use crate::{
     math::{vector3::Vector3, vector4::Vector4},
 };
 
-use super::{
-    entity::hitbox::{Hitbox, HitboxId},
-    model_render::BoneMatrix,
-    WithVmt,
-};
+use super::{entity::hitbox::Hitbox, model_render::BoneMatrix, WithVmt};
 
 pub type ModelInfo = WithVmt<VMTModelInfo>;
 
@@ -28,10 +25,13 @@ pub struct HitboxSet {
 }
 
 impl HitboxSet {
-    pub fn get_hitbox(&self, id: HitboxId) -> OxideResult<&Hitbox> {
-        let ptr = (self as *const _ as i64
-            + self.hitboxindex as i64
-            + size_of::<Hitbox>() as i64 * id as i64) as *const Hitbox;
+    pub fn get_hitbox(&self, id: usize) -> OxideResult<&Hitbox> {
+        if id >= self.numhitboxes as usize {
+            return Err(OxideError::new("hitbox index out of bounds"));
+        }
+        let ptr = (self as *const _ as usize
+            + self.hitboxindex as usize
+            + size_of::<Hitbox>() as usize * id) as *const Hitbox;
         if ptr.is_null() {
             return Err(OxideError::new("could not get hitbox"));
         }

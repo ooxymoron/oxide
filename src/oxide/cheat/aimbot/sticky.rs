@@ -37,7 +37,7 @@ impl Aimbot {
                     continue;
                 }
             }
-            let hitbox = pipe.get_hitbox(HitboxId::Head)?;
+            let hitbox = pipe.get_hitbox(HitboxId::Head as usize)?;
 
             let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                 continue;

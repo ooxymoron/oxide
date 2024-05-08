@@ -1,4 +1,4 @@
-use std::mem::transmute;
+use std::{mem::transmute, usize};
 
 use crate::{
     draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED, WHITE}, interface, math::angles::Angles, sdk::{
@@ -64,7 +64,7 @@ impl Visuals {
                         time = 2.0;
                         color = LIGHT_RED;
                         alpha = 30;
-                        if trace.hitbox_id == HitboxId::Head && weapon.can_headshot() {
+                        if trace.hitbox_id == HitboxId::Head as usize&& weapon.can_headshot() {
                             color = GREEN;
                         }
                     }

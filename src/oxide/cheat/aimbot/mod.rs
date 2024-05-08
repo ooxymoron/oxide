@@ -1,3 +1,5 @@
+use std::usize;
+
 use crate::{
     draw::event::EventType,
     error::OxideResult,
@@ -35,7 +37,7 @@ pub struct Aimbot {
 pub struct Target {
     pub point: Vector3,
     pub ent: &'static Entity,
-    pub hitbox_id: HitboxId,
+    pub hitbox_id: usize,
     pub prio: Priority,
 }
 
@@ -78,7 +80,7 @@ impl Aimbot {
             let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
 
             if trace.entity != hitbox.owner
-                || (hitbox.id == HitboxId::Head && trace.hitbox_id != hitbox.id)
+                || (hitbox.id == HitboxId::Head as usize && trace.hitbox_id != hitbox.id)
             {
                 continue;
             }

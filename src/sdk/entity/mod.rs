@@ -15,7 +15,7 @@ use crate::{
     o, vmt_call,
 };
 
-use self::hitbox::{HitboxId, HitboxWrapper};
+use self::hitbox::HitboxWrapper;
 use self::{
     interfaces::model_info::StudioHdr, interfaces::model_render::BoneMatrix, networkable::ClassId,
     object::Object, pipe::PipeBomb, player::Player, weapon::Weapon,
@@ -181,10 +181,10 @@ impl Entity {
 }
 
 impl Entity {
-    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> OxideResult<&mut HitboxWrapper> {
+    pub fn get_hitbox(&self, hitbox_id: usize) -> OxideResult<&mut HitboxWrapper> {
         Ok(self.get_hitboxes()?.get_mut(&hitbox_id).unwrap())
     }
-    pub fn calculate_hitboxes(&self) -> OxideResult<HashMap<HitboxId, HitboxWrapper>> {
+    pub fn calculate_hitboxes(&self) -> OxideResult<HashMap<usize, HitboxWrapper>> {
         let rend = self.as_renderable();
 
         let bones = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -203,10 +203,9 @@ impl Entity {
         let hitbox_set = studio_model
             .get_hitbox_set(HITBOX_SET)
             .ok_or(OxideError::new("could not get hitboxes"))?;
-       (0..hitbox_set.numhitboxes) 
+        (0..hitbox_set.numhitboxes as usize)
             .into_iter()
             .map(|id| {
-                let id = unsafe { transmute::<_,HitboxId>(id) };
                 let hitbox = hitbox_set.get_hitbox(id)?;
                 Ok((
                     id,
@@ -225,7 +224,7 @@ impl Entity {
             .collect()
     }
 
-    pub fn get_hitboxes(&self) -> OxideResult<&mut HashMap<HitboxId, HitboxWrapper>> {
+    pub fn get_hitboxes(&self) -> OxideResult<&mut HashMap<usize, HitboxWrapper>> {
         Ok(o!()
             .last_entity_cache
             .as_mut()

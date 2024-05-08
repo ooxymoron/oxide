@@ -1,3 +1,5 @@
+use std::usize;
+
 use crate::{
     error::OxideResult,
     o,
@@ -46,7 +48,7 @@ impl<'player> Aimbot {
             hitboxes
                 .values()
                 .map(|hitbox| {
-                    if matches!(hitbox.id, HitboxId::Pelvis) {
+                    if hitbox.id == HitboxId::Pelvis as usize {
                         (1, hitbox)
                     } else {
                         (0, hitbox)
@@ -64,7 +66,7 @@ impl<'player> Aimbot {
             hitboxes
                 .values()
                 .map(|hitbox| {
-                    if matches!(hitbox.id, HitboxId::Head) {
+                    if hitbox.id == HitboxId::Head as usize {
                         (1, hitbox)
                     } else {
                         (0, hitbox)

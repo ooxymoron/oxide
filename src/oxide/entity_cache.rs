@@ -4,10 +4,7 @@ use crate::{
     error::{OxideError, OxideResult},
     interface, o,
     sdk::{
-        entity::{
-            hitbox::{HitboxId, HitboxWrapper},
-            Entity,
-        },
+        entity::{hitbox::HitboxWrapper, Entity},
         networkable::ClassId,
     },
     vmt_call,
@@ -16,7 +13,7 @@ use crate::{
 #[derive(Debug)]
 pub struct EntityCache {
     pub entities: HashMap<ClassId, Vec<u32>>,
-    hitboxes: HashMap<u32, HashMap<HitboxId, HitboxWrapper>>,
+    hitboxes: HashMap<u32, HashMap<usize, HitboxWrapper>>,
 }
 
 impl EntityCache {
@@ -43,7 +40,7 @@ impl EntityCache {
             hitboxes: HashMap::new(),
         })
     }
-    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&mut HashMap<HitboxId, HitboxWrapper>> {
+    pub fn get_hitboxes(&mut self, id: u32) -> OxideResult<&mut HashMap<usize, HitboxWrapper>> {
         if self.hitboxes.contains_key(&id) {
             return Ok(self.hitboxes.get_mut(&id).unwrap());
         }

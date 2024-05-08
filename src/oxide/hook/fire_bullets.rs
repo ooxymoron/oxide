@@ -1,3 +1,5 @@
+use std::borrow::BorrowMut;
+
 use crate::{
     call_original, cfn, get_cheat, interface,
     math::{angles::Angles, vector3::Vector3},
@@ -37,12 +39,15 @@ pub extern "C" fn hook(
     critical: bool,
 ) {
     if player_id == vmt_call!(interface!(base_engine), get_local_player) {
-        seed = if let State::SYNCED { last_seed, .. } = get_cheat!(SpreadReduction).state {
-            if let Some(last_seed) = last_seed {
-                last_seed
+        seed = if let State::SYNCED { last_seed, .. } = get_cheat!(SpreadReduction).state.borrow_mut() {
+            let seed = if let Some(last_seed) = last_seed {
+                *last_seed
             } else {
                 seed
-            }
+            };
+            *last_seed = None;
+
+            seed
         } else {
             seed
         };

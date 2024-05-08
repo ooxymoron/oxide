@@ -21,7 +21,7 @@ pub struct Hitbox {
 #[derive(Debug, Clone, Copy)]
 pub struct HitboxWrapper {
     pub bone: BoneMatrix,
-    pub id: HitboxId,
+    pub id: usize,
     pub group: i32,
     pub min: Vector3,
     pub max: Vector3,
