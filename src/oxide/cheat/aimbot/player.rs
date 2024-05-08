@@ -126,8 +126,13 @@ impl<'player> Aimbot {
             let hp = vmt_call!(player, get_health) as f32;
             if matches!(hitbox_order_prio, HitboxPriority::PrioHead) {
                 if let Ok(gun) = weapon.as_gun() {
-                    if setting!(aimbot, wait_for_charge) && hp > gun.get_damage(true) {
-                        continue;
+                    if setting!(aimbot, wait_for_charge) {
+                        if hp > gun.get_damage(true) {
+                            continue;
+                        }
+                        if hp > gun.get_damage(false) {
+                            hitbox_order_prio = HitboxPriority::HeadOnly;
+                        }
                     }
                     if gun.get_damage(false) >= hp && setting!(aimbot, baim_if_lethal) {
                         hitbox_order_prio = HitboxPriority::BodyOnly;
@@ -148,7 +153,7 @@ impl<'player> Aimbot {
                 };
 
                 if let Some(target) = &best_target {
-                    if target.prio.point > point_prio && target.prio.hitbox == hitbox_prio{
+                    if target.prio.point > point_prio && target.prio.hitbox == hitbox_prio {
                         continue;
                     }
                 }

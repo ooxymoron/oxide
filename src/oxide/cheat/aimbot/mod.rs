@@ -131,7 +131,7 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
-            target = if setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
+            target = if !setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
                 self.find_targets()?
             } else {
                 None
