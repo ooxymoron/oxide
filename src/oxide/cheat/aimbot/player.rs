@@ -16,7 +16,10 @@ use crate::{
 use super::{priority::Priority, Aimbot, Target};
 
 impl<'player> Aimbot {
-    pub fn player_hitbox_order(&self, player: &'player Player) -> Vec<(isize, &'player HitboxWrapper)> {
+    pub fn player_hitbox_order(
+        &self,
+        player: &'player Player,
+    ) -> Vec<(isize, &'player HitboxWrapper)> {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let baim = (|| {
@@ -40,9 +43,16 @@ impl<'player> Aimbot {
             {
                 return vec![];
             }
-            vec![
-                (0, hitboxes.get(&HitboxId::Pelvis).unwrap()),
-            ]
+            hitboxes
+                .values()
+                .map(|hitbox| {
+                    if matches!(hitbox.id, HitboxId::Pelvis) {
+                        (1, hitbox)
+                    } else {
+                        (0, hitbox)
+                    }
+                })
+                .collect()
         } else {
             if weapon.is_sniper_rifle()
                 && setting!(aimbot, wait_for_charge)
@@ -51,10 +61,16 @@ impl<'player> Aimbot {
             {
                 return vec![];
             }
-            vec![
-                (1, hitboxes.get(&HitboxId::Head).unwrap()),
-                (0, hitboxes.get(&HitboxId::Pelvis).unwrap()),
-            ]
+            hitboxes
+                .values()
+                .map(|hitbox| {
+                    if matches!(hitbox.id, HitboxId::Head) {
+                        (1, hitbox)
+                    } else {
+                        (0, hitbox)
+                    }
+                })
+                .collect()
         }
     }
     pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {

@@ -5,6 +5,7 @@ use sdl2_sys::SDL_Scancode;
 use crate::{
     draw::event::EventType,
     error::OxideResult,
+    math::vector3::Vector3,
     o, s,
     sdk::{
         condition::ConditionFlags,
@@ -42,6 +43,7 @@ impl Visuals {
         self.update_spectators()?;
         Ok(())
     }
+    //move to fire event
     pub fn update_spectators(&mut self) -> OxideResult<()> {
         let p_local = Player::get_local()?;
         let ent = if vmt_call!(p_local.as_ent(), is_alive) {
@@ -91,7 +93,8 @@ impl Visuals {
 
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         for id in o!()
-            .last_entity_cache.as_ref()
+            .last_entity_cache
+            .as_ref()
             .unwrap()
             .get_ent(ClassId::CTFPlayer)
         {
@@ -132,18 +135,12 @@ impl Visuals {
         if setting!(visual, third_person) && (zoomed && setting!(visual, remove_zoom) || !zoomed) {
             let dirs = vmt_call!(p_local.as_ent(), get_abs_angles).to_vectors();
             *force_taunt_cam = true;
-            let x = setting!(visual, tp_offset_x);
-            let y = setting!(visual, tp_offset_y);
-            let z = setting!(visual, tp_offset_z);
-            view_setup.origin.x += x * dirs.forward.x;
-            view_setup.origin.y += x * dirs.right.x;
-            view_setup.origin.z += x * dirs.up.x;
-            view_setup.origin.x += y * dirs.forward.y;
-            view_setup.origin.y += y * dirs.right.y;
-            view_setup.origin.z += y * dirs.up.y;
-            view_setup.origin.x += z * dirs.forward.z;
-            view_setup.origin.y += z * dirs.right.z;
-            view_setup.origin.z += z * dirs.up.z;
+            let offset = Vector3::new(
+                setting!(visual, tp_offset_x),
+                setting!(visual, tp_offset_y),
+                setting!(visual, tp_offset_z),
+            );
+            view_setup.origin += dirs.forward * offset.x + dirs.right * offset.y + dirs.up * offset.z;
         } else {
             *force_taunt_cam = false;
         }

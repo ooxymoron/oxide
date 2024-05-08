@@ -34,7 +34,8 @@ impl SpreadReduction {
         }
     }
     pub fn should_run(&self) -> bool {
-        setting!(aimbot, spread_reduction) && Player::get_local().is_ok()
+        let Ok(player) = Player::get_local() else {return false };
+        setting!(aimbot, spread_reduction) && player.can_attack()
     }
 }
 

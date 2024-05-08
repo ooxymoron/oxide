@@ -1,10 +1,6 @@
 use crate::{
     error::OxideResult,
-    hex_to_rgb, interface,
-    math::view_matrix::VMatrix,
-    o,
-    oxide::entity_cache::EntityCache,
-    rgb_to_hex,
+    hex_to_rgb, interface, o, rgb_to_hex,
     sdk::{
         entity::{
             hitbox::{HitboxId, HitboxWrapper},
@@ -16,13 +12,14 @@ use crate::{
     setting, vmt_call,
 };
 
-use super::Paint;
+use super::{frame::PaintFrame, Paint};
 
 impl Paint {
-    pub fn draw_hitboxes(&mut self, cache: &EntityCache) -> OxideResult<()> {
+    pub fn draw_hitboxes(&mut self, frame: &PaintFrame) -> OxideResult<()> {
         if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual, hitboxes) {
             return Ok(());
         }
+        let Some(cache) = o!().last_entity_cache.as_ref() else {return Ok(())};
         let p_local = Player::get_local()?;
         for id in cache.get_ent(ClassId::CTFPlayer) {
             let Some(player) = Entity::get_ent(id ) else {continue};
@@ -34,7 +31,7 @@ impl Paint {
             let color = rgb_to_hex!(r as f32, g as f32, b as f32);
             let hitboxes = player.get_hitboxes()?;
             for hitbox in hitboxes.values_mut() {
-                self.draw_hitbox(hitbox, color, 30)?;
+                self.draw_hitbox(frame, hitbox, color, 30)?;
             }
         }
         for id in cache.get_ent(ClassId::CObjectSentrygun) {
@@ -51,7 +48,7 @@ impl Paint {
             let color = rgb_to_hex!(r as f32, g as f32, b as f32);
             let hitboxes = sentry.get_hitboxes()?;
             for hitbox in hitboxes.values_mut() {
-                self.draw_hitbox(hitbox, color, 50)?;
+                self.draw_hitbox(frame, hitbox, color, 50)?;
             }
         }
         for id in cache.get_ent(ClassId::CTFGrenadePipebombProjectile) {
@@ -65,19 +62,22 @@ impl Paint {
             let team = vmt_call!(pipe, get_team_number);
 
             let hitbox = pipe.get_hitbox(HitboxId::Head)?;
-            self.draw_hitbox(hitbox, team.color(), 10)?;
+            self.draw_hitbox(frame, hitbox, team.color(), 10)?;
         }
         Ok(())
     }
     pub fn draw_hitbox(
         &mut self,
+        frame: &PaintFrame,
         hitbox: &mut HitboxWrapper,
         color: usize,
         alpha: u8,
     ) -> OxideResult<()> {
         let corners = hitbox.corners()?;
-        let v_matrix = VMatrix::default();
-        let corners = corners.iter().map(|x| v_matrix.world_to_screen(x)).collect::<Vec<_>>();
+        let corners = corners
+            .iter()
+            .map(|x| frame.vmatrix.world_to_screen(x))
+            .collect::<Vec<_>>();
 
         let pairs = [
             (&corners[0], &corners[1]),
@@ -94,6 +94,8 @@ impl Paint {
             (&corners[4], &corners[5]),
         ];
 
+        let (r, g, b) = hex_to_rgb!(color);
+        vmt_call!(interface!(surface), set_color, r, g, b, alpha);
         for pair in pairs {
             let Some(pos1) = &pair.0 else {
                 continue;
@@ -101,8 +103,6 @@ impl Paint {
             let Some(pos2) = &pair.1 else {
                 continue;
             };
-            let (r, g, b) = hex_to_rgb!(color);
-            vmt_call!(interface!(surface), set_color, r, g, b, alpha);
 
             vmt_call!(
                 interface!(surface),

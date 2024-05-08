@@ -5,7 +5,7 @@ use crate::{
         spread_reduction::{seed_prediction::State, SpreadReduction},
         visual::Visuals,
     },
-    sdk::entity::{player::Player, weapon::Weapon},
+    sdk::entity::weapon::Weapon,
     vmt_call,
 };
 
@@ -47,7 +47,6 @@ pub extern "C" fn hook(
             seed
         };
         get_cheat!(Visuals).draw_fire_tracer(angles);
-        
     }
     call_original!(
         NAME,

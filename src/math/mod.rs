@@ -27,8 +27,7 @@ pub fn get_corners(pos: &Vector3, rotation: &RotationVectors, min: &Vector3, max
         Vector3::new(min.x, min.y, min.z),
     ];
     for corner in &mut corners {
-        *corner = corner.rotate(&rotation) + pos.clone()
-        //*corner += pos.clone();
+        *corner = corner.rotate(&rotation) + *pos
     }
     corners
 }

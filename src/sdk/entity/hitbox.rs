@@ -32,8 +32,7 @@ pub struct HitboxWrapper {
 
 impl HitboxWrapper {
     pub fn center(&mut self) -> OxideResult<Vector3> {
-        let corners = self.corners()?;
-        Ok((corners[0] + corners[7]) / 2.0)
+        Ok(self.get_pos()?.0)
     }
     pub fn get_pos(&self) -> OxideResult<(Vector3, RotationVectors)> {
         let pos = Vector3::new(self.bone[0][3], self.bone[1][3], self.bone[2][3]);

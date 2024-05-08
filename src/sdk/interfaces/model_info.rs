@@ -22,9 +22,9 @@ pub type ModelInfo = WithVmt<VMTModelInfo>;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct HitboxSet {
-    sznameindex: i32,
-    numhitboxes: i32,
-    hitboxindex: i32,
+    pub sznameindex: i32,
+    pub numhitboxes: i32,
+    pub hitboxindex: i32,
 }
 
 impl HitboxSet {

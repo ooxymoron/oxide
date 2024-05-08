@@ -12,7 +12,7 @@ use crate::{
     math::{angles::Angles, vector3::Vector3},
     netvars::HasNetvars,
     o,
-    sdk::net_channel::LatencyFlow,
+    sdk::{camerd_third_data::CameraThirdData, net_channel::LatencyFlow},
     vmt_call,
 };
 
@@ -119,6 +119,7 @@ impl Player {
         ["baseclass", "localdata", "m_flFriction"],
         f32
     );
+
 }
 
 impl Player {

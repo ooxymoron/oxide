@@ -203,9 +203,10 @@ impl Entity {
         let hitbox_set = studio_model
             .get_hitbox_set(HITBOX_SET)
             .ok_or(OxideError::new("could not get hitboxes"))?;
-        HitboxId::all()
+       (0..hitbox_set.numhitboxes) 
             .into_iter()
             .map(|id| {
+                let id = unsafe { transmute::<_,HitboxId>(id) };
                 let hitbox = hitbox_set.get_hitbox(id)?;
                 Ok((
                     id,
