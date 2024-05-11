@@ -137,6 +137,6 @@ macro_rules! c_str_to_str {
 #[macro_export]
 macro_rules! get_cheat {
     ($cheat: ident) => {
-        crate::o!().cheats.get::<$cheat>($cheat::name())
+        crate::o!().cheats.get::<$cheat>()
     };
 }

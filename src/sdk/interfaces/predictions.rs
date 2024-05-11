@@ -1,4 +1,4 @@
-use crate::{cfn, impl_has_vmt, math::angles::{Angles, ViewAngles}};
+use crate::{cfn, impl_has_vmt, math::angles::Angles};
 
 use super::{entity::player::Player, game_movement::MoveData, user_cmd::UserCmd};
 
@@ -17,7 +17,7 @@ pub struct MoveHelper {
 pub struct VMTPrediction {
     _pad1: [usize; 13],
     pub get_local_view_angles: cfn!((), &mut Prediction, &mut Angles),
-    pub set_local_view_angles: cfn!((), &Prediction, &ViewAngles),
+    pub set_local_view_angles: cfn!((), &Prediction, &Angles),
     _pad2: [usize; 3],
     pub run_command: cfn!((), &Prediction, &Player, &UserCmd, &MoveHelper),
     pub setup_move: cfn!(

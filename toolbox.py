@@ -94,6 +94,7 @@ def build(dev=False):
 
 
 def start_tf2():
+    #const LAUNCH_OPTIONS_GAME = 'firejail --join=%JAILNAME% bash -c \'cd ~/$GAMEPATH && %REPLACE_RUNTIME% LD_PRELOAD=%LD_PRELOAD% DISPLAY=%DISPLAY% PULSE_SERVER="unix:/tmp/pulse.sock" ./hl2_linux -game tf -silent -sw -w 640 -h 200 -novid -nojoy -noshaderapi -nomouse -nomessagebox -nominidumps -nohltv -nobreakpad -reuse -noquicktime -precachefontchars -particles 512 -snoforceformat -softparticlesdefaultoff -wavonly -forcenovsync -threads 1\''
     with suppress(KeyboardInterrupt):
         run(["./tf_linux64", "-game", "tf", "-steam", "-novid", "-nojoy",
              "-nosteamcontroller", "-nohltv", "-particles", "1",

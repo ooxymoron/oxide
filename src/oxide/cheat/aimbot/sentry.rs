@@ -14,7 +14,7 @@ impl Aimbot {
             .last_entity_cache
             .as_ref()
             .unwrap()
-            .get_ent(ClassId::CObjectSentrygun)
+            .get_class_ids(ClassId::CObjectSentrygun)
         {
             let Some(mut sentry) = Entity::get_ent(id) else {continue};
             if vmt_call!(sentry.as_networkable(), is_dormant) {

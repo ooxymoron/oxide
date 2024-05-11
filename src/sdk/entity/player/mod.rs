@@ -1,25 +1,24 @@
 use std::{
+    any::Any,
     intrinsics::transmute_unchecked,
-    mem::{transmute, MaybeUninit},
+    mem::{transmute, MaybeUninit}, usize,
 };
 
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, define_offset,
-    error::{OxideError, OxideResult},
-    interface,
-    math::{angles::Angles, vector3::Vector3},
-    netvars::HasNetvars,
-    o,
-    sdk::net_channel::LatencyFlow,
-    vmt_call,
+    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, remap_clamped, vector3::Vector3}, netvars::HasNetvars, o, oxide::player_resource_manager::PlayerResourceData, sdk::{net_channel::LatencyFlow, EntHandle}, vmt_call
 };
 
 use self::anim_state::AnimState;
 
 use super::{
-    condition::Condition, flags::Flags, interfaces::base_engine::PlayerInfo, user_cmd::UserCmd, weapon::Weapon, Entity, WaterLevel
+    condition::Condition,
+    flags::Flags,
+    interfaces::base_engine::PlayerInfo,
+    user_cmd::UserCmd,
+    weapon::{ids::WeaponId, Weapon},
+    Entity, WaterLevel,
 };
 
 pub mod anim_state;
@@ -49,7 +48,7 @@ impl Player {
         };
         return ent.as_player();
     }
-    pub fn get_byt_user_id(id: u32) -> OxideResult<&'static mut Player> {
+    pub fn get_byt_user_id(id: i32) -> OxideResult<&'static mut Player> {
         let id = vmt_call!(interface!(base_engine), get_player_from_user_id, id);
         let Some(ent) = Entity::get_ent(id) else {
             return Err(OxideError::new("plocal is none"))
@@ -78,6 +77,45 @@ impl Player {
     }
     pub fn weapon(&self) -> &mut Weapon {
         vmt_call!(self.as_ent(), get_weapon)
+    }
+    pub fn get_weapons(&self) -> Vec<&'static mut Weapon> {
+        let mut weapons = Vec::new();
+        for weapon_handle in *self.get_weapon_handles() {
+            if weapon_handle < 0 {
+                break;
+            }
+            let weapon_id = weapon_handle & 0xFFFF;
+            let weapon = Entity::get_ent(weapon_id).unwrap().as_weapon().unwrap();
+            weapons.push(weapon);
+        }
+        weapons
+    }
+    pub fn get_weapon_by_id(&self, id: WeaponId) -> OxideResult<&mut Weapon> {
+        for weapon_handle in *self.get_weapon_handles() {
+            if weapon_handle < 0 {
+                break;
+            }
+            let weapon_id = weapon_handle & 0xFFFF;
+            let weapon = Entity::get_ent(weapon_id).unwrap().as_weapon().unwrap();
+            dbg!(vmt_call!(weapon, get_weapon_id) as i32);
+            if vmt_call!(weapon, get_weapon_id) != id {
+                continue;
+            }
+            return Ok(weapon);
+        }
+        Err(OxideError::new("wepaon not found"))
+    }
+    pub fn is_cirt_boosted(&self) -> bool {
+        (o!().util.is_crit_boosted)(self)
+    }
+    pub fn get_crit_mult(&self) -> f32 {
+        remap_clamped(*self.get_crit_mult_raw(), 0.0, 255.0, 1.0, 4.0)
+    }
+    pub fn get_resource_data(&self) -> PlayerResourceData{
+        let id = vmt_call!(self.as_ent(),get_index);
+        PlayerResourceData{
+            damage: o!().player_resource_manager.entity.as_mut().unwrap().get_damage_resource()[id as usize].clone()
+        }
     }
 }
 
@@ -121,6 +159,14 @@ impl Player {
         ["baseclass", "localdata", "m_flFriction"],
         f32
     );
+    define_netvar!(
+        get_weapon_handles,
+        ["baseclass", "baseclass", "m_hMyWeapons"],
+        [i32; MAX_WEAPONS]
+    );
+    define_netvar!(get_crit_mult_raw, ["m_Shared", "m_iCritMult"], f32);
+    define_netvar!(get_damage_done, ["m_Shared", "tfsharedlocaldata", "m_RoundScoreData", "m_iDamageDone"], f32);
+
 }
 
 impl Player {

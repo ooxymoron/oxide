@@ -35,12 +35,8 @@ impl Visuals {
             tp_offset_key_held: false,
         }
     }
-    pub fn name() -> &'static str {
-        "Visuals"
-    }
     pub fn net_update_end(&mut self) -> OxideResult<()> {
         self.remove_disguises()?;
-        self.update_spectators()?;
         Ok(())
     }
     //move to fire event
@@ -59,7 +55,7 @@ impl Visuals {
             return Ok(())
         };
         let mut spectators = vec![];
-        for id in cache.get_ent(ClassId::CTFPlayer) {
+        for id in cache.get_class_ids(ClassId::CTFPlayer) {
             let Some(spectator) = Entity::get_ent(id) else {continue};
             if vmt_call!(spectator.as_networkable(), is_dormant) {
                 continue;
@@ -96,7 +92,7 @@ impl Visuals {
             .last_entity_cache
             .as_ref()
             .unwrap()
-            .get_ent(ClassId::CTFPlayer)
+            .get_class_ids(ClassId::CTFPlayer)
         {
             let Some(player) = Entity::get_ent(id) else {continue};
             if vmt_call!(player.as_networkable(), is_dormant) {

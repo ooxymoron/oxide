@@ -8,7 +8,7 @@ use crate::{
         condition::ConditionFlags,
         entity::{
             player::Player,
-            weapon::ids::{WeaponId, WeaponType},
+            weapon::ids::{ItemDefinitionInex, WeaponId},
             Entity,
         },
         interfaces::{
@@ -42,9 +42,6 @@ pub struct Target {
 }
 
 impl Aimbot {
-    pub fn name() -> &'static str {
-        "Aimbot"
-    }
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
@@ -144,10 +141,10 @@ impl Aimbot {
                 let angle = diff.angle();
                 if setting!(aimbot, autoshoot) {
                     if self.shoot_weapon(cmd, Some(target)) {
-                        cmd.viewangles = angle.to_view_angles();
+                        cmd.viewangles = angle;
                     }
                 } else {
-                    cmd.viewangles = angle.to_view_angles();
+                    cmd.viewangles = angle;
                 }
             } else {
                 self.shoot_weapon(cmd, None);
@@ -176,7 +173,7 @@ impl Aimbot {
         };
 
         if weapon.is_sniper_rifle() {
-            let classic = matches!(id, WeaponType::SniperrifleClassic);
+            let classic = matches!(id, WeaponId::SniperrifleClassic);
             if setting!(aimbot, auto_scope) {
                 if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
@@ -185,7 +182,7 @@ impl Aimbot {
                 if !vmt_call!(weapon, can_fire_critical_shot, true)
                     && !matches!(
                         weapon.get_item_definition_index(),
-                        WeaponId::SniperMTheSydneySleeper
+                        ItemDefinitionInex::SniperMTheSydneySleeper
                     )
                 {
                     return false;
@@ -195,7 +192,7 @@ impl Aimbot {
             return true;
         }
         match id {
-            WeaponType::Knife => {
+            WeaponId::Knife => {
                 if weapon.as_mele().ready_to_backstab {
                     cmd.buttons.set(ButtonFlags::InAttack, true);
                     return true;

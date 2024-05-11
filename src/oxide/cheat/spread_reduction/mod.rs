@@ -24,9 +24,6 @@ pub struct SpreadReduction {
 }
 
 impl SpreadReduction {
-    pub fn name() -> &'static str {
-        "SpreadReduction"
-    }
     pub fn init() -> SpreadReduction {
         SpreadReduction {
             playerperf_send_data: None,
@@ -45,7 +42,7 @@ impl SpreadReduction {
         let dist = if let Some(target) = target {
             (target.point - src).len()
         } else {
-            let dir = cmd.viewangles.to_angles().to_vectors().forward * 1000000.0;
+            let dir = cmd.viewangles.to_vectors().forward * 1000000.0;
             let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
             let dist = (trace.endpos - trace.startpos).len();
             dist
@@ -82,12 +79,12 @@ impl SpreadReduction {
         let spread_cone = vmt_call!(gun, get_projectile_spread);
         let hit_cone = self.get_hit_cone(target, cmd);
         let weapon_id = vmt_call!(gun.as_weapon(), get_weapon_id);
-        if !matches!(self.state, State::SYNCED { .. }) {
+        if !matches!(self.state, State::SYNCED { .. }) || !self.should_run() {
             if setting!(aimbot, tapfire)
                 && ((setting!(aimbot, tapfire_only_minigun)
                     && matches!(
                         weapon_id,
-                        crate::sdk::entity::weapon::ids::WeaponType::Minigun
+                        crate::sdk::entity::weapon::ids::WeaponId::Minigun
                     ))
                     || !setting!(aimbot, tapfire_only_minigun))
             {
@@ -107,12 +104,11 @@ impl SpreadReduction {
 
         let spread_correction = self.calculate_spread_correction(bullets, hit_cone);
 
-        let dirs = cmd.viewangles.to_angles().to_vectors();
-        cmd.viewangles = dirs.forward.angle().to_view_angles();
+        let dirs = cmd.viewangles.to_vectors();
+        cmd.viewangles = dirs.forward.angle();
         cmd.viewangles = (dirs.forward + dirs.right * spread_correction.x
             - dirs.up * spread_correction.y)
             .angle()
-            .to_view_angles()
     }
     pub fn calculate_spread_correction(&self, mut bullets: Vec<Vector2>, hit_cone: f32) -> Vector2 {
         let mut best = (vec![], Vector2::zeroed());

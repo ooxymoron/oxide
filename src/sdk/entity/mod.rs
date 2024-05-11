@@ -67,10 +67,9 @@ pub struct VMTEntity {
     _pad2: [usize; 6],
     pub get_abs_origin: cfn!(*const Vector3, *const Entity),
     pub get_abs_angles: cfn!(&'static mut Angles, *const Entity),
-
     #[derivative(Debug = "ignore")]
     _pad3: [usize; 66],
-    pub get_index: cfn!(u32, &Entity),
+    pub get_index: cfn!(i32, &Entity),
     #[derivative(Debug = "ignore")]
     _pad4: [usize; 26],
     pub world_space_center: cfn!(&Vector3, &Entity),
@@ -234,7 +233,7 @@ impl Entity {
 }
 
 impl Entity {
-    pub fn get_ent(id: u32) -> Option<&'static mut Entity> {
+    pub fn get_ent(id: i32) -> Option<&'static mut Entity> {
         let ent = vmt_call!(interface!(entity_list), get_client_entity, id);
         if ent.is_null() {
             return None;
@@ -276,6 +275,10 @@ impl Entity {
         };
         return Ok(unsafe { transmute(self) });
     }
+    pub fn as_weapon(&mut self) -> OxideResult<&'static mut Weapon> {
+        //TODO: check if extends weaon
+        return Ok(unsafe { transmute(self) });
+    }
 }
 
 #[repr(C)]
@@ -295,6 +298,11 @@ impl Team {
 }
 
 impl PartialEq for &Entity {
+    fn eq(&self, other: &Self) -> bool {
+        *self as *const _ as usize == *other as *const _ as usize
+    }
+}
+impl PartialEq for &mut Entity {
     fn eq(&self, other: &Self) -> bool {
         *self as *const _ as usize == *other as *const _ as usize
     }

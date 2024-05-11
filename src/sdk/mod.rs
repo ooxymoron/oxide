@@ -26,6 +26,7 @@ pub mod user_message;
 pub mod net_channel;
 pub mod client_state;
 pub mod event_manager;
+pub mod player_resource;
 
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]

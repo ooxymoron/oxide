@@ -1,6 +1,8 @@
 use std::ffi::c_char;
 
-use crate::cfn;
+use std::ffi::CString;
+
+use crate::{cfn, vmt_call};
 
 use super::WithVmt;
 
@@ -22,3 +24,26 @@ pub struct VMTGameEvent {
 }
 
 pub type GameEvent = WithVmt<VMTGameEvent>;
+
+impl GameEvent {
+    pub fn get_int(&self, name: &str) -> Option<i32>{
+        let name = CString::new(name).unwrap();
+        let res = vmt_call!(self,get_int,name.as_ptr(),i32::MAX);
+        if res == i32::MAX {
+            return None;
+        }
+        return Some(res)
+    }
+    pub fn get_float(&self, name: &str) -> Option<f32>{
+        let name = CString::new(name).unwrap();
+        let res = vmt_call!(self,get_float,name.as_ptr(),f32::MAX);
+        if res == f32::MAX {
+            return None;
+        }
+        return Some(res)
+    }
+    pub fn get_bool(&self, name: &str) -> bool{
+        let name = CString::new(name).unwrap();
+        vmt_call!(self,get_bool,name.as_ptr(),false)
+    }
+}

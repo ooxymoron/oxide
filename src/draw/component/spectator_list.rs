@@ -39,7 +39,7 @@ impl Component for SpectatorList {
         &mut self.base
     }
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
-        let spectators = &o!().cheats.get::<Visuals>(Visuals::name()).spectators;
+        let spectators = &o!().cheats.get::<Visuals>().spectators;
         let mut y = self.base.y + self.base.h / 2;
         for (name, mode) in &*spectators.lock().unwrap() {
             let text = format!("[{}] {}", mode.to_string(), name);

@@ -108,7 +108,7 @@ impl<'player> Aimbot {
             .last_entity_cache
             .as_ref()
             .unwrap()
-            .get_ent(ClassId::CTFPlayer)
+            .get_class_ids(ClassId::CTFPlayer)
         {
             let Some(player) = Entity::get_ent(id) else {continue};
             if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {

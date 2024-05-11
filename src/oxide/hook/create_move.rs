@@ -1,6 +1,5 @@
 use crate::{
     define_hook, get_cheat,
-    math::angles::Angles,
     oxide::cheat::{aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction},
     sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
@@ -24,7 +23,7 @@ fn hook(
 
     let org_cmd = cmd.clone();
 
-    let mut movement = o!().cheats.get::<Movement>(Movement::name());
+    let mut movement = get_cheat!(Movement);
     movement.create_move(cmd).unwrap();
 
     if o!().engine_prediction.move_helper.is_some() {
@@ -35,7 +34,7 @@ fn hook(
         o!().engine_prediction.step().unwrap();
     }
 
-    let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
+    let mut aimbot = get_cheat!(Aimbot);
     let target = aimbot.create_move(cmd).unwrap();
 
     if o!().engine_prediction.move_helper.is_some() {
@@ -44,7 +43,7 @@ fn hook(
     let mut spread_reduction = get_cheat!(SpreadReduction);
     spread_reduction.create_move(cmd, target);
 
-    remove_punch();
+    remove_punch(cmd);
     movement.create_move_after(cmd, &org_cmd);
     !setting!(aimbot, silent)
 }
@@ -63,8 +62,7 @@ define_hook!(
     &mut UserCmd
 );
 
-pub fn remove_punch() {
+pub fn remove_punch(cmd: &mut UserCmd) {
     let p_local = Player::get_local().unwrap();
-    let punch_angle = p_local.get_punch_angle();
-    *punch_angle = Angles::new(0.0, 0.0, 0.0);
+    cmd.viewangles -= *p_local.get_punch_angle();
 }

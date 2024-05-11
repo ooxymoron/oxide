@@ -17,7 +17,7 @@ impl Aimbot {
             .last_entity_cache
             .as_ref()
             .unwrap()
-            .get_ent(ClassId::CTFGrenadePipebombProjectile)
+            .get_class_ids(ClassId::CTFGrenadePipebombProjectile)
         {
             let Some(mut pipe) = Entity::get_ent(id) else {continue};
             if vmt_call!(pipe.as_networkable(), is_dormant) {

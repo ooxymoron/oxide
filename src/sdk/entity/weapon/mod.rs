@@ -4,7 +4,7 @@ use crate::{o, vmt_call};
 
 use self::{
     entity::Entity,
-    ids::{WeaponId, WeaponType},
+    ids::{ItemDefinitionInex, WeaponId},
     info::WeaponInfo,
     interfaces::condition::ConditionFlags,
 };
@@ -20,20 +20,22 @@ pub mod info;
 pub struct VMTWeapon {
     #[derivative(Debug = "ignore")]
     _pad1: [usize; 79],
-    pub get_index: cfn!(isize, &'static Weapon),
+    pub get_index: cfn!(isize, &Weapon),
     #[derivative(Debug = "ignore")]
-    _pad2: [usize; 318],
-    pub get_slot: cfn!(isize, &'static Weapon),
+    _pad2: [usize; 137],
+    pub primary_attack: cfn!((), &Weapon),
+    _pad21: [usize; 47],
+    pub get_slot: cfn!(isize, &Weapon),
     #[derivative(Debug = "ignore")]
     _pad3: [usize; 1],
-    pub get_name: cfn!(CStr, &'static Weapon),
+    pub get_name: cfn!(CStr, &Weapon),
     #[derivative(Debug = "ignore")]
     _pad4: [usize; 48],
-    pub get_weapon_id: cfn!(WeaponType, &Weapon),
+    pub get_weapon_id: cfn!(WeaponId, &Weapon),
     pub get_damage_type: cfn!(isize, &Weapon),
     #[derivative(Debug = "ignore")]
     _pad5: [usize; 14],
-    pub calc_is_attack_critical_helper: cfn!(bool, &'static Weapon),
+    pub calc_is_attack_critical_helper: cfn!(bool, &Weapon),
     #[derivative(Debug = "ignore")]
     _pad6: [usize; 28],
     pub can_fire_critical_shot: cfn!(bool, &Weapon, bool), //0x525
@@ -75,7 +77,7 @@ impl Gun {
         if crit
             && matches!(
                 self.as_weapon().get_item_definition_index(),
-                WeaponId::SniperMTheSydneySleeper
+                ItemDefinitionInex::SniperMTheSydneySleeper
             )
         {
             mult = 1.35
@@ -141,16 +143,16 @@ impl Weapon {
     pub fn is_sniper_rifle(&mut self) -> bool {
         matches!(
             vmt_call!(self, get_weapon_id),
-            WeaponType::Sniperrifle | WeaponType::SniperrifleClassic | WeaponType::SniperrifleDecap
+            WeaponId::Sniperrifle | WeaponId::SniperrifleClassic | WeaponId::SniperrifleDecap
         )
     }
     pub fn is_minigun(&mut self) -> bool {
-        matches!(vmt_call!(self, get_weapon_id), WeaponType::Minigun)
+        matches!(vmt_call!(self, get_weapon_id), WeaponId::Minigun)
     }
     pub fn is_ambassador(&mut self) -> bool {
         matches!(
             self.get_item_definition_index(),
-            WeaponId::SpyMTheAmbassador | WeaponId::SpyMFestiveAmbassador
+            ItemDefinitionInex::SpyMTheAmbassador | ItemDefinitionInex::SpyMFestiveAmbassador
         )
     }
     pub fn can_headshot(&mut self) -> bool {
@@ -171,6 +173,8 @@ impl Weapon {
         }) as usize
     }
 }
+
+
 impl HasNetvars for Weapon {
     fn get_class_name() -> &'static str {
         "CTFWeaponBase"
@@ -189,7 +193,7 @@ impl Weapon {
             "m_Item",
             "m_iItemDefinitionIndex"
         ],
-        WeaponId
+        ItemDefinitionInex
     );
     define_netvar!(
         get_next_primary_attack,
@@ -207,9 +211,23 @@ impl Weapon {
     );
 
     define_netvar!(get_clip1, ["baseclass", "LocalWeaponData", "m_iClip1"], i32);
+    define_netvar!(get_owner, ["baseclass", "m_hOwner"], EntHandle);
+    define_netvar!(get_observed_crit_chance, ["LocalActiveTFWeaponData", "m_flObservedCritChance"], f32);
+
 }
 
 impl_has_vmt!(Weapon, VMTWeapon);
+
+pub enum WeaponMode {
+    Invalid = -1,
+    Hitscan = 0,
+    Projectile,
+    Melee,
+    Pda,
+    Medigun,
+    Consumable,
+    Throwable
+}
 
 //CTFWeaponBase{
 //CTFWeaponBase m_bDisguiseWeapon

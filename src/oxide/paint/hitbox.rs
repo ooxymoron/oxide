@@ -21,7 +21,7 @@ impl Paint {
         }
         let Some(cache) = o!().last_entity_cache.as_ref() else {return Ok(())};
         let p_local = Player::get_local()?;
-        for id in cache.get_ent(ClassId::CTFPlayer) {
+        for id in cache.get_class_ids(ClassId::CTFPlayer) {
             let Some(player) = Entity::get_ent(id ) else {continue};
             if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {
                 continue;
@@ -34,7 +34,7 @@ impl Paint {
                 self.draw_hitbox(frame, hitbox, color, 30)?;
             }
         }
-        for id in cache.get_ent(ClassId::CObjectSentrygun) {
+        for id in cache.get_class_ids(ClassId::CObjectSentrygun) {
             let Some(sentry) = Entity::get_ent(id ) else {continue};
             if vmt_call!(sentry.as_networkable(), is_dormant) {
                 continue;
@@ -51,7 +51,7 @@ impl Paint {
                 self.draw_hitbox(frame, hitbox, color, 50)?;
             }
         }
-        for id in cache.get_ent(ClassId::CTFGrenadePipebombProjectile) {
+        for id in cache.get_class_ids(ClassId::CTFGrenadePipebombProjectile) {
             let Some(pipe) = Entity::get_ent(id) else {continue};
             if vmt_call!(pipe.as_networkable(), is_dormant) {
                 continue;

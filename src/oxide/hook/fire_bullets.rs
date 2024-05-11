@@ -16,7 +16,7 @@ pub const NAME: &str = "FireBullets";
 pub type FireBullets = cfn!(
     (),
     &Weapon,
-    u32,
+    i32,
     &Vector3,
     &Angles,
     u32,
@@ -28,7 +28,7 @@ pub type FireBullets = cfn!(
 );
 pub extern "C" fn hook(
     weapon: &Weapon,
-    player_id: u32,
+    player_id: i32,
     origin: &Vector3,
     angles: &Angles,
     weapon_id: u32,

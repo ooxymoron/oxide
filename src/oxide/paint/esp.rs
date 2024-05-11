@@ -43,7 +43,7 @@ impl Paint {
         }
         let Some(cache) = o!().last_entity_cache.as_ref() else {return Ok(())};
         let p_local = Player::get_local()?;
-        for id in cache.get_ent(ClassId::CTFPlayer) {
+        for id in cache.get_class_ids(ClassId::CTFPlayer) {
             let Some(ent) = Entity::get_ent(id) else {
                 continue;
             };
@@ -76,7 +76,7 @@ impl Paint {
             self.paint_esp_box(frame, ent, true, true, Some(&name), conditions);
         }
         if setting!(visual, esp_sentreis) {
-            for id in cache.get_ent(ClassId::CObjectSentrygun) {
+            for id in cache.get_class_ids(ClassId::CObjectSentrygun) {
                 let Some(ent) = Entity::get_ent(id) else{
                     continue;
                 };
@@ -97,7 +97,7 @@ impl Paint {
         }
 
         if setting!(visual, esp_projectiles) {
-            for id in cache.get_ent(ClassId::CTFProjectileRocket) {
+            for id in cache.get_class_ids(ClassId::CTFProjectileRocket) {
                 let Some(ent) = Entity::get_ent(id) else{
                     continue;
                 };
@@ -108,7 +108,7 @@ impl Paint {
                 }
                 self.paint_esp_box(frame, ent, false, false, Some("rocket"), vec![]);
             }
-            for id in cache.get_ent(ClassId::CTFGrenadePipebombProjectile) {
+            for id in cache.get_class_ids(ClassId::CTFGrenadePipebombProjectile) {
                 let Some(ent) = Entity::get_ent(id) else{
                     continue;
                 };
@@ -170,8 +170,9 @@ impl Paint {
         let maxx = maxx.unwrap();
         let miny = miny.unwrap();
         let maxy = maxy.unwrap();
+        
 
-        if r#box {
+        if r#box{
             let (r, g, b) = hex_to_rgb!(team.color());
             vmt_call!(interface!(surface), set_color, r, g, b, 50);
             vmt_call!(

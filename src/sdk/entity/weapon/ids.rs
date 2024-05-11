@@ -1,8 +1,8 @@
 use derivative::Derivative;
 
-
-#[derive(Debug)]
-pub enum WeaponType {
+#[derive(Debug, Hash, PartialEq, PartialOrd, Eq, Clone)]
+#[repr(i32)]
+pub enum WeaponId {
     None = 0,
     Bat,
     BatWood,
@@ -109,8 +109,8 @@ pub enum WeaponType {
     ChargedSmg,
 }
 
-#[derive(Derivative, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-pub enum WeaponId {
+#[derive(Derivative, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
+pub enum ItemDefinitionInex {
     ScoutMScattergun = 13,
     ScoutMScattergunR = 200,
     ScoutMForceANature = 45,

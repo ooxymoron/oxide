@@ -2,7 +2,7 @@ use std::mem::transmute;
 
 use libc::c_void;
 
-use crate::math::angles::{Angles, ViewAngles};
+use crate::math::angles::Angles;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -10,7 +10,7 @@ pub struct UserCmd {
     pub vmt: &'static c_void,
     pub command_number: i32,
     pub tick_count: i32,
-    pub viewangles: ViewAngles,
+    pub viewangles: Angles,
     pub forwardmove: f32,
     pub sidemove: f32,
     pub upmove: f32,

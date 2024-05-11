@@ -33,9 +33,6 @@ impl Movement {
             jumped_last_cmd: false,
         }
     }
-    pub fn name() -> &'static str {
-        "Movement"
-    }
     pub fn create_move(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
         let p_local = Player::get_local()?;
         if p_local.get_flags().get(Flag::INWATER)

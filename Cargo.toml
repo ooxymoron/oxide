@@ -1,9 +1,9 @@
 [package]
 name = "oxide"
-authors = ["SNIAPA"]
+authors = ["oxymoron"]
 version = "0.8.9"
 edition = "2021"
-repository = "https://github.com/SNIAPA/oxide"
+repository = "https://github.com/ooxymoron/oxide"
 
 [lib]
 crate-type = ["dylib"]
