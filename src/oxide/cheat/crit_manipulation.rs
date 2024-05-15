@@ -1,7 +1,7 @@
 use std::mem::transmute;
 
 use crate::{
-    draw::event::EventType,
+    draw::event::Event,
     log, o,
     sdk::{
         entity::{player::Player, weapon::Weapon},
@@ -26,7 +26,7 @@ const TF_DAMAGE_CRIT_CHANCE: f32 = 0.02;
 //const TF_DAMAGE_CRITMOD_DAMAGE: i32 = 800;
 //const TF_DAMAGE_CRITMOD_MAXMULT: i32 = 6;
 //
-//const TF_DAMAGE_CRIT_MULTIPLIER: f32 = 3.0;
+const TF_DAMAGE_CRIT_MULTIPLIER: f32 = 3.0;
 //const TF_DAMAGE_MINICRIT_MULTIPLIER: f32 = 1.35;
 
 #[derive(Debug)]
@@ -88,7 +88,8 @@ impl CritManipulation {
         let owner_index = vmt_call!(owner.as_ent(), get_index);
         let index_seed_mask = (weapon_index << 8) | owner_index;
 
-        let crit_chance = owner.get_crit_mult() * TF_DAMAGE_CRIT_CHANCE * WEAPON_RANDOM_RANGE as f32;
+        let crit_chance =
+            owner.get_crit_mult() * TF_DAMAGE_CRIT_CHANCE * WEAPON_RANDOM_RANGE as f32;
         dbg!(crit_chance);
 
         for cmd_number in curr_cmd_number..curr_cmd_number + 100000 {
@@ -98,7 +99,7 @@ impl CritManipulation {
             //if random == 0 {
             //    return Some(cmd_number);
             //}
-            if (random as f32) < crit_chance  {
+            if (random as f32) < crit_chance {
                 return Some(cmd_number);
             }
         }
@@ -109,8 +110,10 @@ impl CritManipulation {
         if let Ok(gun) = weapon.as_gun() {
             weapon_damage *= gun.get_bullets()
         }
-        dbg!(weapon.get_crit_bucket(), 3.0 * weapon_damage as f32);
-        (*weapon.get_crit_bucket() / (3.0 * weapon_damage as f32)).floor() as i32
+        dbg!(weapon.get_crit_bucket(), TF_DAMAGE_CRIT_MULTIPLIER * weapon_damage as f32);
+        dbg!(weapon.get_crit_checks());
+        dbg!(weapon.get_crit_seed_requests());
+        (*weapon.get_crit_bucket() / (TF_DAMAGE_CRIT_MULTIPLIER * weapon_damage as f32)).floor() as i32
     }
     pub fn damage_till_crit(&mut self, weapon: &mut Weapon) -> Option<f32> {
         let p_local = Player::get_local().unwrap();
@@ -125,7 +128,7 @@ impl CritManipulation {
 
         //transformed formula for crit check
         let needed_damage =
-            (self.crit_damage * (1.2 + needed_chance)) / (3.0 * (needed_chance + 0.1));
+            (self.crit_damage * (1.2 + needed_chance)) / (TF_DAMAGE_CRIT_MULTIPLIER * (needed_chance + 0.1));
 
         let resource = p_local.get_resource_data();
         let ranged_damage = resource.damage as f32 - self.melee_damage;
@@ -140,7 +143,7 @@ impl CritManipulation {
             return 0.0;
         }
 
-        let normalized_crit_damage = self.crit_damage / 3.0;
+        let normalized_crit_damage = self.crit_damage / TF_DAMAGE_CRIT_MULTIPLIER;
 
         normalized_crit_damage / (normalized_crit_damage + ranged_damage - self.crit_damage)
     }
@@ -176,22 +179,13 @@ impl CritManipulation {
 }
 
 impl Cheat for CritManipulation {
-    fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
-        let aimbot_key = setting!(aimbot, crit_key);
-        match event.r#type {
-            EventType::KeyDown(key) => {
-                if key == *aimbot_key {
-                    self.crit_key_pressed = true;
-                    event.handled = true;
-                }
-            }
-            EventType::KeyUp(key) => {
-                if key == *aimbot_key {
-                    self.crit_key_pressed = false;
-                    event.handled = true;
-                }
-            }
-            _ => (),
+    fn handle_event(&mut self, event: &mut Event) {
+        let crit_key = setting!(aimbot, crit_key);
+        if event.is_key_down(&crit_key) {
+            self.crit_key_pressed = true
+        }
+        if event.is_key_up(&crit_key) {
+            self.crit_key_pressed = false
         }
     }
 }

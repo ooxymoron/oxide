@@ -6,7 +6,9 @@ use sdl2_sys::SDL_Scancode;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    draw::component::base::key_input::KeyInputValue, error::OxideResult, util::{arcm::Arcm, scancode::Scancode}
+    draw::component::base::key_input::KeyInputValue,
+    error::OxideResult,
+    util::{arcm::Arcm, scancode::Scancode},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,7 +79,7 @@ pub struct AimbotSettings {
     pub spread_reduction: Arcm<bool>,
     pub tapfire: Arcm<bool>,
     pub tapfire_only_minigun: Arcm<bool>,
-    pub crit_key: Arcm<Scancode>,
+    pub crit_key: Arcm<KeyInputValue>,
 }
 
 impl AimbotSettings {
@@ -87,7 +89,9 @@ impl AimbotSettings {
             draw_fov: Arcm::new(false),
             fov: Arcm::new(30.0),
             always_on: Arcm::new(false),
-            key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(SDL_Scancode::SDL_SCANCODE_LSHIFT))),
+            key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
+                SDL_Scancode::SDL_SCANCODE_LSHIFT,
+            ))),
             multipoint: Arcm::new(false),
             hitbox_scale: Arcm::new(0.8),
             autoshoot: Arcm::new(false),
@@ -105,7 +109,9 @@ impl AimbotSettings {
             spread_reduction: Arcm::new(false),
             tapfire: Arcm::new(false),
             tapfire_only_minigun: Arcm::new(false),
-            crit_key: Arcm::new(Scancode::new(SDL_Scancode::SDL_SCANCODE_RIGHT)),
+            crit_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
+                SDL_Scancode::SDL_SCANCODE_RIGHT,
+            ))),
         }
     }
 }
@@ -137,8 +143,12 @@ impl VisualSettings {
     pub fn new() -> VisualSettings {
         VisualSettings {
             third_person: Arcm::new(false),
-            tp_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(SDL_Scancode::SDL_SCANCODE_C))),
-            tp_offset_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(SDL_Scancode::SDL_SCANCODE_T))),
+            tp_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
+                SDL_Scancode::SDL_SCANCODE_C,
+            ))),
+            tp_offset_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
+                SDL_Scancode::SDL_SCANCODE_T,
+            ))),
             tp_offset_x: Arcm::new(0f32),
             tp_offset_y: Arcm::new(0f32),
             tp_offset_z: Arcm::new(0f32),

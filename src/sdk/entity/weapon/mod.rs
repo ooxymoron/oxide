@@ -224,6 +224,22 @@ impl Weapon {
             transmute(transmute::<_, *const f32>(self).byte_add(netvar.offset - 3 * 4))
         }
     }
+    pub fn get_crit_checks(&mut self) -> &mut i32 {
+        unsafe {
+            let netvar = self
+                .get_netvar(["baseclass", "LocalWeaponData", "m_nViewModelIndex"])
+                .unwrap();
+            transmute(transmute::<_, *const i32>(self).byte_add(netvar.offset - 2 * 4))
+        }
+    }
+    pub fn get_crit_seed_requests(&mut self) -> &mut i32 {
+        unsafe {
+            let netvar = self
+                .get_netvar(["baseclass", "LocalWeaponData", "m_nViewModelIndex"])
+                .unwrap();
+            transmute(transmute::<_, *const i32>(self).byte_add(netvar.offset -  4))
+        }
+    }
 }
 impl_has_vmt!(Weapon, VMTWeapon);
 

@@ -43,10 +43,15 @@ impl AimbotWindow {
             s!().aimbot.fov.clone(),
             None
         ));
-        a!(Checkbox::new("always_on", s!().aimbot.always_on.clone(), 10, y));
+        a!(Checkbox::new(
+            "always_on",
+            s!().aimbot.always_on.clone(),
+            10,
+            y
+        ));
         a!(KeyInput::new(10, y, "aimbot key", s!().aimbot.key.clone()));
 
-        y+= 10;
+        y += 10;
         a!(Checkbox::new(
             "multipoint",
             s!().aimbot.multipoint.clone(),
@@ -61,7 +66,7 @@ impl AimbotWindow {
             Some(|val| { val <= 1.0 && val >= 0.0 })
         ));
 
-        y+= 20;
+        y += 20;
         a!(Checkbox::new(
             "autoshoot",
             s!().aimbot.autoshoot.clone(),
@@ -69,8 +74,13 @@ impl AimbotWindow {
             y
         ));
         a!(Checkbox::new("silent", s!().aimbot.silent.clone(), 10, y));
-        a!(Checkbox::new("fire only when able", s!().aimbot.fire_only_when_able.clone(), 10, y));
-        y+= 20;
+        a!(Checkbox::new(
+            "fire only when able",
+            s!().aimbot.fire_only_when_able.clone(),
+            10,
+            y
+        ));
+        y += 20;
 
         a!(Checkbox::new(
             "target sentries",
@@ -96,7 +106,7 @@ impl AimbotWindow {
             10,
             y
         ));
-        y+= 20;
+        y += 20;
 
         a!(Checkbox::new(
             "wait for charge",
@@ -110,7 +120,7 @@ impl AimbotWindow {
             10,
             y
         ));
-        y+= 20;
+        y += 20;
 
         a!(Checkbox::new(
             "auto zoom",
@@ -130,28 +140,28 @@ impl AimbotWindow {
             10,
             y
         ));
-        y+= 20;
+        y += 20;
         a!(Checkbox::new(
             "spread reduction",
             s!().aimbot.spread_reduction.clone(),
             10,
             y
         ));
-        a!(Checkbox::new(
-            "tapfire",
-            s!().aimbot.tapfire.clone(),
-            10,
-            y
-        ));
+        a!(Checkbox::new("tapfire", s!().aimbot.tapfire.clone(), 10, y));
         a!(Checkbox::new(
             "tapfire only minigun",
             s!().aimbot.tapfire_only_minigun.clone(),
             10,
             y
         ));
-        y+= 20;
+        y += 20;
 
-        a!(KeyInput::new(10, y, "crit key", s!().aimbot.crit_key.clone()));
+        a!(KeyInput::new(
+            10,
+            y,
+            "crit key",
+            s!().aimbot.crit_key.clone()
+        ));
         AimbotWindow { window }
     }
 }
