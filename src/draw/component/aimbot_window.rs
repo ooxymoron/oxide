@@ -149,7 +149,9 @@ impl AimbotWindow {
             10,
             y
         ));
+        y+= 20;
 
+        a!(KeyInput::new(10, y, "crit key", s!().aimbot.crit_key.clone()));
         AimbotWindow { window }
     }
 }

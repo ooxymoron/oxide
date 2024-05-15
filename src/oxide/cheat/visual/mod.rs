@@ -41,7 +41,7 @@ impl Visuals {
     }
     //move to fire event
     pub fn update_spectators(&mut self) -> OxideResult<()> {
-        let p_local = Player::get_local()?;
+        let Ok(p_local) = Player::get_local() else {return Ok(())};
         let ent = if vmt_call!(p_local.as_ent(), is_alive) {
             p_local.as_ent()
         } else {

@@ -1,6 +1,9 @@
 use crate::{
     define_hook, get_cheat,
-    oxide::cheat::{aimbot::Aimbot, movement::Movement, spread_reduction::SpreadReduction},
+    oxide::cheat::{
+        aimbot::Aimbot, crit_manipulation::CritManipulation, movement::Movement,
+        spread_reduction::SpreadReduction,
+    },
     sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
 };
@@ -40,10 +43,13 @@ fn hook(
     if o!().engine_prediction.move_helper.is_some() {
         o!().engine_prediction.finish().unwrap();
     }
+    get_cheat!(CritManipulation).create_move(cmd);
     let mut spread_reduction = get_cheat!(SpreadReduction);
     spread_reduction.create_move(cmd, target);
 
-    remove_punch(cmd);
+    if setting!(aimbot, silent) {
+        remove_punch(cmd);
+    }
     movement.create_move_after(cmd, &org_cmd);
     !setting!(aimbot, silent)
 }

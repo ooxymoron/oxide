@@ -9,7 +9,12 @@ use libc::dlsym;
 use crate::{
     o,
     oxide::hook::{
-        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook, fire_event::FireEventHook, frame_stage_notify::FrameStageNotifyHook, level_shutdown::LevelShutdownHook, paint::PaintHook, paint_traverse::PaintTraverseHook, poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook, should_draw_local_player::ShouldDrawLocalPlayerHook, should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook
+        create_move::CreateMoveHook, dispatch_user_message::DispatchUserMessageHook,
+        fire_event::FireEventHook, frame_stage_notify::FrameStageNotifyHook,
+        level_shutdown::LevelShutdownHook, paint::PaintHook, paint_traverse::PaintTraverseHook,
+        poll_event::PollEventHook, pre_render::PreRenderHook, run_command::RunCommandHook,
+        should_draw_local_player::ShouldDrawLocalPlayerHook,
+        should_draw_view_model::ShouldDrawViewModelHook, swap_window::SwapWindowHook,
     },
     sdk::HasVmt,
     util::{get_handle, handles::*, sigscanner::find_sig},
@@ -29,6 +34,7 @@ pub mod fire_bullets;
 pub mod fire_bullets_server;
 pub mod fire_event;
 pub mod frame_stage_notify;
+pub mod get_user_cmd;
 pub mod level_shutdown;
 pub mod load_whitelist;
 pub mod paint;
@@ -44,7 +50,9 @@ pub mod send_user_msg;
 pub mod should_draw_local_player;
 pub mod should_draw_view_model;
 pub mod swap_window;
+pub mod validate_user_cmd;
 pub mod write_user_cmd;
+pub mod write_user_cmd_delta_to_buffer;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -83,7 +91,10 @@ impl Hooks {
         }
 
         InitPointerHook!(FireEventHook, &o!().event_manager.get_vmt().fire_event);
-        InitPointerHook!(PreRenderHook, &interfaces.client_mode.get_vmt().override_view);
+        InitPointerHook!(
+            PreRenderHook,
+            &interfaces.client_mode.get_vmt().override_view
+        );
         InitPointerHook!(
             LevelShutdownHook,
             &interfaces.base_client.get_vmt().level_shutdown
@@ -109,6 +120,11 @@ impl Hooks {
             &interfaces.client_mode.get_vmt().create_move
         );
         InitPointerHook!(RunCommandHook, &interfaces.prediction.get_vmt().run_command);
+        InitDetourHook!(
+            get_user_cmd,
+            CLIENT,
+            "48 63 C6 89 F2 48 69 C0 B7 60 0B B6 C1 FA 1F 48 C1 E8 20 01 F0 C1 F8 06 29 D0 89 F2 6B C0 5A 29 C2 48 63 C2 48 8D 14 ? 48 8B 87 ? ? ? ? 48 8D 04"
+        );
         InitDetourHook!(
             load_whitelist,
             ENGINE,
@@ -138,45 +154,27 @@ impl Hooks {
             "55 48 89 E5 41 57 41 56 45 89 CE 41 55 49 89 F5"
         );
 
-        //InitDetourHook!(
-        //    cl_send_move,
-        //    ENGINE,
-        //    "55 66 0F EF C0 48 89 E5 41 57 41 56 48 8D BD"
-        //);
-        //InitDetourHook!(
-        //    write_user_cmd,
-        //    CLIENT,
-        //    "55 48 89 E5 41 55 49 89 D5 41 54 49 89 FC 53 48 89 F3 48 83 EC 08 8B 72"
-        //);
-        //InitDetourHook!(plat_floattime, TIER0, "80 3D ? ? ? ? 00 75 ? 55 48 89 E5");
+        InitDetourHook!(
+            cl_send_move,
+            ENGINE,
+            "55 66 0F EF C0 48 89 E5 41 57 41 56 48 8D BD"
+        );
+        InitDetourHook!(
+            validate_user_cmd,
+            CLIENT,
+            "55 48 89 E5 41 56 41 89 D6 41 55 49 89 FD 41 54 4C 8D 65"
+        );
+        InitDetourHook!(
+            write_user_cmd,
+            CLIENT,
+            "55 48 89 E5 41 55 49 89 D5 41 54 49 89 FC 53 48 89 F3 48 83 EC 08 8B 72"
+        );
 
-        //InitDetourHook!(
-        //    send_perf_server,
-        //    SERVER,
-        //    "55 48 89 E5 41 57 41 56 41 55 41 54 53 48 81 EC A8 01 00 00 48 85 F6 48 89 BD"
-        //);
-        //
-        //tramp_hooks.insert(
-        //    dispatch_effect::NAME.to_string(),
-        //    DetourHook::hook(
-        //        find_sig(
-        //            "./tf/bin/linux64/client.so",
-        //            "55 48 89 E5 41 55 41 54 49 89 FC 53 48 83 EC 08 48 8B 1D",
-        //        ).unwrap(),
-        //        dispatch_effect::dispatch_effect as *const u8,
-        //    ),
-        //);
-
-        //tramp_hooks.insert(
-        //    base_interpolate_part1::NAME.to_string(),
-        //    DetourHook::hook(
-        //        find_sig(
-        //            "./tf/bin/client.so",
-        //            "55 89 E5 57 56 53 83 EC 2C 8B 45 ? 8B 5D ? 8B 75 ? 8B 7D ? C7 00 01 00 00 00",
-        //        ).unwrap(),
-        //        base_interpolate_part1::BaseInterpolatePart1Hook as *const u8,
-        //    ),
-        //);
+        InitDetourHook!(
+            write_user_cmd_delta_to_buffer,
+            CLIENT,
+            "55 48 8D 05 ? ? ? ? 66 0F EF C0 48 89 E5 41 57 49 89 FF"
+        );
 
         unsafe {
             let handle = get_handle(SDL).unwrap();

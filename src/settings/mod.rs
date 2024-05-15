@@ -78,6 +78,7 @@ pub struct AimbotSettings {
     pub spread_reduction: Arcm<bool>,
     pub tapfire: Arcm<bool>,
     pub tapfire_only_minigun: Arcm<bool>,
+    pub crit_key: Arcm<Scancode>,
 }
 
 impl AimbotSettings {
@@ -105,6 +106,7 @@ impl AimbotSettings {
             spread_reduction: Arcm::new(false),
             tapfire: Arcm::new(false),
             tapfire_only_minigun: Arcm::new(false),
+            crit_key: Arcm::new(Scancode::new(SDL_Scancode::SDL_SCANCODE_RIGHT)),
         }
     }
 }

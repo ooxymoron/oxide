@@ -9,14 +9,11 @@ fn hook(event_manager: &GameEventManager, event: &GameEvent, org: FireEventHook:
     let name = unsafe { CStr::from_ptr(vmt_call!(event, get_name)) }
         .to_str()
         .unwrap();
-    dbg!(name);
     match name {
         "player_hurt" => get_cheat!(CritManipulation).player_hurt(&event),
         "spec_target_updated" => {
             get_cheat!(Visuals).update_spectators().unwrap();
         }
-        "player_spawn" => get_cheat!(CritManipulation).player_spawn(&event),
-
         _ => {}
     }
     (org)(event_manager, event)

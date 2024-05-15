@@ -1,10 +1,8 @@
 use std::mem::transmute;
 
-use crate::{
-    sdk::{
-        entity::player::Player, interfaces::entity::Entity, networkable::ClassId,
-        player_resource::PlayerResource,
-    },
+use crate::sdk::{
+    interfaces::entity::Entity, networkable::ClassId,
+    player_resource::PlayerResource,
 };
 
 use super::entity_cache::EntityCache;
@@ -27,5 +25,5 @@ impl PlayerResourceManager {
 }
 #[derive(Debug)]
 pub struct PlayerResourceData {
-    pub damage: i32
+    pub damage: i32,
 }

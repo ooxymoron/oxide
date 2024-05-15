@@ -1,10 +1,8 @@
-use crate::cfn;
+use crate::{cfn, impl_has_vmt};
 
-use super::WithVmt;
+use super::user_cmd::UserCmd;
 
-
-
-pub type Input = WithVmt<VMTInput>;
+pub const MULTIPLAYER_BACKUP: usize = 90;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -13,3 +11,10 @@ pub struct VMTInput {
     pub activate_mouse: cfn!((), &Input),
     pub deactivate_mouse: cfn!((), &Input),
 }
+pub struct Input {
+    vmt: *const VMTInput,
+    _pad: [i8; 0x100],
+    pub commands: *const UserCmd,
+}
+
+impl_has_vmt!(Input, VMTInput);

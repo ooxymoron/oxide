@@ -22,9 +22,7 @@ pub struct VMTWeapon {
     _pad1: [usize; 79],
     pub get_index: cfn!(isize, &Weapon),
     #[derivative(Debug = "ignore")]
-    _pad2: [usize; 137],
-    pub primary_attack: cfn!((), &Weapon),
-    _pad21: [usize; 47],
+    _pad21: [usize; 318],
     pub get_slot: cfn!(isize, &Weapon),
     #[derivative(Debug = "ignore")]
     _pad3: [usize; 1],
@@ -174,7 +172,6 @@ impl Weapon {
     }
 }
 
-
 impl HasNetvars for Weapon {
     fn get_class_name() -> &'static str {
         "CTFWeaponBase"
@@ -212,10 +209,22 @@ impl Weapon {
 
     define_netvar!(get_clip1, ["baseclass", "LocalWeaponData", "m_iClip1"], i32);
     define_netvar!(get_owner, ["baseclass", "m_hOwner"], EntHandle);
-    define_netvar!(get_observed_crit_chance, ["LocalActiveTFWeaponData", "m_flObservedCritChance"], f32);
-
+    define_netvar!(
+        get_observed_crit_chance,
+        ["LocalActiveTFWeaponData", "m_flObservedCritChance"],
+        f32
+    );
 }
-
+impl Weapon {
+    pub fn get_crit_bucket(&mut self) -> &mut f32 {
+        unsafe {
+            let netvar = self
+                .get_netvar(["baseclass", "LocalWeaponData", "m_nViewModelIndex"])
+                .unwrap();
+            transmute(transmute::<_, *const f32>(self).byte_add(netvar.offset - 3 * 4))
+        }
+    }
+}
 impl_has_vmt!(Weapon, VMTWeapon);
 
 pub enum WeaponMode {
@@ -226,7 +235,7 @@ pub enum WeaponMode {
     Pda,
     Medigun,
     Consumable,
-    Throwable
+    Throwable,
 }
 
 //CTFWeaponBase{
