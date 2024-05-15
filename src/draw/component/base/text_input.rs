@@ -77,7 +77,7 @@ impl Component for TextInput {
 
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
-            EventType::MouseButtonDown => {
+            EventType::MouseButtonDown(1) => {
                 if !self.focussed {
                     let ComponentBase{x,y,w,h} = self.base;
                     if point_in_bounds(

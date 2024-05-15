@@ -1,7 +1,7 @@
 use std::usize;
 
 use crate::{
-    draw::event::EventType,
+    draw::{component::base::key_input::KeyInputValue, event::EventType},
     error::OxideResult,
     math::vector3::Vector3,
     sdk::{
@@ -13,7 +13,7 @@ use crate::{
         },
         interfaces::{
             engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
-            entity::hitbox::{PlayerHitboxId, HitboxWrapper},
+            entity::hitbox::{HitboxWrapper, PlayerHitboxId},
         },
         user_cmd::{ButtonFlags, UserCmd},
     },
@@ -168,7 +168,7 @@ impl Aimbot {
             {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
             }
-            if setting!(aimbot,auto_rev) && weapon.is_minigun() {
+            if setting!(aimbot, auto_rev) && weapon.is_minigun() {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
                 return false;
             }
@@ -213,20 +213,37 @@ impl Aimbot {
 impl Cheat for Aimbot {
     fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
         let aimbot_key = setting!(aimbot, key);
-        match event.r#type {
-            EventType::KeyDown(key) => {
-                if key == *aimbot_key {
-                    self.shoot_key_pressed = true;
-                    event.handled = true;
+        match aimbot_key {
+            KeyInputValue::Keyboard(aimbot_key) => match event.r#type {
+                EventType::KeyDown(key) => {
+                    if key == *aimbot_key {
+                        self.shoot_key_pressed = true;
+                        event.handled = true;
+                    }
                 }
-            }
-            EventType::KeyUp(key) => {
-                if key == *aimbot_key {
-                    self.shoot_key_pressed = false;
-                    event.handled = true;
+                EventType::KeyUp(key) => {
+                    if key == *aimbot_key {
+                        self.shoot_key_pressed = false;
+                        event.handled = true;
+                    }
                 }
-            }
-            _ => (),
+                _ => {}
+            },
+            KeyInputValue::Mouse(aimbot_key) => match event.r#type {
+                EventType::MouseButtonUp(key) => {
+                    if key == aimbot_key {
+                        self.shoot_key_pressed = true;
+                        event.handled = true;
+                    }
+                }
+                EventType::MouseButtonDown(key) => {
+                    if key == aimbot_key {
+                        self.shoot_key_pressed = false;
+                        event.handled = true;
+                    }
+                }
+                _ => (),
+            },
         }
     }
 }

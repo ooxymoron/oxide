@@ -6,8 +6,7 @@ use sdl2_sys::SDL_Scancode;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    error::OxideResult,
-    util::{arcm::Arcm, scancode::Scancode},
+    draw::component::base::key_input::KeyInputValue, error::OxideResult, util::{arcm::Arcm, scancode::Scancode}
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -60,7 +59,7 @@ pub struct AimbotSettings {
     pub draw_fov: Arcm<bool>,
     pub fov: Arcm<f32>,
     pub always_on: Arcm<bool>,
-    pub key: Arcm<Scancode>,
+    pub key: Arcm<KeyInputValue>,
     pub multipoint: Arcm<bool>,
     pub hitbox_scale: Arcm<f32>,
     pub autoshoot: Arcm<bool>,
@@ -87,7 +86,7 @@ impl AimbotSettings {
             draw_fov: Arcm::new(false),
             fov: Arcm::new(30.0),
             always_on: Arcm::new(false),
-            key: Arcm::new(Scancode::new(SDL_Scancode::SDL_SCANCODE_LSHIFT)),
+            key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(SDL_Scancode::SDL_SCANCODE_LSHIFT))),
             multipoint: Arcm::new(false),
             hitbox_scale: Arcm::new(0.8),
             autoshoot: Arcm::new(false),
@@ -112,8 +111,8 @@ impl AimbotSettings {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VisualSettings {
     pub third_person: Arcm<bool>,
-    pub tp_key: Arcm<Scancode>,
-    pub tp_offset_key: Arcm<Scancode>,
+    pub tp_key: Arcm<KeyInputValue>,
+    pub tp_offset_key: Arcm<KeyInputValue>,
     pub tp_offset_x: Arcm<f32>,
     pub tp_offset_y: Arcm<f32>,
     pub tp_offset_z: Arcm<f32>,
@@ -136,8 +135,8 @@ impl VisualSettings {
     pub fn new() -> VisualSettings {
         VisualSettings {
             third_person: Arcm::new(false),
-            tp_key: Arcm::new(Scancode::new(SDL_Scancode::SDL_SCANCODE_C)),
-            tp_offset_key: Arcm::new(Scancode::new(SDL_Scancode::SDL_SCANCODE_T)),
+            tp_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(SDL_Scancode::SDL_SCANCODE_C))),
+            tp_offset_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(SDL_Scancode::SDL_SCANCODE_T))),
             tp_offset_x: Arcm::new(0f32),
             tp_offset_y: Arcm::new(0f32),
             tp_offset_z: Arcm::new(0f32),

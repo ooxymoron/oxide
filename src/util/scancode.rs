@@ -5,8 +5,8 @@ use serde::{de::Error, Deserialize, Serialize};
 
 use super::{sdl_scancode_name_from_string, sdl_scancode_name_to_string};
 
-#[derive(Debug, Clone, Copy)]
-pub struct Scancode(SDL_Scancode);
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Scancode(pub SDL_Scancode);
 impl Scancode {
     pub fn new(code: SDL_Scancode) -> Scancode {
         Scancode(code)
