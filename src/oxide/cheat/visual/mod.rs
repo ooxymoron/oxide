@@ -159,6 +159,12 @@ impl Cheat for Visuals {
                     event.handled = true;
                 }
             }
+            EventType::MouseButtonUp(button) => {
+                if KeyInputValue::Mouse(button) == tp_offset_key {
+                    self.tp_offset_key_held = false;
+                    event.handled = true;
+                }
+            }
             EventType::KeyDown(key) => {
                 if KeyInputValue::Keyboard(Scancode(key)) == tp_key {
                     let mut tp = s!().visual.third_person.lock().unwrap();

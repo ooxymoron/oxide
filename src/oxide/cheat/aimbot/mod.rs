@@ -229,13 +229,13 @@ impl Cheat for Aimbot {
             KeyInputValue::Mouse(aimbot_key) => match event.r#type {
                 EventType::MouseButtonUp(key) => {
                     if key == aimbot_key {
-                        self.shoot_key_pressed = true;
+                        self.shoot_key_pressed = false;
                         event.handled = true;
                     }
                 }
                 EventType::MouseButtonDown(key) => {
                     if key == aimbot_key {
-                        self.shoot_key_pressed = false;
+                        self.shoot_key_pressed = true;
                         event.handled = true;
                     }
                 }
