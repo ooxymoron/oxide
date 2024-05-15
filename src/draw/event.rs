@@ -1,22 +1,20 @@
-
 use std::mem::transmute;
 
 use sdl2_sys::*;
 
-
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub enum EventType {
     CursorMove((isize, isize)),
-    MouseButtonDown,
-    MouseButtonUp,
+    MouseButtonDown(u8),
+    MouseButtonUp(u8),
     KeyDown(SDL_Scancode),
     KeyUp(SDL_Scancode),
     None,
 }
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct Event {
     pub handled: bool,
-    pub r#type: EventType
+    pub r#type: EventType,
 }
 
 impl From<SDL_Event> for Event {
@@ -27,8 +25,10 @@ impl From<SDL_Event> for Event {
                     let motion = (event).motion;
                     EventType::CursorMove((motion.x as isize, motion.y as isize))
                 }
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => EventType::MouseButtonDown,
-                SDL_EventType::SDL_MOUSEBUTTONUP => EventType::MouseButtonUp,
+                SDL_EventType::SDL_MOUSEBUTTONDOWN => {
+                    EventType::MouseButtonDown(event.button.button)
+                }
+                SDL_EventType::SDL_MOUSEBUTTONUP => EventType::MouseButtonUp(event.button.button),
                 SDL_EventType::SDL_KEYDOWN => {
                     let key = event.key.keysym.scancode;
                     EventType::KeyDown(key)
@@ -42,7 +42,7 @@ impl From<SDL_Event> for Event {
         };
         Event {
             handled: false,
-            r#type
+            r#type,
         }
     }
 }

@@ -52,7 +52,7 @@ impl Component for Button {
 
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
-            EventType::MouseButtonDown => {
+            EventType::MouseButtonDown(1) => {
                 let ComponentBase { x, y, w, h } = self.base;
                 if point_in_bounds(d!().cursor.0, d!().cursor.1, x, y, w, h) {
                     let mut val = self.val.lock().unwrap();

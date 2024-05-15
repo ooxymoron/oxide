@@ -172,7 +172,7 @@ impl Component for Window {
                     }
                 }
             }
-            EventType::MouseButtonDown => {
+            EventType::MouseButtonDown(1) => {
                 if point_in_bounds(d!().cursor.0, d!().cursor.1, *x, *y, *w, HEADER_HEIGHT) {
                     self.dragging = true;
                 }
@@ -181,7 +181,7 @@ impl Component for Window {
                     event.handled = true;
                 }
             }
-            EventType::MouseButtonUp => {
+            EventType::MouseButtonUp(1) => {
                 self.dragging = false;
             }
             _ => (),

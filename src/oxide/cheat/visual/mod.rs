@@ -3,7 +3,7 @@ use std::ptr::null;
 use sdl2_sys::SDL_Scancode;
 
 use crate::{
-    draw::event::EventType,
+    draw::{component::base::key_input::KeyInputValue, event::EventType},
     error::OxideResult,
     math::vector3::Vector3,
     o, s,
@@ -14,7 +14,7 @@ use crate::{
         view_setup::ViewSetup,
     },
     setting,
-    util::arcm::Arcm,
+    util::{arcm::Arcm, scancode::Scancode},
     vmt_call,
 };
 
@@ -136,7 +136,8 @@ impl Visuals {
                 setting!(visual, tp_offset_y),
                 setting!(visual, tp_offset_z),
             );
-            view_setup.origin += dirs.forward * offset.x + dirs.right * offset.y + dirs.up * offset.z;
+            view_setup.origin +=
+                dirs.forward * offset.x + dirs.right * offset.y + dirs.up * offset.z;
         } else {
             *force_taunt_cam = false;
         }
@@ -147,16 +148,38 @@ impl Cheat for Visuals {
         let tp_key = setting!(visual, tp_key);
         let tp_offset_key = setting!(visual, tp_offset_key);
         match event.r#type {
-            EventType::KeyDown(key) => {
-                if key == *tp_key {
+            EventType::MouseButtonDown(button) => {
+                if KeyInputValue::Mouse(button) == tp_key {
                     let mut tp = s!().visual.third_person.lock().unwrap();
                     *tp = !*tp;
                     event.handled = true;
                 }
-                if key == *tp_offset_key {
+                if KeyInputValue::Mouse(button) == tp_offset_key {
                     self.tp_offset_key_held = true;
                     event.handled = true;
                 }
+            }
+            EventType::KeyDown(key) => {
+                if KeyInputValue::Keyboard(Scancode(key)) == tp_key {
+                    let mut tp = s!().visual.third_person.lock().unwrap();
+                    *tp = !*tp;
+                    event.handled = true;
+                }
+                if KeyInputValue::Keyboard(Scancode(key)) == tp_offset_key {
+                    self.tp_offset_key_held = true;
+                    event.handled = true;
+                }
+            }
+            EventType::KeyUp(key) => {
+                if KeyInputValue::Keyboard(Scancode(key)) == tp_offset_key {
+                    self.tp_offset_key_held = false;
+                    event.handled = true;
+                }
+            }
+            _ => (),
+        }
+        match event.r#type {
+            EventType::KeyDown(key) => {
                 if self.tp_offset_key_held {
                     {
                         let mut x = s!().visual.tp_offset_x.lock().unwrap();
@@ -174,13 +197,7 @@ impl Cheat for Visuals {
                     }
                 }
             }
-            EventType::KeyUp(key) => {
-                if key == *tp_offset_key {
-                    self.tp_offset_key_held = false;
-                    event.handled = true;
-                }
-            }
-            _ => (),
+            _ => {}
         }
     }
 }

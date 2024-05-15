@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ffi::CString, mem::transmute};
+use std::{collections::HashMap, ffi::CString, mem::transmute, process::Command};
 
 use libc::{dlclose, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Event;
@@ -17,7 +17,10 @@ use crate::{
         global_vars::GlobalVars,
         interfaces::{base_client::BaseClient, base_engine::BaseEngine},
     },
-    util::{handles::ENGINE, sigscanner::find_sig},
+    util::{
+        handles::{ENGINE, SDL},
+        sigscanner::find_sig,
+    },
     DRAW,
 };
 
@@ -70,6 +73,18 @@ impl Oxide {
         }
     }
     pub fn init() -> OxideResult<Oxide> {
+        let output = Command::new("ldconfig").arg("-p").output()?;
+        let output = String::from_utf8_lossy(&output.stdout);
+        let sdl_path = output
+            .split("\n")
+            .filter(|line| line.find("libSDL2-2.0.so.0").is_some() && line.find("64").is_some())
+            .next()
+            .unwrap()
+            .split(" ")
+            .last()
+            .unwrap();
+        unsafe { SDL = Box::leak(sdl_path.to_string().into_boxed_str()) }
+
         let interfaces = Interfaces::init()?;
         let hooks = Hooks::init();
         let cheats = Cheats::init();

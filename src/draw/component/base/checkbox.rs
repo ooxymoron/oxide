@@ -55,7 +55,7 @@ impl Component for Checkbox {
 
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
-            EventType::MouseButtonDown => {
+            EventType::MouseButtonDown(1) => {
                 let ComponentBase { x, y, w:_, h:_ } = self.base;
                 if d!().cursor.0 as isize <= x + SIZE
                     && x <= d!().cursor.0 as isize
