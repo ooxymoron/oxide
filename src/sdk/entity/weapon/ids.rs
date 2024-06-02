@@ -107,6 +107,12 @@ pub enum WeaponId {
     Grapplinghook,
     PasstimeGun,
     ChargedSmg,
+	BreakableSign,
+	Rocketpack,
+	Slap,
+	JarGas,
+	GrenadeJarGas,
+	FlameBall
 }
 
 #[derive(Derivative, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]

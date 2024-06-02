@@ -117,10 +117,12 @@ pub struct MeleWeapon {
 }
 
 impl Weapon {
-    pub fn as_ent(&mut self) -> &'static mut Entity {
-        return unsafe { transmute(self) };
+    pub fn as_ent(&self) -> &'static mut Entity {
+        #[allow(mutable_transmutes)]
+        return unsafe { transmute::<_, _>(self) };
     }
-    pub fn as_mele(&mut self) -> &'static mut MeleWeapon {
+    pub fn as_mele(&self) -> &'static mut MeleWeapon {
+        #[allow(mutable_transmutes)]
         return unsafe { transmute(self) };
     }
     pub fn as_gun(&mut self) -> OxideResult<&'static mut Gun> {

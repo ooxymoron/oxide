@@ -193,6 +193,13 @@ impl Player {
         ],
         f32
     );
+    define_netvar!(
+        get_ground_entity,
+        [
+            "baseclass", "localdata", "m_hGroundEntity"
+        ],
+        Entity
+    );
 }
 
 impl Player {
