@@ -61,8 +61,7 @@ impl Aimbot {
         Some(-angle as isize)
     }
     pub fn ent_priority(&self, ent: &mut Entity) -> OxideResult<Option<isize>> {
-        let p_local = Player::get_local().unwrap();
-        if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number) {
+        if !ent.should_attack() {
             return Ok(None);
         }
         return Ok(Some(1));

@@ -1,6 +1,6 @@
 <img src='https://github.com/ooxymoron/oxide/blob/master/assets/oxide-logo-outlined.bmp' width='100'>
 
-https://discord.gg/9kGpBkr6XB
+https://discord.gg/hcwHA7ANzQ
 
 # usage
 either start with 

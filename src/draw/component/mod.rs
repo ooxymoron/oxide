@@ -12,6 +12,7 @@ pub mod aimbot_window;
 pub mod movement_window;
 pub mod spectator_list;
 pub mod spread_reduction_info;
+pub mod crit_manipulation_info;
 
 #[derive(Debug,Clone)]
 pub enum DrawOrder {

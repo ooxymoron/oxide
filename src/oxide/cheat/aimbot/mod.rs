@@ -108,7 +108,7 @@ impl Aimbot {
     }
 
     pub fn should_run(&self) -> bool {
-        let p_local = Player::get_local().unwrap();
+        let Ok(p_local) = Player::get_local() else {return false};
         if !setting!(aimbot, enabled) || (!self.shoot_key_pressed && !setting!(aimbot, always_on)) {
             return false;
         }

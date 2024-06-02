@@ -6,44 +6,40 @@ pub use derivative::Derivative;
 use self::entity::Entity;
 
 pub mod attribute_manager;
+pub mod bf_read;
 pub mod camerd_third_data;
+pub mod client_state;
 pub mod collideable;
 pub mod condition;
 pub mod convar;
 pub mod effect_data;
 pub mod entity;
+pub mod event_manager;
 pub mod fire_bullets_info;
 pub mod font;
 pub mod game_event;
 pub mod global_vars;
 pub mod input;
 pub mod interfaces;
-pub mod networkable;
-pub mod user_cmd;
-pub mod view_setup;
-pub mod bf_read;
-pub mod user_message;
 pub mod net_channel;
-pub mod client_state;
-pub mod event_manager;
+pub mod networkable;
 pub mod player_resource;
+pub mod user_cmd;
+pub mod user_message;
+pub mod view_setup;
+
+const ENT_ENTRY_MASK: i32 = 0xfff;
 
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy)]
-pub struct EntHandle(u32);
-
-const INVALID_HANDLE: u32 = 0xffffffff;
+pub struct EntHandle(i32);
 
 impl EntHandle {
     pub fn resolve(self) -> Option<&'static mut Entity> {
-        if self.0 == INVALID_HANDLE {
-            return None;
-        }
         Entity::get_ent_from_handle(self)
     }
 }
 pub type ConCommand = *const u8;
-
 
 #[repr(C)]
 #[derive(Debug, Clone)]

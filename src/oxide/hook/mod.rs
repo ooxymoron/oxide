@@ -53,6 +53,7 @@ pub mod swap_window;
 pub mod validate_user_cmd;
 pub mod write_user_cmd;
 pub mod write_user_cmd_delta_to_buffer;
+pub mod calc_is_attack_critical;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -175,6 +176,13 @@ impl Hooks {
             CLIENT,
             "55 48 8D 05 ? ? ? ? 66 0F EF C0 48 89 E5 41 57 49 89 FF"
         );
+        InitDetourHook!(
+            calc_is_attack_critical,
+            CLIENT,
+            "55 48 89 E5 41 57 41 56 41 55 41 54 49 89 FC 53 48 83 EC 28 E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 48 8D 15"
+        );
+
+
 
         unsafe {
             let handle = get_handle(SDL).unwrap();

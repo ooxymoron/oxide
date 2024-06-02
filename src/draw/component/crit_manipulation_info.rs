@@ -1,16 +1,15 @@
 use crate::{
     d,
     draw::{
-        colors::{BACKGROUND, FOREGROUND, RED, WHITE, YELLOW},
+        colors::{BACKGROUND, FOREGROUND, GREEN, RED, WHITE, YELLOW},
         event::Event,
         fonts::FontSize,
         frame::Frame,
     },
     error::OxideResult,
     get_cheat,
-    oxide::cheat::spread_reduction::{seed_prediction::State, SpreadReduction},
+    oxide::cheat::crit_manipulation::{CritManipulation, CritManipulationState},
     sdk::entity::player::Player,
-    setting,
 };
 
 use super::{
@@ -19,37 +18,54 @@ use super::{
 };
 
 #[derive(Debug)]
-pub struct SpreadReductionInfoWindow {
+pub struct CritManipulationInfoWindow {
     visible_window: VisibleWindow,
 }
 
 #[derive(Debug)]
-pub struct SpreadReductionInfo {
+pub struct CirtManipulationInfo {
     base: ComponentBase,
 }
-impl SpreadReductionInfo {
-    pub fn new() -> SpreadReductionInfo {
+impl CirtManipulationInfo {
+    pub fn new() -> CirtManipulationInfo {
         let base = ComponentBase {
             x: 0,
             y: 0,
             w: 200,
             h: 30,
         };
-        SpreadReductionInfo { base }
+        CirtManipulationInfo { base }
     }
 }
 
-impl Component for SpreadReductionInfo {
+impl Component for CirtManipulationInfo {
     fn get_base(&mut self) -> &mut ComponentBase {
         &mut self.base
     }
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
+        let Some(CritManipulationState{crits, max_crits,needed_damage, next_check,crit_time, needed_blanks}) = &get_cheat!(CritManipulation).state else {return Ok(())};
+
         frame.filled_rect(
             self.base.x,
             self.base.y,
             self.base.w,
             self.base.h,
             BACKGROUND,
+            100,
+        );
+        let (value, color) = if let Some(crit_time) = crit_time {
+            (*crit_time, GREEN)
+        } else if let Some(next_check) = next_check {
+            (*next_check, YELLOW)
+        } else {
+            (0.0, WHITE)
+        };
+        frame.filled_rect(
+            self.base.x,
+            self.base.y,
+            (self.base.w as f32 * value) as isize,
+            self.base.h,
+            color,
             100,
         );
         frame.outlined_rect(
@@ -60,11 +76,13 @@ impl Component for SpreadReductionInfo {
             FOREGROUND,
             200,
         );
-        let (text, color) = match get_cheat!(SpreadReduction).state {
-            State::SYNCING { precision, .. } => (format!("syncing[{}]", precision), YELLOW),
-            State::IMPOSSIBLE { precision } => (format!("impossible[{}]", precision), RED),
-            State::SYNCED { precision, .. } => (format!("synced[{}]", precision), WHITE),
-            State::UNSYNCED => (format!("unsynced"), FOREGROUND),
+        let (text, color) = if let Some(damage) = needed_damage {
+            (format!("deal {} damage", damage.round()), RED)
+        } else if let Some(shots) = needed_blanks {
+            let suffix = if *shots > 1 { "times" } else { "time" };
+            (format!("fire {} {}", shots, suffix), RED)
+        } else {
+            (format!("{}/{}", crits, max_crits), WHITE)
         };
 
         frame.text(
@@ -82,24 +100,19 @@ impl Component for SpreadReductionInfo {
     }
 }
 
-impl SpreadReductionInfoWindow {
-    pub fn new() -> SpreadReductionInfoWindow {
-        let mut window = Window::new("SPREAD REDUCTION".to_string(), None);
-        let spectator_list = SpreadReductionInfo::new();
+impl CritManipulationInfoWindow {
+    pub fn new() -> CritManipulationInfoWindow {
+        let mut window = Window::new("CRIT MANIPULATION".to_string(), None);
+        window.get_base().x = (d!().window_size.0 - window.get_base().w) / 2;
+        window.get_base().y = (d!().window_size.1 - window.get_base().y) / 2 + 100;
 
-        window.get_base().x = 10;
-        window.get_base().y = (d!().window_size.1 - window.get_base().y) / 2;
-
-        window.add(spectator_list, 0);
-
-        SpreadReductionInfoWindow {
+        let crit_manipulatino_info = CirtManipulationInfo::new();
+        window.add(crit_manipulatino_info, 0);
+        CritManipulationInfoWindow {
             visible_window: VisibleWindow::new(window),
         }
     }
     fn should_draw(&self) -> bool {
-        if !setting!(aimbot, spread_reduction) {
-            return false;
-        }
         if Player::get_local().is_err() {
             return false;
         };
@@ -117,7 +130,7 @@ impl SpreadReductionInfoWindow {
     }
 }
 
-impl Component for SpreadReductionInfoWindow {
+impl Component for CritManipulationInfoWindow {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         self.visible_window.draw(frame)
     }

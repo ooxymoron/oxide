@@ -14,7 +14,6 @@ use crate::{
     netvars::HasNetvars,
     o,
     oxide::player_resource_manager::PlayerResourceData,
-    sdk::net_channel::LatencyFlow,
     vmt_call,
 };
 
@@ -68,11 +67,7 @@ impl Player {
     }
     pub fn can_attack(&self) -> bool {
         let weapon = vmt_call!(self.as_ent(), get_weapon);
-        let net_channel = interface!(base_engine).get_net_channel().unwrap();
-        let now = o!().global_vars.interval_per_tick
-            * ((o!().global_vars.tick_count + 1) as f32
-                + vmt_call!(net_channel, get_latency, LatencyFlow::BOTH));
-        *self.get_next_attack() <= now && weapon.can_attack()
+        weapon.can_attack()
     }
     pub fn info(&self) -> OxideResult<PlayerInfo> {
         let mut info = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -129,6 +124,16 @@ impl Player {
                 .get_damage_resource()[id as usize]
                 .clone(),
         }
+    }
+    pub fn time(&self) -> f32 {
+        o!().global_vars.interval_per_tick * *self.get_tick_base() as f32
+    }
+    pub fn should_attack(&self) -> bool {
+        let info = self.info().unwrap();
+        if [].contains(&info.guid.as_str()) {
+            return false;
+        }
+        true
     }
 }
 

@@ -155,6 +155,7 @@ pub struct Entity {
 
 impl_has_vmt!(Entity, VMTEntity);
 
+
 impl Entity {
     pub fn as_renderable(&self) -> &mut Renderable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 8) }
@@ -162,11 +163,20 @@ impl Entity {
     pub fn as_networkable(&self) -> &mut Networkable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
-    pub fn should_attack(&self) -> bool {
+    pub fn should_attack(&mut self) -> bool {
         let p_local = Player::get_local().unwrap();
         let team = vmt_call!(self, get_team_number);
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
-        return local_team != team;
+        if local_team == team {
+            return false
+        }
+        if let Ok(player) = self.as_player()  {
+            if !player.should_attack() {
+                return false
+            }
+        }
+        true
+        
     }
     pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
         let name = CString::new(name).unwrap();
@@ -243,8 +253,8 @@ impl Entity {
     pub fn get_ent_from_handle(handle: EntHandle) -> Option<&'static mut Entity> {
         let ent = vmt_call!(
             interface!(entity_list),
-            get_client_entity_from_handle,
-            handle
+            get_client_entity,
+            handle.0 & ENT_ENTRY_MASK
         );
         if ent.is_null() {
             return None;
@@ -252,7 +262,10 @@ impl Entity {
         unsafe { Some(&mut *ent) }
     }
     pub fn as_player(&mut self) -> OxideResult<&'static mut Player> {
-        if !vmt_call!(self, is_player) {
+        if !matches!(
+            self.as_networkable().get_client_class().class_id,
+            ClassId::CTFPlayer
+        ) {
             return Err(OxideError::new("not a player"));
         };
         return Ok(unsafe { transmute(self) });

@@ -11,8 +11,10 @@ use self::{
 
 use super::*;
 
+pub mod crit;
 pub mod ids;
 pub mod info;
+pub mod netvars;
 
 #[repr(C)]
 #[derive(Derivative, Clone)]
@@ -44,6 +46,8 @@ pub struct VMTWeapon {
 #[derivative(Debug)]
 pub struct Weapon {
     pub vmt: *const VMTWeapon,
+    _pad: [u8; 0x1ee],
+    pub current_seed: i32,
 }
 
 #[repr(C)]
@@ -135,8 +139,15 @@ impl Weapon {
 
 impl Weapon {
     pub fn can_attack(&mut self) -> bool {
-        let now = o!().global_vars.interval_per_tick * ((o!().global_vars.tick_count + 1) as f32);
-        *self.get_next_primary_attack() <= now && *self.get_clip1() != 0
+        let owner = self.get_owner().resolve().unwrap().as_player().unwrap();
+        let info = self.get_info();
+        let data = &info.weapon_data[self.get_mode()];
+        let delay = if info.melee_weapon {
+            data.smack_delay
+        } else {
+            (o!().util.apply_fire_delay)(data.time_fire_delay, self)
+        };
+        *self.get_last_fire() + delay <= owner.time() && *self.get_clip1() != 0
     }
     pub fn is_sniper_rifle(&mut self) -> bool {
         matches!(
@@ -172,49 +183,8 @@ impl Weapon {
     }
 }
 
-impl HasNetvars for Weapon {
-    fn get_class_name() -> &'static str {
-        "CTFWeaponBase"
-    }
-}
-
 pub type WeaponInfoHandle = i32;
 
-impl Weapon {
-    define_netvar!(
-        get_item_definition_index,
-        [
-            "baseclass",
-            "baseclass",
-            "m_AttributeManager",
-            "m_Item",
-            "m_iItemDefinitionIndex"
-        ],
-        ItemDefinitionInex
-    );
-    define_netvar!(
-        get_next_primary_attack,
-        [
-            "baseclass",
-            "LocalActiveWeaponData",
-            "m_flNextPrimaryAttack"
-        ],
-        f32
-    );
-    define_netvar!(
-        get_last_fire,
-        ["LocalActiveTFWeaponData", "m_flLastFireTime"],
-        f32
-    );
-
-    define_netvar!(get_clip1, ["baseclass", "LocalWeaponData", "m_iClip1"], i32);
-    define_netvar!(get_owner, ["baseclass", "m_hOwner"], EntHandle);
-    define_netvar!(
-        get_observed_crit_chance,
-        ["LocalActiveTFWeaponData", "m_flObservedCritChance"],
-        f32
-    );
-}
 impl Weapon {
     pub fn get_crit_bucket(&mut self) -> &mut f32 {
         unsafe {
@@ -237,7 +207,7 @@ impl Weapon {
             let netvar = self
                 .get_netvar(["baseclass", "LocalWeaponData", "m_nViewModelIndex"])
                 .unwrap();
-            transmute(transmute::<_, *const i32>(self).byte_add(netvar.offset -  4))
+            transmute(transmute::<_, *const i32>(self).byte_add(netvar.offset - 4))
         }
     }
 }

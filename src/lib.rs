@@ -4,7 +4,8 @@
     stmt_expr_attributes,
     core_intrinsics,
     unboxed_closures,
-    inherent_associated_types
+    inherent_associated_types,
+    let_chains
 )]
 #![allow(improper_ctypes_definitions, internal_features, incomplete_features)]
 

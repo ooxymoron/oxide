@@ -7,9 +7,9 @@ use crate::{
     sdk::{
         entity::{
             player::Player,
-            weapon::{ids::WeaponId, info::WeaponInfo, WeaponInfoHandle},
+            weapon::{ids::WeaponId, info::WeaponInfo, Weapon, WeaponInfoHandle},
         },
-        interfaces::entity::Entity,
+        interfaces::entity::Entity, user_cmd::UserCmd,
     },
     util::{
         get_handle,
@@ -29,7 +29,11 @@ pub struct Util {
     pub random_float: extern "C" fn(f32, f32) -> f32,
     pub random_int: extern "C" fn(i32, i32) -> i32,
     pub is_crit_boosted: extern "C" fn(&Player) -> bool,
-    pub md5_pseudorandom: extern "C" fn (i32) -> i32
+    pub md5_pseudorandom: extern "C" fn (i32) -> i32,
+    pub add_to_crit_bucket: extern "C" fn (f32,&Weapon),
+    pub check_if_can_withdraw_form_critbucket: extern "C" fn (f32,&Weapon),
+    pub set_prediction_seed: extern "C" fn (&UserCmd),
+    pub apply_fire_delay: extern "C" fn (f32,&Weapon) -> f32,
 }
 
 impl Util {
@@ -84,6 +88,18 @@ impl Util {
                 ,
                 random_int: 
                     transmute(dlsym(get_handle(VSTDLIB).unwrap(), random_int.as_ptr()))
+                ,
+                add_to_crit_bucket: 
+                    transmute(find_sig::<u8>(CLIENT, "48 8B 05 ? ? ? ? 0F 28 C8 F3 0F 10 87").unwrap())
+                ,
+                check_if_can_withdraw_form_critbucket: 
+                    transmute(find_sig::<u8>(CLIENT, "55 48 89 E5 53 48 89 FB 48 83 EC 18 F3 0F 11 45 ? 83 87 ? ? ? ? 01").unwrap())
+                ,
+                set_prediction_seed: 
+                    transmute(find_sig::<u8>(CLIENT, "48 85 FF 74 ? 8B 57 ? 48 8D 05").unwrap())
+                ,
+                apply_fire_delay: 
+                    transmute(find_sig::<u8>(CLIENT, "55 31 D2 48 89 FE B9 01 00 00 00 48 89 E5 41 56").unwrap())
                 ,
             }
         }

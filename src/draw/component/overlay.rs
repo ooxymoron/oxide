@@ -18,7 +18,8 @@ use crate::{
 };
 
 use super::{
-    aimbot_window::AimbotWindow, base::button::Button, movement_window::MovementWindow,
+    aimbot_window::AimbotWindow, base::button::Button,
+    crit_manipulation_info::CritManipulationInfoWindow, movement_window::MovementWindow,
     spread_reduction_info::SpreadReductionInfoWindow, visuals_window::VisualsWindow, Component,
     ComponentBase, Components,
 };
@@ -36,6 +37,7 @@ pub struct Overlay {
     pub windows: Components,
     pub spectator_list: SpectatorListWindow,
     pub spread_reduction_info: SpreadReductionInfoWindow,
+    pub crit_manipulation_info: CritManipulationInfoWindow,
 }
 
 impl Overlay {
@@ -75,6 +77,7 @@ impl Overlay {
             windows,
             spectator_list: SpectatorListWindow::new(),
             spread_reduction_info: SpreadReductionInfoWindow::new(),
+            crit_manipulation_info: CritManipulationInfoWindow::new(),
             base: ComponentBase {
                 x: 0,
                 y: 0,
@@ -137,6 +140,8 @@ impl Component for Overlay {
         self.spectator_list.draw_wrapper(frame, self.visible)?;
         self.spread_reduction_info
             .draw_wrapper(frame, self.visible)?;
+        self.crit_manipulation_info
+            .draw_wrapper(frame, self.visible)?;
         if !self.visible {
             self.draw_watermark(frame);
             return Ok(());
@@ -160,7 +165,14 @@ impl Component for Overlay {
             BACKGROUND,
             255,
         );
-        frame.outlined_rect(-1, -1, LEFT_OVERLAY_WIDTH, TOP_OVERLAY_HEIGHT, FOREGROUND3, 255);
+        frame.outlined_rect(
+            -1,
+            -1,
+            LEFT_OVERLAY_WIDTH,
+            TOP_OVERLAY_HEIGHT,
+            FOREGROUND3,
+            255,
+        );
         frame.logo(0, 0, TOP_OVERLAY_HEIGHT - 2, TOP_OVERLAY_HEIGHT - 2);
 
         let version = format!("V{}", VERSION);
@@ -211,6 +223,7 @@ impl Component for Overlay {
         self.components.handle_event(event);
         self.spectator_list.handle_event(event);
         self.spread_reduction_info.handle_event(event);
+        self.crit_manipulation_info.handle_event(event);
     }
 
     fn get_base(&mut self) -> &mut ComponentBase {

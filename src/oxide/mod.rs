@@ -18,24 +18,25 @@ use crate::{
         interfaces::{base_client::BaseClient, base_engine::BaseEngine},
     },
     util::{
-        handles::{ENGINE, SDL},
+        handles::{CLIENT, ENGINE, SDL},
         sigscanner::find_sig,
     },
     DRAW,
 };
 
 use self::{
-    engine_prediction::EnginePredicion, entity_cache::EntityCache, logger::Logger, paint::Paint, player_resource_manager::PlayerResourceManager, util::Util
+    engine_prediction::EnginePredicion, entity_cache::EntityCache, logger::Logger, paint::Paint,
+    player_resource_manager::PlayerResourceManager, util::Util,
 };
 
 pub mod cheat;
 pub mod engine_prediction;
 pub mod entity_cache;
-pub mod player_resource_manager;
 pub mod hook;
 pub mod interfaces;
 pub mod logger;
 pub mod paint;
+pub mod player_resource_manager;
 pub mod util;
 
 #[derive(Debug)]
@@ -56,6 +57,7 @@ pub struct Oxide {
     pub client_state: &'static mut ClientState,
     pub event_manager: &'static mut GameEventManager,
     pub player_resource_manager: PlayerResourceManager,
+    pub prediction_seed: &'static mut i32,
 }
 pub type GetBonePositionFn =
     unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
@@ -93,6 +95,7 @@ impl Oxide {
         let client_state =
             Oxide::get_client_state(unsafe { transmute(interfaces.base_engine.interface_ref()) });
         let event_manager = Oxide::get_event_manager();
+        let prediction_seed = Oxide::get_prediction_seed();
 
         let netvars = load_netvars(unsafe { transmute(interfaces.base_client.interface_ref()) });
         let paint = Paint::init(&interfaces);
@@ -114,7 +117,8 @@ impl Oxide {
             util: Util::init(),
             client_state,
             event_manager,
-            player_resource_manager: PlayerResourceManager::new()
+            player_resource_manager: PlayerResourceManager::new(),
+            prediction_seed,
         };
 
         Ok(oxide)
@@ -136,6 +140,18 @@ impl Oxide {
             let game_event_manager =
                 transmute(addr.byte_add(4).read() as u64 + transmute::<_, u64>(addr) + 8);
             game_event_manager
+        }
+    }
+    fn get_prediction_seed() -> &'static mut i32 {
+        unsafe {
+            let set_pred_cmd = find_sig::<u32>(CLIENT, "48 85 FF 74 ? 8B 57 ? 48 8D 05").unwrap();
+            let pred_sed = transmute(
+                set_pred_cmd.byte_add(11).read() as u64
+                    + transmute::<_, u64>(set_pred_cmd)
+                    + 11
+                    + 4,
+            );
+            pred_sed
         }
     }
     fn get_global_vars(base_client: &BaseClient) -> &'static mut GlobalVars {

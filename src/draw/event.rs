@@ -2,8 +2,6 @@ use std::mem::transmute;
 
 use sdl2_sys::*;
 
-use crate::util::scancode::Scancode;
-
 use super::component::base::key_input::KeyInputValue;
 
 #[derive(Debug, Clone)]
@@ -52,19 +50,19 @@ impl From<SDL_Event> for Event {
 }
 
 impl Event {
-    pub fn is_key_up(&self,target_key: &KeyInputValue) -> bool{
+    pub fn is_key_up(&self, target_key: &KeyInputValue) -> bool {
         match target_key {
             KeyInputValue::Keyboard(target_key) => match self.r#type {
                 EventType::KeyUp(key) => {
-                    if Scancode(key) == *target_key {
+                    if key == target_key.0 {
                         return true;
                     }
                 }
                 _ => {}
             },
-            KeyInputValue::Mouse(aimbot_key) => match self.r#type {
+            KeyInputValue::Mouse(target_key) => match self.r#type {
                 EventType::MouseButtonUp(key) => {
-                    if key == *aimbot_key {
+                    if key == *target_key {
                         return true;
                     }
                 }
@@ -73,19 +71,19 @@ impl Event {
         }
         false
     }
-    pub fn is_key_down(&self,target_key: &KeyInputValue) -> bool{
+    pub fn is_key_down(&self, target_key: &KeyInputValue) -> bool {
         match target_key {
             KeyInputValue::Keyboard(target_key) => match self.r#type {
                 EventType::KeyDown(key) => {
-                    if Scancode(key) == *target_key {
+                    if key == target_key.0 {
                         return true;
                     }
                 }
                 _ => {}
             },
-            KeyInputValue::Mouse(aimbot_key) => match self.r#type {
+            KeyInputValue::Mouse(target_key) => match self.r#type {
                 EventType::MouseButtonDown(key) => {
-                    if key == *aimbot_key {
+                    if key == *target_key {
                         return true;
                     }
                 }
@@ -93,6 +91,5 @@ impl Event {
             },
         }
         false
-
     }
 }
