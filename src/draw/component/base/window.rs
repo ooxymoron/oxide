@@ -3,7 +3,7 @@ use std::{borrow::BorrowMut, isize};
 use crate::{
     d,
     draw::{
-        colors::{BACKGROUND, FOREGROUND3, FOREGROUND},
+        colors::{BACKGROUND, FOREGROUND, FOREGROUND3},
         component::{Component, ComponentBase, Components, DrawOrder},
         event::{Event, EventType},
         fonts::FontSize,
@@ -15,7 +15,7 @@ use crate::{
 
 use super::button::Button;
 
-const HEADER_HEIGHT: isize = 30;
+pub const HEADER_HEIGHT: isize = 30;
 const CLOSE_BUTTON_SIZE: isize = FontSize::Small as isize + 2;
 const PADDING: isize = HEADER_HEIGHT / 2 - CLOSE_BUTTON_SIZE / 2;
 
@@ -33,16 +33,27 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(title: String, visible: Option<Arcm<bool>>) -> Window {
+    fn new_base(title: &str, close_button: bool) -> ComponentBase {
         let x = 100;
         let y = 100;
-        let mut w = d!().fonts.get_text_size(&title, FontSize::Small).0 + PADDING * 2;
-        let close_button = if let Some(visible) = &visible {
+        let mut w = d!().fonts.get_text_size(title, FontSize::Small).0 + PADDING * 2;
+        if close_button {
             w += CLOSE_BUTTON_SIZE + PADDING;
+        }
+        ComponentBase {
+            x,
+            y,
+            w,
+            h: HEADER_HEIGHT,
+        }
+    }
+    pub fn new(title: String, visible: Option<Arcm<bool>>) -> Window {
+        let base = Window::new_base(&title, visible.is_some());
+        let close_button = if let Some(visible) = &visible {
             Some(Button::new(
                 ComponentBase {
-                    x: x + w - CLOSE_BUTTON_SIZE - PADDING,
-                    y: y + PADDING,
+                    x: base.x + base.w - CLOSE_BUTTON_SIZE - PADDING,
+                    y: base.y + PADDING,
                     w: CLOSE_BUTTON_SIZE,
                     h: CLOSE_BUTTON_SIZE,
                 },
@@ -55,12 +66,7 @@ impl Window {
         };
 
         Window {
-            base: ComponentBase {
-                x,
-                y,
-                w,
-                h: HEADER_HEIGHT,
-            },
+            base,
             title,
             last_cursor: (0, 0),
             visible,
@@ -71,16 +77,20 @@ impl Window {
             close_button,
         }
     }
+    pub fn clear(&mut self) {
+        self.components.0.clear();
+        let old_base = self.base.clone();
+        self.base = Window::new_base(&self.title,self.close_button.is_some());
+        self.base.x = old_base.x;
+        self.base.y = old_base.y;
+    }
     pub fn add(&mut self, mut component: impl Component + 'static, pad: isize) {
         let component_base = component.get_base();
         self.base.h = self
             .base
             .h
             .max(component_base.y + component_base.h + HEADER_HEIGHT + pad);
-        self.base.w = self
-            .base
-            .w
-            .max(component_base.x + component_base.w + pad);
+        self.base.w = self.base.w.max(component_base.x + component_base.w + pad);
         if let Some(button) = &mut self.close_button {
             let button_base = button.get_base();
             button_base.x = self.base.x + self.base.w - CLOSE_BUTTON_SIZE - PADDING;
@@ -91,16 +101,23 @@ impl Window {
 
         self.components.add(component)
     }
+    pub fn should_draw(&self) -> bool {
+
+        if let Some(visible) = &self.visible {
+            if !*visible.lock().unwrap() {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 impl Component for Window {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         let ComponentBase { x, y, w, h } = self.base;
-        if let Some(visible) = &self.visible {
-            if !*visible.lock().unwrap() {
+        if !self.should_draw() {
                 self.last_visible = false;
                 return Ok(());
-            }
         }
         if !self.last_visible {
             self.draw_order = DrawOrder::Top

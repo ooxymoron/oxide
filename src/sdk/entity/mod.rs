@@ -155,7 +155,6 @@ pub struct Entity {
 
 impl_has_vmt!(Entity, VMTEntity);
 
-
 impl Entity {
     pub fn as_renderable(&self) -> &mut Renderable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 8) }
@@ -168,15 +167,14 @@ impl Entity {
         let team = vmt_call!(self, get_team_number);
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         if local_team == team {
-            return false
+            return false;
         }
-        if let Ok(player) = self.as_player()  {
+        if let Ok(player) = self.as_player() {
             if !player.should_attack() {
-                return false
+                return false;
             }
         }
         true
-        
     }
     pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
         let name = CString::new(name).unwrap();
@@ -307,6 +305,17 @@ impl Team {
             Team::Red => RED,
             Team::Blue => BLUE,
         }
+    }
+}
+
+impl From<i32> for Team {
+    fn from(value: i32) -> Self {
+        unsafe { transmute(value) }
+    }
+}
+impl  Team {
+    pub fn as_i32(self) -> i32 {
+        unsafe { transmute(self) }
     }
 }
 

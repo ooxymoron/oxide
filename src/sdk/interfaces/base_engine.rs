@@ -1,6 +1,6 @@
 use std::ffi::c_char;
 
-use crate::{math::{angles::Angles, view_matrix::VMatrix}, vmt_call};
+use crate::{math::{angles::Angles, view_matrix::VMatrix}, util::str_from_arr, vmt_call};
 
 use self::net_channel::NetChannel;
 
@@ -42,20 +42,12 @@ pub struct PlayerInfo {
 
 impl From<PlayerInfoUnparsed> for PlayerInfo {
     fn from(value: PlayerInfoUnparsed) -> Self {
-        let str_from_arr = |arr: Vec<u8>| -> String {
-            unsafe {
-                String::from_utf8_unchecked(arr)
-                    .chars()
-                    .filter(|char| *char != '\0')
-                    .collect()
-            }
-        };
         PlayerInfo {
-            name: str_from_arr(value.name.to_vec()),
+            name: str_from_arr(&value.name.to_vec()),
             user_id: value.user_id,
-            guid: str_from_arr(value.guid.to_vec()),
+            guid: str_from_arr(&value.guid.to_vec()),
             friends_id: value.friends_id,
-            friends_name: str_from_arr(value.friends_name.to_vec()),
+            friends_name: str_from_arr(&value.friends_name.to_vec()),
             fakeplayer: value.fakeplayer,
             ishltv: value.ishltv,
             custom_files: value.custom_files,

@@ -13,6 +13,7 @@ pub mod movement_window;
 pub mod spectator_list;
 pub mod spread_reduction_info;
 pub mod crit_manipulation_info;
+pub mod player_list_window;
 
 #[derive(Debug,Clone)]
 pub enum DrawOrder {

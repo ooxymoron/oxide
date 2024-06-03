@@ -631,3 +631,12 @@ impl Display for Padding {
         write!(f, "{:0x}", self.0)
     }
 }
+
+pub fn str_from_arr(arr: &Vec<u8>) -> String {
+    unsafe {
+        String::from_utf8_unchecked(arr.to_vec())
+            .chars()
+            .filter(|char| *char != '\0')
+            .collect()
+    }
+}

@@ -2,7 +2,7 @@ use std::{
     any::type_name, collections::HashMap, mem::{transmute, ManuallyDrop}
 };
 
-use crate::{draw::event::Event, oxide::cheat::{crit_manipulation::CritManipulation, spread_reduction::SpreadReduction}};
+use crate::{draw::event::Event, oxide::cheat::{crit_manipulation::CritManipulation, player_list::PlayerList, spread_reduction::SpreadReduction}};
 
 use super::{aimbot::Aimbot, movement::Movement, visual::Visuals, Cheat};
 
@@ -27,6 +27,7 @@ impl Cheats {
         add!(Visuals);
         add!(SpreadReduction);
         add!(CritManipulation);
+        add!(PlayerList);
 
         cheats
     }

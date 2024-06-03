@@ -6,7 +6,7 @@ use crate::{
     d,
     draw::{
         colors::*,
-        component::spectator_list::SpectatorListWindow,
+        component::{player_list_window::PlayerListWindow, spectator_list::SpectatorListWindow},
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
@@ -69,6 +69,7 @@ impl Overlay {
         add_window!("AIMBOT", AimbotWindow);
         add_window!("VISUALS", VisualsWindow);
         add_window!("MOVEMENT", MovementWindow);
+        add_window!("PLAYER LIST", PlayerListWindow);
 
         let size = d!().window_size;
         Overlay {

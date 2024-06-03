@@ -1,9 +1,10 @@
 use crate::{
-    define_hook, get_cheat, oxide::{cheat::visual::Visuals, entity_cache::EntityCache}, sdk::interfaces::base_client::{BaseClient, FrameStage}
+    define_hook, get_cheat,
+    oxide::{cheat::visual::Visuals, entity_cache::EntityCache},
+    sdk::interfaces::base_client::{BaseClient, FrameStage},
 };
 
 fn hook(client: &BaseClient, stage: FrameStage, org: FrameStageNotifyHook::RawFn) {
-
     match stage {
         FrameStage::FrameNetUpdateEnd => {
             match EntityCache::init() {
@@ -20,7 +21,7 @@ fn hook(client: &BaseClient, stage: FrameStage, org: FrameStageNotifyHook::RawFn
         }
         _ => {}
     }
-    (org)(client,stage);
+    (org)(client, stage);
 }
 
 define_hook!(

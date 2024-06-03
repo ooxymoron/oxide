@@ -8,6 +8,7 @@ pub mod movement;
 pub mod visual;
 pub mod spread_reduction;
 pub mod crit_manipulation;
+pub mod player_list;
 
 pub trait Cheat: std::fmt::Debug {
     fn handle_event(&mut self, _: &mut Event) {}

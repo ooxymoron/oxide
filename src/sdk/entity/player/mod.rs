@@ -114,16 +114,8 @@ impl Player {
         remap_clamped(*self.get_crit_mult_raw(), 0.0, 255.0, 1.0, 4.0)
     }
     pub fn get_resource_data(&self) -> PlayerResourceData {
-        let id = vmt_call!(self.as_ent(), get_index);
-        PlayerResourceData {
-            damage: o!()
-                .player_resource_manager
-                .entity
-                .as_mut()
-                .unwrap()
-                .get_damage_resource()[id as usize]
-                .clone(),
-        }
+        let id = vmt_call!(self.as_ent(), get_index) as usize;
+        PlayerResourceData::new(id).unwrap()
     }
     pub fn time(&self) -> f32 {
         o!().global_vars.interval_per_tick * *self.get_tick_base() as f32
@@ -195,9 +187,7 @@ impl Player {
     );
     define_netvar!(
         get_ground_entity,
-        [
-            "baseclass", "localdata", "m_hGroundEntity"
-        ],
+        ["baseclass", "localdata", "m_hGroundEntity"],
         Entity
     );
 }
