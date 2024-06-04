@@ -96,9 +96,8 @@ impl Component for KeyInput {
         match event.r#type {
             EventType::MouseButtonDown(button) => {
                 if button == 1 {
-                    let ComponentBase { x, y, w, h } = self.base;
                     if !self.focussed {
-                        if point_in_bounds(d!().cursor.0, d!().cursor.1, x, y, w, h) {
+                        if point_in_bounds(d!().cursor.0, d!().cursor.1, &self.base) {
                             self.focussed = true;
                             event.handled = true;
                         }

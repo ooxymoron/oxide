@@ -1,16 +1,13 @@
+#[allow(deprecated)]
 use std::{
-    error::Error,
-    ffi::{c_char, CStr, CString},
-    fmt::Display,
-    mem::transmute,
-    usize,
+    env::home_dir, error::Error, ffi::{c_char, CStr, CString}, fmt::Display, mem::transmute, usize
 };
 
 use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
 use libc::{c_void, dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Scancode;
 
-use crate::error::OxideError;
+use crate::{draw::component::ComponentBase, error::OxideError};
 
 pub mod arcm;
 pub mod debug;
@@ -18,6 +15,11 @@ pub mod handles;
 pub mod macros;
 pub mod scancode;
 pub mod sigscanner;
+
+pub fn dir() -> String {
+    #[allow(deprecated)]
+    return format!("{}/.config/oxide/", home_dir().unwrap().to_string_lossy());
+}
 
 pub fn vmt_size(vmt: *const c_void) -> usize {
     unsafe {
@@ -617,12 +619,9 @@ pub fn sdl_scancode_to_char(key: SDL_Scancode) -> Option<char> {
 pub fn point_in_bounds(
     x: isize,
     y: isize,
-    bound_x: isize,
-    bound_y: isize,
-    w: isize,
-    h: isize,
+    base: &ComponentBase
 ) -> bool {
-    bound_x <= x && x <= bound_x + w && bound_y <= y && y <= bound_y + h
+    base.x <= x && x <= base.x + base.w && base.y <= y && y <= base.y + base.h
 }
 
 pub struct Padding(u8);

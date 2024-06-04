@@ -25,8 +25,7 @@ use crate::{
 };
 
 use self::{
-    engine_prediction::EnginePredicion, entity_cache::EntityCache, logger::Logger, paint::Paint,
-    player_resource_manager::PlayerResourceManager, util::Util,
+    engine_prediction::EnginePredicion, entity_cache::EntityCache, logger::Logger, paint::Paint, player_db::PlayerDb, player_resource_manager::PlayerResourceManager, util::Util
 };
 
 pub mod cheat;
@@ -38,6 +37,7 @@ pub mod logger;
 pub mod paint;
 pub mod player_resource_manager;
 pub mod util;
+pub mod player_db;
 
 #[derive(Debug)]
 pub struct Oxide {
@@ -58,6 +58,7 @@ pub struct Oxide {
     pub event_manager: &'static mut GameEventManager,
     pub player_resource_manager: PlayerResourceManager,
     pub prediction_seed: &'static mut i32,
+    pub player_db: PlayerDb
 }
 pub type GetBonePositionFn =
     unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
@@ -119,6 +120,7 @@ impl Oxide {
             event_manager,
             player_resource_manager: PlayerResourceManager::new(),
             prediction_seed,
+            player_db: PlayerDb::init()
         };
 
         Ok(oxide)

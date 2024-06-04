@@ -55,7 +55,7 @@ impl Player {
         };
         return ent.as_player();
     }
-    pub fn get_byt_user_id(id: i32) -> OxideResult<&'static mut Player> {
+    pub fn get_from_user_id(id: i32) -> OxideResult<&'static mut Player> {
         let id = vmt_call!(interface!(base_engine), get_player_from_user_id, id);
         let Some(ent) = Entity::get_ent(id) else {
             return Err(OxideError::new("player is none"))

@@ -3,6 +3,7 @@ use crate::{
     error::OxideResult,
     o,
     oxide::{cheat::player_list::PlayerList, player_resource_manager::PlayerResourceData},
+    sdk::{entity::player::Player, interfaces::base_engine::PlayerInfo},
     util::arcm::Arcm,
 };
 
@@ -14,11 +15,17 @@ use super::{
 #[derive(Debug, Clone)]
 pub struct PlayerListInfo {
     pub resource: PlayerResourceData,
+    pub info: Option<PlayerInfo>,
 }
 
 impl PlayerListInfo {
     pub fn new(resource: PlayerResourceData) -> PlayerListInfo {
-        PlayerListInfo { resource }
+        let info = if let Ok(player) = Player::get_from_user_id(resource.user_id) {
+            Some(player.info().unwrap())
+        } else {
+            None
+        };
+        PlayerListInfo { resource, info }
     }
 }
 #[derive(Debug)]
@@ -47,19 +54,21 @@ impl Component for PlayerListWindow {
 
         table_data.push([
             Box::new(Label::new("name".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
-            Box::new(Label::new("steam id".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+            Box::new(Label::new("guid".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
         ]);
         for player in players {
-            let resource = player.resource.clone();
+            let guid = if let Some(info) = player.info {
+                info.guid
+            } else {
+                "".to_string()
+            };
+            let mut name = Label::new(player.resource.name, 0, 0, player.resource.team.color());
+            name.copy = true;
+            let mut guid = Label::new(guid, 0, 0, FOREGROUND);
+            guid.copy = true;
             table_data.push([
-                Box::new(Label::new(resource.name, 0, 0, resource.team.color()))
-                    as Box<dyn Component>,
-                Box::new(Label::new(
-                    resource.account_id.to_string(),
-                    0,
-                    0,
-                    FOREGROUND,
-                )) as Box<dyn Component>,
+                Box::new(name) as Box<dyn Component>,
+                Box::new(guid) as Box<dyn Component>,
             ]);
         }
 

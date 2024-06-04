@@ -1,6 +1,5 @@
-#[allow(deprecated)]
-use std::{env::home_dir, fs::File, io::Write};
 use std::{fs::create_dir_all, io::Read, path::Path};
+use std::{fs::File, io::Write};
 
 use sdl2_sys::SDL_Scancode;
 use serde::{Deserialize, Serialize};
@@ -8,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     draw::component::base::key_input::KeyInputValue,
     error::OxideResult,
-    util::{arcm::Arcm, scancode::Scancode},
+    util::{arcm::Arcm, dir, scancode::Scancode},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -27,7 +26,7 @@ impl Settings {
         }
     }
     pub fn load() -> OxideResult<Self> {
-        let path = format!("{}/main.toml", Settings::dir());
+        let path = format!("{}/main.toml", dir());
         if !Path::new(&path).exists() {
             return Ok(Settings::new());
         }
@@ -41,13 +40,9 @@ impl Settings {
         };
         Ok(settings)
     }
-    fn dir() -> String {
-        #[allow(deprecated)]
-        return format!("{}/.config/oxide/", home_dir().unwrap().to_string_lossy());
-    }
     pub fn save(&self) -> OxideResult<()> {
-        create_dir_all(Settings::dir())?;
-        let path = format!("{}/main.toml", Settings::dir());
+        create_dir_all(dir())?;
+        let path = format!("{}/main.toml", dir());
         let mut file = File::create(path)?;
         let text = toml::to_string(self).unwrap();
         file.write_all(text.as_bytes())?;

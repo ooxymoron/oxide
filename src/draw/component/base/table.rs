@@ -35,11 +35,41 @@ impl<const T: usize> Table<T> {
             row_heights.push(row_max_h);
             h += row_max_h;
         }
+
+        let mut y = 0;
+        for (row_i, row) in data.iter_mut().enumerate() {
+            let mut x = 0;
+            for (col_i, col) in row.iter_mut().enumerate() {
+                col.get_base().x = x;
+                col.get_base().y = y;
+                x += col_widths[col_i];
+            }
+            y += row_heights[row_i];
+        }
+
         Table::<T> {
             base: ComponentBase { x: 0, y: 0, w, h },
             data,
             col_widths,
             row_heights,
+        }
+    }
+    pub fn componesate_components(&mut self) {
+        let ComponentBase { x, y, .. } = self.base;
+        for row in &mut self.data {
+            for col in row {
+                col.get_base().x += x;
+                col.get_base().y += y;
+            }
+        }
+    }
+    pub fn uncomponesate_components(&mut self) {
+        let ComponentBase { x, y, .. } = self.base;
+        for row in &mut self.data {
+            for col in row {
+                col.get_base().x -= x;
+                col.get_base().y -= y;
+            }
         }
     }
 }
@@ -49,18 +79,15 @@ impl<const T: usize> Component for Table<T> {
         self.base.borrow_mut()
     }
     fn draw(&mut self, frame: &mut crate::draw::frame::Frame) -> crate::error::OxideResult<()> {
-        let ComponentBase { mut y, w, h,.. } = self.base;
+        let ComponentBase { w, h, .. } = self.base;
 
-        for (row_i, row) in self.data.iter_mut().enumerate() {
-            let mut x = self.base.x;
-            for (col_i, col) in row.iter_mut().enumerate() {
-                col.get_base().x = x;
-                col.get_base().y = y;
+        self.componesate_components();
+        for row in &mut self.data {
+            for col in row {
                 col.draw(frame)?;
-                x += self.col_widths[col_i];
             }
-            y += self.row_heights[row_i];
         }
+        self.uncomponesate_components();
 
         let mut y = self.base.y;
         let x = self.base.x;
@@ -77,5 +104,15 @@ impl<const T: usize> Component for Table<T> {
         }
 
         Ok(())
+    }
+    fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
+        self.componesate_components();
+        for row in &mut self.data {
+            for col in row {
+                col.handle_event(event);
+            }
+        }
+
+        self.uncomponesate_components();
     }
 }

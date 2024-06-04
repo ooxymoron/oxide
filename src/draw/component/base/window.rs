@@ -80,7 +80,7 @@ impl Window {
     pub fn clear(&mut self) {
         self.components.0.clear();
         let old_base = self.base.clone();
-        self.base = Window::new_base(&self.title,self.close_button.is_some());
+        self.base = Window::new_base(&self.title, self.close_button.is_some());
         self.base.x = old_base.x;
         self.base.y = old_base.y;
     }
@@ -102,7 +102,6 @@ impl Window {
         self.components.add(component)
     }
     pub fn should_draw(&self) -> bool {
-
         if let Some(visible) = &self.visible {
             if !*visible.lock().unwrap() {
                 return false;
@@ -116,8 +115,8 @@ impl Component for Window {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         let ComponentBase { x, y, w, h } = self.base;
         if !self.should_draw() {
-                self.last_visible = false;
-                return Ok(());
+            self.last_visible = false;
+            return Ok(());
         }
         if !self.last_visible {
             self.draw_order = DrawOrder::Top
@@ -128,7 +127,7 @@ impl Component for Window {
         frame.text(
             &self.title,
             x + (w - if self.close_button.is_some() {
-                2*PADDING + CLOSE_BUTTON_SIZE
+                2 * PADDING + CLOSE_BUTTON_SIZE
             } else {
                 0
             }) / 2,
@@ -190,10 +189,12 @@ impl Component for Window {
                 }
             }
             EventType::MouseButtonDown(1) => {
-                if point_in_bounds(d!().cursor.0, d!().cursor.1, *x, *y, *w, HEADER_HEIGHT) {
+                let mut header_base = self.base.clone();
+                header_base.h = HEADER_HEIGHT;
+                if point_in_bounds(d!().cursor.0, d!().cursor.1, &header_base) {
                     self.dragging = true;
                 }
-                if point_in_bounds(d!().cursor.0, d!().cursor.1, *x, *y, *w, *h) {
+                if point_in_bounds(d!().cursor.0, d!().cursor.1, &self.base) {
                     self.draw_order = DrawOrder::Top;
                     event.handled = true;
                 }

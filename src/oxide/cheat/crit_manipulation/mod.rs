@@ -157,11 +157,11 @@ impl CritManipulation {
 impl CritManipulation {
     pub fn player_hurt(&mut self, event: &GameEvent) {
         let Ok(p_local) = Player::get_local() else {return};
-        let Ok(attacker) = Player::get_byt_user_id(event.get_int("attacker").unwrap()) else {return};
+        let Ok(attacker) = Player::get_from_user_id(event.get_int("attacker").unwrap()) else {return};
         if attacker.as_ent() != p_local.as_ent() {
             return;
         }
-        let attacked = Player::get_byt_user_id(event.get_int("userid").unwrap()).unwrap();
+        let attacked = Player::get_from_user_id(event.get_int("userid").unwrap()).unwrap();
         if attacker.as_ent() == attacked.as_ent() {
             return;
         }

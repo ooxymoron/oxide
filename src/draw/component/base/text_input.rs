@@ -79,14 +79,10 @@ impl Component for TextInput {
         match event.r#type {
             EventType::MouseButtonDown(1) => {
                 if !self.focussed {
-                    let ComponentBase{x,y,w,h} = self.base;
                     if point_in_bounds(
                         d!().cursor.0,
                         d!().cursor.1,
-                        x,
-                        y,
-                        w,
-                        h,
+                        &self.base
                     ) {
                         self.focussed = true;
                         event.handled = true;

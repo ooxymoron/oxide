@@ -1,13 +1,18 @@
-use std::borrow::BorrowMut;
+use std::{borrow::BorrowMut, ffi::CString, mem::transmute};
+
+use sdl2_sys::SDL_SetClipboardText;
 
 use crate::{
     d,
     draw::{
         component::{Component, ComponentBase},
+        event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
     },
     error::OxideResult,
+    log,
+    util::point_in_bounds,
 };
 
 const PADDING: isize = 6;
@@ -17,6 +22,7 @@ pub struct Label {
     text: String,
     base: ComponentBase,
     color: usize,
+    pub copy: bool,
 }
 
 impl Label {
@@ -28,6 +34,7 @@ impl Label {
             text,
             base: ComponentBase { x, y, w, h },
             color,
+            copy: false,
         }
     }
 }
@@ -49,5 +56,20 @@ impl Component for Label {
             255,
         );
         Ok(())
+    }
+    fn handle_event(&mut self, event: &mut Event) {
+        match event.r#type {
+            EventType::MouseButtonDown(1) => {
+                if point_in_bounds(d!().cursor.0, d!().cursor.1, &self.base) && self.copy {
+                    unsafe {
+                        log!("coppied {}", &self.text);
+                        let text = CString::new(self.text.clone()).unwrap();
+                        SDL_SetClipboardText(text.as_ptr());
+                    }
+                    event.handled = true;
+                }
+            }
+            _ => {}
+        }
     }
 }
