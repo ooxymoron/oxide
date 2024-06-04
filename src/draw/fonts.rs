@@ -32,17 +32,23 @@ struct CacheValue {
 #[derive(Debug, Clone)]
 pub struct Fonts {
     pub free_type: FT_Library,
-    pub face_large: FT_Face,
-    pub face_medium: FT_Face,
-    pub face_small: FT_Face,
+    pub faces: HashMap<FontSize, FT_Face>,
     cache: HashMap<CacheKey, CacheValue>,
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, PartialOrd, Ord, Eq)]
+#[repr(isize)]
 pub enum FontSize {
-    Small = 16,
-    Medium = 24,
-    Large = 36,
+    Small = 8,
+    Medium = 16,
+    Large = 24,
+    Huge = 36,
+}
+
+impl FontSize {
+    pub fn height(&self) -> isize {
+        self.clone() as isize
+    }
 }
 
 impl Fonts {
@@ -68,35 +74,34 @@ impl Fonts {
 
             FT_Init_FreeType(&mut free_type);
 
-            let face_large = Fonts::init_face(free_type, FontSize::Large as isize);
-            let face_medium = Fonts::init_face(free_type, FontSize::Medium as isize);
-            let face_small = Fonts::init_face(free_type, FontSize::Small as isize);
+            let mut faces = HashMap::new();
+
+            macro_rules! init_face {
+                ($size: path) => {
+                    faces.insert($size, Fonts::init_face(free_type, $size as isize));
+                };
+            }
+            init_face!(FontSize::Small);
+            init_face!(FontSize::Medium);
+            init_face!(FontSize::Large);
+            init_face!(FontSize::Huge);
             Fonts {
                 free_type,
-                face_large,
-                face_medium,
-                face_small,
+                faces,
                 cache: HashMap::new(),
             }
         }
     }
-    pub fn get_face(&self, size: &FontSize) -> *mut FT_FaceRec {
-        match size {
-            FontSize::Small => self.face_small,
-            FontSize::Medium => self.face_medium,
-            FontSize::Large => self.face_large,
-        }
-    }
     pub fn restore(&self) {
         unsafe {
-            FT_Done_Face(self.face_small);
-            FT_Done_Face(self.face_medium);
-            FT_Done_Face(self.face_large);
+            for face in self.faces.values() {
+                FT_Done_Face(*face);
+            }
             FT_Done_FreeType(self.free_type);
         }
     }
     pub fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
-        let face = self.get_face(&size);
+        let face = *self.faces.get(&size).unwrap();
 
         let mut w = 0;
         let mut h_min = 0;
@@ -116,7 +121,7 @@ impl Fonts {
         (w, h_min, h_max)
     }
     pub fn get_glyph(&self, size: FontSize, char: char) -> FT_GlyphSlotRec {
-        let face = self.get_face(&size);
+        let face = *self.faces.get(&size).unwrap();
 
         unsafe {
             FT_Load_Char(face, char as u64, FT_LOAD_RENDER);
@@ -135,11 +140,16 @@ impl Fonts {
     ) -> (isize, isize) {
         unsafe {
             if letter == ' ' {
-                let size = self.get_text_size("a", FontSize::Small);
+                let size = self.get_text_size("a", size);
                 return (size.0, 0);
             }
 
-            let cache_key = CacheKey { letter, size, color,alpha };
+            let cache_key = CacheKey {
+                letter,
+                size,
+                color,
+                alpha,
+            };
             if let Some(cached) = self.cache.get(&cache_key) {
                 let mut rect = SDL_Rect {
                     x: x as i32 + cached.left,

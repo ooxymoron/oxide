@@ -15,7 +15,7 @@ use crate::{
     util::{arcm::Arcm, point_in_bounds, sdl_scancode_to_char},
 };
 
-const SIZE: isize = FontSize::Small as isize + 4;
+const SIZE: isize = FontSize::Medium as isize + 4;
 
 #[derive(Debug)]
 pub struct TextInput {
@@ -28,7 +28,7 @@ pub struct TextInput {
 
 impl TextInput {
     pub fn new( x: isize, y: isize, label: &'static str, val: Arcm<String>) -> TextInput {
-        let text_size = d!().fonts.get_text_size(label, FontSize::Small);
+        let text_size = d!().fonts.get_text_size(label, FontSize::Medium);
         let input_w = 100;
         let w = text_size.0 + input_w + 10;
         let h = SIZE;
@@ -54,7 +54,7 @@ impl Component for TextInput {
             &*self.val.lock().unwrap(),
             x + self.input_w / 2,
             y + h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             true,
             true,
             FOREGROUND,
@@ -65,7 +65,7 @@ impl Component for TextInput {
             &self.label,
             x + self.input_w + 10,
             y + h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             false,
             true,
             FOREGROUND,

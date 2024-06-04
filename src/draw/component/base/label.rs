@@ -3,7 +3,6 @@ use std::borrow::BorrowMut;
 use crate::{
     d,
     draw::{
-        colors::FOREGROUND,
         component::{Component, ComponentBase},
         fonts::FontSize,
         frame::Frame,
@@ -11,24 +10,24 @@ use crate::{
     error::OxideResult,
 };
 
-const PADDING: isize = 2;
+const PADDING: isize = 6;
 
 #[derive(Debug)]
 pub struct Label {
     text: String,
     base: ComponentBase,
-    color: usize
+    color: usize,
 }
 
 impl Label {
     pub fn new(text: String, x: isize, y: isize, color: usize) -> Label {
-        let size = d!().fonts.get_text_size(&text, FontSize::Small);
+        let size = d!().fonts.get_text_size(&text, FontSize::Medium);
         let w = size.0 + PADDING * 2;
-        let h = size.1 + size.2 + PADDING * 2;
+        let h = FontSize::Medium.height() + PADDING * 2;
         Label {
             text,
             base: ComponentBase { x, y, w, h },
-            color
+            color,
         }
     }
 }
@@ -43,7 +42,7 @@ impl Component for Label {
             &self.text,
             base.x + PADDING,
             base.y + self.base.h - PADDING,
-            FontSize::Small,
+            FontSize::Medium,
             false,
             false,
             self.color,

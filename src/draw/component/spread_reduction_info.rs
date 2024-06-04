@@ -71,7 +71,7 @@ impl Component for SpreadReductionInfo {
             &text,
             self.base.x + self.base.w / 2,
             self.base.y + self.base.h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             true,
             true,
             color,
@@ -90,7 +90,7 @@ impl SpreadReductionInfoWindow {
         window.get_base().x = 10;
         window.get_base().y = (d!().window_size.1 - window.get_base().y) / 2;
 
-        window.add(spectator_list, 0);
+        window.add(spectator_list);
 
         SpreadReductionInfoWindow {
             visible_window: VisibleWindow::new(window),

@@ -115,7 +115,7 @@ impl Frame {
                 x -= text_size.0 / 2;
             }
         }
-        let face = self.fonts.get_face(&size);
+        let face = *self.fonts.faces.get(&size).unwrap();
 
         for letter in text.chars() {
             let advance = d!()

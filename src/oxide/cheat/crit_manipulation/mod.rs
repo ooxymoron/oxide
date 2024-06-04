@@ -183,12 +183,13 @@ impl CritManipulation {
         }
     }
     pub fn create_move(&mut self, cmd: &mut UserCmd) {
-        self.state = None;
         let Ok(p_local) = Player::get_local() else { 
+            self.state = None;
             return
         };
         let weapon = p_local.weapon();
         if !weapon.can_crit() {
+            self.state = None;
             return
         }
         self.update_state(weapon);

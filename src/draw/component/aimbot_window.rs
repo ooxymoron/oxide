@@ -1,5 +1,9 @@
 use crate::{
-    draw::{event::Event, frame::Frame},
+    draw::{
+        component::base::linear_layout::{LinearLayout, LinearLayoutOrientation},
+        event::Event,
+        frame::Frame,
+    },
     error::OxideResult,
     s,
     util::arcm::Arcm,
@@ -18,150 +22,153 @@ pub struct AimbotWindow {
 impl AimbotWindow {
     pub fn new(visible: Arcm<bool>) -> AimbotWindow {
         let mut window = Window::new("AIMBOT".to_owned(), Some(visible));
-        let mut y = 10;
-        macro_rules! a {
-            ($e:expr) => {
-                #[allow(unused_assignments)]
-                {
-                    window.add($e, 8);
-                    y += $e.get_base().h + 8
-                }
-            };
-        }
 
-        a!(Checkbox::new("enable", s!().aimbot.enabled.clone(), 10, y));
-        a!(Checkbox::new(
+        let mut container = LinearLayout::new( LinearLayoutOrientation::VERTICAL, 16, 10);
+
+        let mut main_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        main_settings.add(Checkbox::new("enable", s!().aimbot.enabled.clone(), 0, 0));
+        main_settings.add(Checkbox::new(
             "draw fov",
             s!().aimbot.draw_fov.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        a!(FloatInput::new(
-            10,
-            y,
+        main_settings.add(FloatInput::new(
+            0,
+            0,
             "aimbot fov",
             s!().aimbot.fov.clone(),
-            None
+            None,
         ));
-        a!(Checkbox::new(
+        main_settings.add(Checkbox::new(
             "always_on",
             s!().aimbot.always_on.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(KeyInput::new(10, y, "aimbot key", s!().aimbot.key.clone()));
+        main_settings.add(KeyInput::new(0, 0, "aimbot key", s!().aimbot.key.clone()));
+        container.add(main_settings);
 
-        y += 10;
-        a!(Checkbox::new(
+        let mut multipoint_settings =
+            LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        multipoint_settings.add(Checkbox::new(
             "multipoint",
             s!().aimbot.multipoint.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(FloatInput::new(
-            10,
-            y,
+        multipoint_settings.add(FloatInput::new(
+            0,
+            0,
             "hitbox scale",
             s!().aimbot.hitbox_scale.clone(),
-            Some(|val| { val <= 1.0 && val >= 0.0 })
+            Some(|val| val <= 1.0 && val >= 0.0),
         ));
+        container.add(multipoint_settings);
 
-        y += 20;
-        a!(Checkbox::new(
+        let mut fire_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        fire_settings.add(Checkbox::new(
             "autoshoot",
             s!().aimbot.autoshoot.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new("silent", s!().aimbot.silent.clone(), 10, y));
-        a!(Checkbox::new(
+        fire_settings.add(Checkbox::new("silent", s!().aimbot.silent.clone(), 0, 0));
+        fire_settings.add(Checkbox::new(
             "fire only when able",
             s!().aimbot.fire_only_when_able.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        y += 20;
+        container.add(fire_settings);
 
-        a!(Checkbox::new(
+        let mut target_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        target_settings.add(Checkbox::new(
             "target sentries",
             s!().aimbot.target_sentries.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        target_settings.add(Checkbox::new(
             "target invisible",
             s!().aimbot.target_invisible.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        target_settings.add(Checkbox::new(
             "target disguised",
             s!().aimbot.target_disguised.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        target_settings.add(Checkbox::new(
             "target stickies",
             s!().aimbot.target_stickies.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        y += 20;
+        container.add(target_settings);
 
-        a!(Checkbox::new(
+        let mut misc_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        misc_settings.add(Checkbox::new(
             "wait for charge",
             s!().aimbot.wait_for_charge.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        misc_settings.add(Checkbox::new(
             "baim if lethal",
             s!().aimbot.baim_if_lethal.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        y += 20;
-
-        a!(Checkbox::new(
+        misc_settings.add(Checkbox::new(
             "auto zoom",
             s!().aimbot.auto_scope.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        misc_settings.add(Checkbox::new(
             "auto unzoom",
             s!().aimbot.auto_unscope.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        misc_settings.add(Checkbox::new(
             "auto rev",
             s!().aimbot.auto_rev.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        y += 20;
-        a!(Checkbox::new(
+        container.add(misc_settings);
+
+        let mut spread_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        spread_settings.add(Checkbox::new(
             "spread reduction",
             s!().aimbot.spread_reduction.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new("tapfire", s!().aimbot.tapfire.clone(), 10, y));
-        a!(Checkbox::new(
+        spread_settings.add(Checkbox::new("tapfire", s!().aimbot.tapfire.clone(), 0, 0));
+        spread_settings.add(Checkbox::new(
             "tapfire only minigun",
             s!().aimbot.tapfire_only_minigun.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        y += 20;
+        container.add(spread_settings);
 
-        a!(KeyInput::new(
-            10,
-            y,
+        let mut crit_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        crit_settings.add(KeyInput::new(
+            0,
+            0,
             "crit key",
-            s!().aimbot.crit_key.clone()
+            s!().aimbot.crit_key.clone(),
         ));
+        container.add(crit_settings);
+
+        window.add(container);
+
         AimbotWindow { window }
     }
 }

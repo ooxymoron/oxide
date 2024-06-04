@@ -16,7 +16,7 @@ use crate::{
 use super::button::Button;
 
 pub const HEADER_HEIGHT: isize = 30;
-const CLOSE_BUTTON_SIZE: isize = FontSize::Small as isize + 2;
+const CLOSE_BUTTON_SIZE: isize = FontSize::Medium as isize + 2;
 const PADDING: isize = HEADER_HEIGHT / 2 - CLOSE_BUTTON_SIZE / 2;
 
 #[derive(Debug)]
@@ -36,7 +36,7 @@ impl Window {
     fn new_base(title: &str, close_button: bool) -> ComponentBase {
         let x = 100;
         let y = 100;
-        let mut w = d!().fonts.get_text_size(title, FontSize::Small).0 + PADDING * 2;
+        let mut w = d!().fonts.get_text_size(title, FontSize::Medium).0 + PADDING * 2;
         if close_button {
             w += CLOSE_BUTTON_SIZE + PADDING;
         }
@@ -59,7 +59,7 @@ impl Window {
                 },
                 "x",
                 visible.clone(),
-                FontSize::Small,
+                FontSize::Medium,
             ))
         } else {
             None
@@ -84,13 +84,13 @@ impl Window {
         self.base.x = old_base.x;
         self.base.y = old_base.y;
     }
-    pub fn add(&mut self, mut component: impl Component + 'static, pad: isize) {
+    pub fn add(&mut self, mut component: impl Component + 'static) {
         let component_base = component.get_base();
         self.base.h = self
             .base
             .h
-            .max(component_base.y + component_base.h + HEADER_HEIGHT + pad);
-        self.base.w = self.base.w.max(component_base.x + component_base.w + pad);
+            .max(component_base.y + component_base.h + HEADER_HEIGHT);
+        self.base.w = self.base.w.max(component_base.x + component_base.w);
         if let Some(button) = &mut self.close_button {
             let button_base = button.get_base();
             button_base.x = self.base.x + self.base.w - CLOSE_BUTTON_SIZE - PADDING;
@@ -128,12 +128,12 @@ impl Component for Window {
         frame.text(
             &self.title,
             x + (w - if self.close_button.is_some() {
-                PADDING + CLOSE_BUTTON_SIZE
+                2*PADDING + CLOSE_BUTTON_SIZE
             } else {
                 0
             }) / 2,
             y + HEADER_HEIGHT / 2,
-            FontSize::Small,
+            FontSize::Medium,
             true,
             true,
             FOREGROUND,

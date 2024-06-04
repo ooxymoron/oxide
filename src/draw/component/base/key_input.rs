@@ -14,7 +14,7 @@ use crate::{
     util::{arcm::Arcm, point_in_bounds, scancode::Scancode, sdl_scancode_name_to_string},
 };
 
-const SIZE: isize = FontSize::Small as isize + 4;
+const SIZE: isize = FontSize::Medium as isize + 4;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum KeyInputValue {
@@ -45,7 +45,7 @@ pub struct KeyInput {
 
 impl KeyInput {
     pub fn new(x: isize, y: isize, label: &'static str, val: Arcm<KeyInputValue>) -> KeyInput {
-        let text_size = d!().fonts.get_text_size(label, FontSize::Small);
+        let text_size = d!().fonts.get_text_size(label, FontSize::Medium);
         let input_w = 100;
         let w = text_size.0 + input_w + 10;
         let h = SIZE;
@@ -73,7 +73,7 @@ impl Component for KeyInput {
             val.to_string().as_str(),
             x + self.input_w / 2,
             y + h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             true,
             true,
             FOREGROUND,
@@ -83,7 +83,7 @@ impl Component for KeyInput {
             &self.label,
             x + self.input_w + 10,
             y + h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             false,
             true,
             FOREGROUND,

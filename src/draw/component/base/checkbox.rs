@@ -23,7 +23,7 @@ pub struct Checkbox {
 }
 impl Checkbox {
     pub fn new(label: &'static str, checked: Arcm<bool>, x: isize, y: isize) -> Checkbox {
-        let text_size = d!().fonts.get_text_size(label, FontSize::Small);
+        let text_size = d!().fonts.get_text_size(label, FontSize::Medium);
         let w = text_size.0 + SIZE + 10;
         let h = SIZE;
         Checkbox {
@@ -44,7 +44,7 @@ impl Component for Checkbox {
             self.label,
             x + SIZE + 10,
             y + SIZE / 2,
-            FontSize::Small,
+            FontSize::Medium,
             false,
             true,
             FOREGROUND,

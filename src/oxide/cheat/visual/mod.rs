@@ -9,7 +9,7 @@ use crate::{
     o, s,
     sdk::{
         condition::ConditionFlags,
-        entity::{player::Player, Entity, ObserverMode},
+        entity::{player::Player, Entity, ObserverMode, Team},
         networkable::ClassId,
         view_setup::ViewSetup,
     },
@@ -24,7 +24,7 @@ pub mod tracers;
 
 #[derive(Debug)]
 pub struct Visuals {
-    pub spectators: Arcm<Vec<(String, ObserverMode)>>,
+    pub spectators: Arcm<Vec<(String, ObserverMode, Team)>>,
     pub tp_offset_key_held: bool,
 }
 
@@ -74,7 +74,7 @@ impl Visuals {
                 continue;
             }
             let info = spectator.as_player()?.info()?;
-            spectators.push((info.name, mode));
+            spectators.push((info.name, mode, vmt_call!(spectator,get_team_number)));
         }
         let mut spectators_orig = self.spectators.lock().unwrap();
         *spectators_orig = spectators;

@@ -7,16 +7,11 @@ use crate::{
 };
 
 use super::{
-    base::{
-        label::Label,
-        window::{Window, HEADER_HEIGHT},
-    },
+    base::{label::Label, table::Table, window::Window},
     Component, ComponentBase,
 };
 
-const PADDING: isize = 10;
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PlayerListInfo {
     pub resource: PlayerResourceData,
 }
@@ -45,35 +40,34 @@ impl Component for PlayerListWindow {
     }
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         self.window.clear();
-        let players = &o!().cheats.get::<PlayerList>().players;
 
-        let mut y = PADDING / 2;
-        let x = PADDING;
-        let mut line_ys = Vec::new();
+        let player_list = o!().cheats.get::<PlayerList>();
+        let players = player_list.players.lock().unwrap().clone();
+        let mut table_data = Vec::new();
 
-        for (i, player) in players.lock().unwrap().iter().enumerate() {
-            let pr = &player.resource;
-            let text = format!("{} | {}", pr.name, pr.id);
-            let mut label = Label::new(text, x, y, pr.team.color());
-            label.get_base().w += PADDING;
-            if i != 0 {
-                let base = self.window.get_base();
-
-                let y = y - PADDING / 2 + base.y + HEADER_HEIGHT;
-                line_ys.push(y)
-            }
-            y += PADDING + label.get_base().h;
-
-            self.window.add(label, PADDING);
+        table_data.push([
+            Box::new(Label::new("name".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+            Box::new(Label::new("steam id".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+        ]);
+        for player in players {
+            let resource = player.resource.clone();
+            table_data.push([
+                Box::new(Label::new(resource.name, 0, 0, resource.team.color()))
+                    as Box<dyn Component>,
+                Box::new(Label::new(
+                    resource.account_id.to_string(),
+                    0,
+                    0,
+                    FOREGROUND,
+                )) as Box<dyn Component>,
+            ]);
         }
-        self.window.get_base().h -= PADDING / 2;
+
+        let table = Table::new(table_data);
+
+        self.window.add(table);
+
         self.window.draw(frame)?;
-        let base = self.window.get_base().clone();
-        for y in line_ys {
-            if self.window.should_draw() {
-                frame.line(base.x, y, base.x + base.w, y, FOREGROUND, 255);
-            }
-        }
         Ok(())
     }
     fn handle_event(&mut self, event: &mut Event) {

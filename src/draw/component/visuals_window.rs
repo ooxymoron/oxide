@@ -1,5 +1,12 @@
 use crate::{
-    draw::{component::base::key_input::KeyInput, event::Event, frame::Frame},
+    draw::{
+        component::base::{
+            key_input::KeyInput,
+            linear_layout::{LinearLayout, LinearLayoutOrientation},
+        },
+        event::Event,
+        frame::Frame,
+    },
     error::OxideResult,
     s,
     util::arcm::Arcm,
@@ -18,133 +25,129 @@ pub struct VisualsWindow {
 impl VisualsWindow {
     pub fn new(visible: Arcm<bool>) -> VisualsWindow {
         let mut window = Window::new("VISUALS".to_owned(), Some(visible));
-        let mut y = 10;
-        macro_rules! a {
-            ($e:expr) => {
-                #[allow(unused_assignments)]
-                {
-                    window.add($e, 8);
-                    y += $e.get_base().h + 8
-                }
-            };
-        }
+        let mut container = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 16, 10);
 
-        a!(Checkbox::new(
+        let mut third_person_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        third_person_settings.add(Checkbox::new(
             "third person",
             s!().visual.third_person.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        a!(KeyInput::new(
-            10,
-            y,
+        third_person_settings.add(KeyInput::new(
+            0,
+            0,
             "toggle key",
             s!().visual.tp_key.clone(),
         ));
-        a!(KeyInput::new(
-            10,
-            y,
+        third_person_settings.add(KeyInput::new(
+            0,
+            0,
             "offset key",
             s!().visual.tp_offset_key.clone(),
         ));
-        a!(FloatInput::new(
-            10,
-            y,
+        third_person_settings.add(FloatInput::new(
+            0,
+            0,
             "x offset",
             s!().visual.tp_offset_x.clone(),
             None,
         ));
-        a!(FloatInput::new(
-            10,
-            y,
+        third_person_settings.add(FloatInput::new(
+            0,
+            0,
             "y offset",
             s!().visual.tp_offset_y.clone(),
             None,
         ));
-        a!(FloatInput::new(
-            10,
-            y,
+        third_person_settings.add(FloatInput::new(
+            0,
+            0,
             "z offset",
             s!().visual.tp_offset_z.clone(),
             None,
         ));
-        y+= 20;
-        a!(FloatInput::new(10, y, "fov", s!().visual.fov.clone(), None,));
-        y+= 20;
+        container.add(third_person_settings);
 
-        a!(Checkbox::new("esp", s!().visual.esp.clone(), 10, y));
-        a!(Checkbox::new(
+        let mut fov_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        fov_settings.add(FloatInput::new(0, 0, "fov", s!().visual.fov.clone(), None));
+        container.add(fov_settings);
+
+        let mut esp_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        esp_settings.add(Checkbox::new("esp", s!().visual.esp.clone(), 0, 0));
+        esp_settings.add(Checkbox::new(
             "friendlies",
             s!().visual.esp_friendlies.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        esp_settings.add(Checkbox::new(
             "sentries",
             s!().visual.esp_sentreis.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        esp_settings.add(Checkbox::new(
             "projectiles",
             s!().visual.esp_projectiles.clone(),
-            10,
-            y
+            0,
+            0,
         ));
-        y+= 20;
+        container.add(esp_settings);
 
-        a!(Checkbox::new(
+        let mut hitbox_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        hitbox_settings.add(Checkbox::new(
             "hitboxes",
             s!().visual.hitboxes.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        y+= 20;
-        a!(Checkbox::new(
+        container.add(hitbox_settings);
+
+        let mut remove_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        remove_settings.add(Checkbox::new(
             "remove scope",
             s!().visual.remove_scope.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        remove_settings.add(Checkbox::new(
             "remove zoom",
             s!().visual.remove_zoom.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        a!(Checkbox::new(
+        remove_settings.add(Checkbox::new(
             "remove disguises",
             s!().visual.remove_disguises.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        y+= 20;
-        a!(Checkbox::new(
+        container.add(remove_settings);
+
+        let mut spectator_list = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        spectator_list.add(Checkbox::new(
             "spectator list",
             s!().visual.spectator_list.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        y+= 20;
-        a!(Checkbox::new(
+        container.add(spectator_list);
+
+        let mut pure_bypass = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        pure_bypass.add(Checkbox::new(
             "pure bypass",
             s!().visual.pure_bypass.clone(),
-            10,
-            y,
+            0,
+            0,
         ));
-        y+= 20;
-        a!(Checkbox::new(
-            "tracers",
-            s!().visual.tracers.clone(),
-            10,
-            y,
-        ));
-        a!(Checkbox::new(
-            "impacts",
-            s!().visual.impacts.clone(),
-            10,
-            y,
-        ));
+        container.add(pure_bypass);
+
+        let mut tracer_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        tracer_settings.add(Checkbox::new("tracers", s!().visual.tracers.clone(), 0, 0));
+        tracer_settings.add(Checkbox::new("impacts", s!().visual.impacts.clone(), 0, 0));
+        container.add(tracer_settings);
+        window.add(container);
         VisualsWindow { window }
     }
 }

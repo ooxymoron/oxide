@@ -44,7 +44,8 @@ pub struct PlayerResourceData {
     pub damage: i32,
     pub name: String,
     pub team: Team,
-    pub id: i32,
+    pub account_id: i32,
+    pub user_id: i32,
     pub connected: bool,
 }
 impl PlayerResourceData {
@@ -61,10 +62,10 @@ impl PlayerResourceData {
             if let Ok(name) = unsafe { std::ffi::CStr::from_ptr(name_ptr).to_str() } {
                 name
             } else {
-                "null"
+                ""
             }
         } else {
-            "null"
+            ""
         }
         .to_string();
 
@@ -72,7 +73,8 @@ impl PlayerResourceData {
             damage: pr.get_damage_resource()[id].clone(),
             name: str_from_arr(unsafe { name.as_mut_vec() }),
             team: pr.get_team()[id].clone().into(),
-            id: pr.get_account_id()[id],
+            account_id: pr.get_account_id()[id],
+            user_id: pr.get_user_id()[id],
             connected: pr.get_connected()[id],
         })
     }

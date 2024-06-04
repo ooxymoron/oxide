@@ -89,7 +89,7 @@ impl Component for CirtManipulationInfo {
             &text,
             self.base.x + self.base.w / 2,
             self.base.y + self.base.h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             true,
             true,
             color,
@@ -107,7 +107,7 @@ impl CritManipulationInfoWindow {
         window.get_base().y = (d!().window_size.1 - window.get_base().y) / 2 + 100;
 
         let crit_manipulatino_info = CirtManipulationInfo::new();
-        window.add(crit_manipulatino_info, 0);
+        window.add(crit_manipulatino_info);
         CritManipulationInfoWindow {
             visible_window: VisibleWindow::new(window),
         }

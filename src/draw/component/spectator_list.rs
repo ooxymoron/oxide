@@ -1,6 +1,6 @@
 use crate::{
     d,
-    draw::{colors::FOREGROUND, event::Event, fonts::FontSize, frame::Frame},
+    draw::{colors::FOREGROUND, event::Event, frame::Frame},
     error::OxideResult,
     o,
     oxide::cheat::visual::Visuals,
@@ -9,7 +9,12 @@ use crate::{
 };
 
 use super::{
-    base::{visible_window::VisibleWindow, window::Window},
+    base::{
+        label::Label,
+        linear_layout::{LinearLayout, LinearLayoutOrientation},
+        visible_window::VisibleWindow,
+        window::Window,
+    },
     Component, ComponentBase,
 };
 
@@ -40,24 +45,19 @@ impl Component for SpectatorList {
     }
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         let spectators = &o!().cheats.get::<Visuals>().spectators;
-        let mut y = self.base.y + self.base.h / 2;
-        for (name, mode) in &*spectators.lock().unwrap() {
-            let text = format!("[{}] {}", mode.to_string(), name);
-            frame.text(
-                &text,
-                self.base.x + self.base.w / 2,
-                y,
-                FontSize::Small,
-                true,
-                true,
-                FOREGROUND,
-                255,
-            );
-            let text_size = frame.fonts.get_text_size(&text, FontSize::Small);
-            y += text_size.1 + text_size.2;
-        }
+        let mut container = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 10);
+        container.center = true;
 
-        Ok(())
+        for (name, mode, team) in &*spectators.lock().unwrap() {
+            let mut row = LinearLayout::new(LinearLayoutOrientation::HORIZONTAL, 8, 0);
+            let mode = format!("[{}]", mode.to_string());
+            row.add(Label::new(mode, 0, 0, FOREGROUND));
+            row.add(Label::new(name.to_string(), 0, 0, team.color()));
+            container.add(row);
+        }
+        container.get_base().x = self.get_base().x + (self.base.w - container.get_base().w) / 2;
+        container.get_base().y = self.get_base().y;
+        container.draw(frame)
     }
 }
 
@@ -68,7 +68,7 @@ impl SpectatorListWindow {
         spectator_list.get_base().w = window.get_base().w;
         window.get_base().x = (d!().window_size.0 - window.get_base().w) / 2;
 
-        window.add(spectator_list, 0);
+        window.add(spectator_list);
 
         SpectatorListWindow {
             visible_window: VisibleWindow::new(window),

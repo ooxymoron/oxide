@@ -24,10 +24,10 @@ use super::{
     ComponentBase, Components,
 };
 
-const LEFT_OVERLAY_WIDTH: isize = 300;
-const TOP_OVERLAY_HEIGHT: isize = 50;
 const PADDING: isize = 10;
-const BUTTON_HEIGHT: isize = 50;
+const BUTTON_HEIGHT: isize = FontSize::Small as isize + 2 * PADDING;
+const TOP_OVERLAY_HEIGHT: isize = FontSize::Medium as isize + 2 * PADDING;
+const LEFT_OVERLAY_WIDTH: isize = 200;
 
 #[derive(Debug)]
 pub struct Overlay {
@@ -99,7 +99,7 @@ impl Overlay {
     fn draw_watermark(&mut self, frame: &mut Frame) {
         let text_size = frame
             .fonts
-            .get_text_size(&NAME.to_uppercase(), FontSize::Small);
+            .get_text_size(&NAME.to_uppercase(), FontSize::Medium);
 
         let pad = 5;
         let x = 30;
@@ -114,7 +114,7 @@ impl Overlay {
             &NAME.to_uppercase(),
             x + w / 2 + h,
             y + h / 2,
-            FontSize::Small,
+            FontSize::Medium,
             true,
             true,
             FOREGROUND,
@@ -177,12 +177,12 @@ impl Component for Overlay {
         frame.logo(0, 0, TOP_OVERLAY_HEIGHT - 2, TOP_OVERLAY_HEIGHT - 2);
 
         let version = format!("V{}", VERSION);
-        let text_size = frame.fonts.get_text_size(&version, FontSize::Small);
+        let text_size = frame.fonts.get_text_size(&version, FontSize::Medium);
         frame.text(
             &version,
             size.0 - text_size.0 - PADDING,
             TOP_OVERLAY_HEIGHT / 2,
-            FontSize::Small,
+            FontSize::Medium,
             false,
             true,
             FOREGROUND,
