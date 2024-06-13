@@ -9,3 +9,4 @@ pub mod label;
 pub mod linear_layout;
 pub mod table;
 pub mod select;
+pub mod int_input;

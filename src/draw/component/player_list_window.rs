@@ -1,43 +1,98 @@
+use std::{collections::HashMap, mem::transmute};
+
 use crate::{
     draw::{colors::FOREGROUND, event::Event, frame::Frame},
     error::OxideResult,
     o,
-    oxide::{cheat::player_list::PlayerList, player_resource_manager::PlayerResourceData},
-    sdk::{entity::player::Player, interfaces::base_engine::PlayerInfo},
+    oxide::cheat::player_list::{PlayerList, PlayerListInfo, PlayerListInfoInner},
     util::arcm::Arcm,
 };
 
 use super::{
-    base::{label::Label, table::Table, window::Window},
+    base::{int_input::IntInput, label::Label, select::Select, table::Table, window::Window},
     Component, ComponentBase,
 };
 
-#[derive(Debug, Clone)]
-pub struct PlayerListInfo {
-    pub resource: PlayerResourceData,
-    pub info: Option<PlayerInfo>,
-}
-
-impl PlayerListInfo {
-    pub fn new(resource: PlayerResourceData) -> PlayerListInfo {
-        let info = if let Ok(player) = Player::get_from_user_id(resource.user_id) {
-            Some(player.info().unwrap())
-        } else {
-            None
-        };
-        PlayerListInfo { resource, info }
-    }
-}
 #[derive(Debug)]
 pub struct PlayerListWindow {
     window: Window,
+    last_players: Option<HashMap<i32, PlayerListInfo>>,
 }
 
 impl PlayerListWindow {
     pub fn new(visible: Arcm<bool>) -> PlayerListWindow {
+        let headers = [
+            Box::new(Label::new("name".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+            Box::new(Label::new("guid".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+            Box::new(Label::new("prio".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+            Box::new(Label::new("tags".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
+        ];
+        let mut window = Window::new("PLAYER LIST".to_string(), Some(visible));
+        window.add(Table::new(headers, HashMap::new()));
         PlayerListWindow {
-            window: Window::new("PLAYER LIST".to_string(), Some(visible)),
+            window,
+            last_players: None,
         }
+    }
+    pub fn update_data(&mut self) {
+        let player_list = o!().cheats.get::<PlayerList>();
+        let mut players = player_list.players.lock().unwrap();
+
+        let table: &mut Box<Table<4>> =
+            unsafe { transmute(self.window.components.0.first_mut().unwrap()) };
+
+        table.data.retain(|id, _| {
+            let Some(player) = players.get_mut(id) else { return false};
+            if player.changed {
+                player.changed = false;
+                return false;
+            }
+            true
+        });
+        let tags = o!().player_db.get_tags();
+
+        for (id, player) in players.iter() {
+            if table.data.contains_key(id) {
+                continue;
+            }
+            let mut name = Label::new(player.name.clone(), 0, 0, player.team.color());
+            name.copy = true;
+            let (guid, player_tags) = if let PlayerListInfo {
+                inner: PlayerListInfoInner::Real { guid, tags, .. },
+                ..
+            } = player
+            {
+                (guid.clone(), tags.clone())
+            } else {
+                ("".to_string(), None)
+            };
+            let mut guid = Label::new(guid, 0, 0, FOREGROUND);
+            guid.copy = true;
+            let mut prio = IntInput::new(0, 0, None, player.prio.clone(), None);
+            prio.text_input.background = false;
+            let tags = player_tags
+                .map(|player_tags| {
+                    Box::new(Select::new(tags.clone(), player_tags.clone(), true))
+                        as Box<dyn Component>
+                })
+                .unwrap_or(
+                    Box::new(Label::new("".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>
+                );
+
+            table.data.insert(
+                *id,
+                [
+                    Box::new(name) as Box<dyn Component>,
+                    Box::new(guid) as Box<dyn Component>,
+                    Box::new(prio) as Box<dyn Component>,
+                    tags,
+                ],
+            );
+        }
+
+        self.last_players = Some(players.clone());
+        table.update_data();
+        self.window.update_size();
     }
 }
 
@@ -46,35 +101,7 @@ impl Component for PlayerListWindow {
         self.window.get_base()
     }
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
-        self.window.clear();
-
-        let player_list = o!().cheats.get::<PlayerList>();
-        let players = player_list.players.lock().unwrap().clone();
-        let mut table_data = Vec::new();
-
-        table_data.push([
-            Box::new(Label::new("name".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
-            Box::new(Label::new("guid".to_string(), 0, 0, FOREGROUND)) as Box<dyn Component>,
-        ]);
-        for player in players {
-            let guid = if let Some(info) = player.info {
-                info.guid
-            } else {
-                "".to_string()
-            };
-            let mut name = Label::new(player.resource.name, 0, 0, player.resource.team.color());
-            name.copy = true;
-            let mut guid = Label::new(guid, 0, 0, FOREGROUND);
-            guid.copy = true;
-            table_data.push([
-                Box::new(name) as Box<dyn Component>,
-                Box::new(guid) as Box<dyn Component>,
-            ]);
-        }
-
-        let table = Table::new(table_data);
-
-        self.window.add(table);
+        self.update_data();
 
         self.window.draw(frame)?;
         Ok(())

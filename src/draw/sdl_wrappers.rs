@@ -115,15 +115,7 @@ impl Frame {
                 x -= text_size.0 / 2;
             }
         }
-        let face = *self.fonts.faces.get(&size).unwrap();
+        self.fonts.draw_text(text, size, x, y, color, alpha)
 
-        for letter in text.chars() {
-            let advance = d!()
-                .fonts
-                .draw_glyph(&face, letter, size.clone(), x, y, color, alpha);
-
-            x += advance.0;
-            y += advance.1;
-        }
     }
 }

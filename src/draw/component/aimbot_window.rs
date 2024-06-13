@@ -36,7 +36,7 @@ impl AimbotWindow {
         main_settings.add(FloatInput::new(
             0,
             0,
-            "aimbot fov",
+            Some("aimbot fov".to_string()),
             s!().aimbot.fov.clone(),
             None,
         ));
@@ -60,7 +60,7 @@ impl AimbotWindow {
         multipoint_settings.add(FloatInput::new(
             0,
             0,
-            "hitbox scale",
+            Some("hitbox scale".to_string()),
             s!().aimbot.hitbox_scale.clone(),
             Some(|val| val <= 1.0 && val >= 0.0),
         ));

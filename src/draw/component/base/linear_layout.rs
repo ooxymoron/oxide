@@ -2,7 +2,7 @@ use std::borrow::BorrowMut;
 
 use crate::draw::component::{Component, ComponentBase, Components};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum LinearLayoutOrientation {
     HORIZONTAL,
     VERTICAL,

@@ -1,7 +1,7 @@
 use std::mem::transmute;
 
 use crate::{
-    draw::event::Event, log,  sdk::{
+    draw::event::Event, log, o, sdk::{
         entity::{player::Player, weapon::Weapon},
         game_event::GameEvent,
         user_cmd::{ButtonFlags, UserCmd},
@@ -183,6 +183,9 @@ impl CritManipulation {
         }
     }
     pub fn create_move(&mut self, cmd: &mut UserCmd) {
+        if o!().player_resource_manager.entity.is_none() {
+            return
+        }
         let Ok(p_local) = Player::get_local() else { 
             self.state = None;
             return

@@ -1,7 +1,8 @@
 use crate::{
     define_hook, get_cheat,
     oxide::cheat::{
-        aimbot::Aimbot, crit_manipulation::CritManipulation, movement::Movement, player_list::PlayerList, spread_reduction::SpreadReduction
+        aimbot::Aimbot, crit_manipulation::CritManipulation, movement::Movement,
+        spread_reduction::SpreadReduction,
     },
     sdk::{entity::player::Player, interfaces::client_mode::ClientMode, user_cmd::UserCmd},
     setting, vmt_call,
@@ -17,7 +18,6 @@ fn hook(
     if cmd.command_number == 0 {
         return false;
     }
-    o!().cheats.get::<PlayerList>().update();
     let p_local = Player::get_local().unwrap();
 
     if !vmt_call!(p_local.as_ent(), is_alive) {

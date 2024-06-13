@@ -7,13 +7,13 @@ use sdl2_sys::{
     SDL_FreeSurface, SDL_Rect, SDL_RenderCopy, SDL_SetSurfaceBlendMode, SDL_Texture,
 };
 
-use crate::{d, hex_to_rgb};
+use crate::{d, hex_to_rgb, log};
 
 pub static HACK_FONT: &[u8; 2215536] = include_bytes!("./../../assets/HackNerdFont-Regular.ttf");
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct CacheKey {
-    letter: char,
+    text: String,
     size: FontSize,
     color: usize,
     alpha: u8,
@@ -26,7 +26,6 @@ struct CacheValue {
     rows: i32,
     top: i32,
     left: i32,
-    advance: FT_Vector,
 }
 
 #[derive(Debug, Clone)]
@@ -128,25 +127,19 @@ impl Fonts {
             (*face).glyph.read_volatile()
         }
     }
-    pub fn draw_glyph(
+    pub fn draw_text(
         &mut self,
-        face: &FT_Face,
-        letter: char,
+        text: &str,
         size: FontSize,
         x: isize,
         y: isize,
         color: usize,
         alpha: u8,
-    ) -> (isize, isize) {
+    ) {
         unsafe {
-            if letter == ' ' {
-                let size = self.get_text_size("a", size);
-                return (size.0, 0);
-            }
-
             let cache_key = CacheKey {
-                letter,
-                size,
+                text: text.to_string(),
+                size: size.clone(),
                 color,
                 alpha,
             };
@@ -158,48 +151,73 @@ impl Fonts {
                     h: cached.rows,
                 };
                 SDL_RenderCopy(d!().renderer, cached.texture.clone(), null(), &mut rect);
-                return (
-                    (cached.advance.x >> 6) as isize,
-                    (cached.advance.y >> 6) as isize,
-                );
+                return;
+            }
+            log!("caching text texture {}", text);
+
+            let face = self.faces.get(&size).unwrap();
+
+            let mut bitmaps = Vec::new();
+
+            for letter in text.chars() {
+                let glyph_index = FT_Get_Char_Index(face.clone(), letter as u64);
+
+                FT_Load_Glyph(face.clone(), glyph_index, FT_LOAD_DEFAULT);
+
+                FT_Render_Glyph(face.read().glyph, FT_RENDER_MODE_NORMAL);
+                let bitmap = face.read().glyph.read().bitmap;
+
+                let width = bitmap.width as usize;
+                let height = bitmap.rows as usize;
+
+                if bitmap.buffer.is_null() {
+                    bitmaps.push((Vec::new(), size.height() as usize, 0, 0));
+                    continue;
+                }
+                let buffer = std::slice::from_raw_parts(bitmap.buffer, width * height);
+
+                let mut vec_bitmap = vec![vec![0u8; width]; height];
+
+                for row in 0..height {
+                    for coll in 0..width {
+                        vec_bitmap[row][coll] =
+                            (buffer[row * width + coll] as f32 * (alpha as f32 / 255f32)) as u8;
+                    }
+                }
+                let top_offset = (face.read().glyph.read().metrics.horiBearingY >> 6) as usize;
+                dbg!(letter, face.read().glyph.read().metrics);
+                bitmaps.push((vec_bitmap, width, height, top_offset));
             }
 
-            let glyph_index = FT_Get_Char_Index(face.clone(), letter as u64);
+            let width = bitmaps.iter().fold(0, |acc, x| acc + x.1);
+            let height = (face.read().max_advance_height >> 6) as usize;
 
-            //TODO: ftload color?
-            let error = FT_Load_Glyph(face.clone(), glyph_index, FT_LOAD_DEFAULT);
-            if error != 0 {
-                return (0, 0);
-            }
+            let mut rgba_bitmap = vec![0u8; (width * height as usize) * 4];
 
-            let error = FT_Render_Glyph(face.read().glyph, FT_RENDER_MODE_NORMAL);
-            if error != 0 {
-                return (0, 0);
-            }
-            let bitmap = face.read().glyph.read().bitmap;
-
-            let len = (bitmap.width * bitmap.rows * 4) as usize;
-            if len == 0 {
-                return (0, 0);
-            }
-
-            let mut rgba = vec![0u8; len];
-
-            let buffer = std::slice::from_raw_parts(bitmap.buffer, len);
-            let rgb = hex_to_rgb!(color);
-            for i in (0..len).step_by(4) {
-                let val = buffer[i / 4];
-
-                (rgba[i], rgba[i + 1], rgba[i + 2]) = rgb;
-                rgba[i + 3] = (val as f32 * (alpha as f32 / 255f32)) as u8;
+            let color = hex_to_rgb!(color);
+            for row_i in 0..height {
+                let mut x_offset = 0;
+                for bitmap in &bitmaps {
+                    if row_i >= bitmap.2 {
+                        x_offset += bitmap.1;
+                        continue;
+                    }
+                    for cell_i in 0..bitmap.1 {
+                        dbg!(height, bitmap.2, bitmap.3, height, row_i);
+                        let i = ((row_i + bitmap.2 - bitmap.3) * width + cell_i + x_offset) * 4;
+                        (rgba_bitmap[i], rgba_bitmap[i + 1], rgba_bitmap[i + 2]) = color;
+                        rgba_bitmap[i + 3] = bitmap.0[row_i][cell_i]
+                    }
+                    x_offset += bitmap.1
+                }
             }
 
             let surface = SDL_CreateRGBSurfaceFrom(
-                rgba.as_ptr() as *mut c_void,
-                bitmap.width,
-                bitmap.rows,
+                rgba_bitmap.as_ptr() as *mut c_void,
+                width as i32,
+                height as i32,
                 32,
-                bitmap.width * 4,
+                width as i32 * 4,
                 0x000000ff,
                 0x0000ff00,
                 0x00ff0000,
@@ -207,33 +225,26 @@ impl Fonts {
             );
 
             SDL_SetSurfaceBlendMode(surface, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-
-            let texture = SDL_CreateTextureFromSurface(d!().renderer, surface);
-
             let slot = face.read().glyph.read();
+            let texture = SDL_CreateTextureFromSurface(d!().renderer, surface);
             let mut rect = SDL_Rect {
                 x: x as i32 + slot.bitmap_left,
                 y: y as i32 - slot.bitmap_top,
-                w: bitmap.width,
-                h: bitmap.rows,
+                w: width as i32,
+                h: height as i32,
             };
             SDL_RenderCopy(d!().renderer, texture, null(), &mut rect);
             self.cache.insert(
                 cache_key,
                 CacheValue {
                     texture,
-                    width: bitmap.width,
-                    rows: bitmap.rows,
+                    width: width as i32,
+                    rows: height as i32,
                     top: slot.bitmap_top,
                     left: slot.bitmap_left,
-                    advance: slot.advance,
                 },
             );
             SDL_FreeSurface(surface);
-            return (
-                (slot.advance.x >> 6) as isize,
-                (slot.advance.y >> 6) as isize,
-            );
         }
     }
     pub fn resture(&mut self) {

@@ -86,11 +86,13 @@ impl Window {
     }
     pub fn add(&mut self, mut component: impl Component + 'static) {
         let component_base = component.get_base();
-        self.base.h = self
-            .base
-            .h
-            .max(component_base.y + component_base.h + HEADER_HEIGHT);
-        self.base.w = self.base.w.max(component_base.x + component_base.w);
+
+        let mut w = d!().fonts.get_text_size(&self.title, FontSize::Medium).0 + PADDING * 2;
+        if self.close_button.is_some() {
+            w += CLOSE_BUTTON_SIZE + PADDING;
+        }
+        self.base.h = HEADER_HEIGHT.max(component_base.y + component_base.h + HEADER_HEIGHT);
+        self.base.w = w.max(component_base.x + component_base.w);
         if let Some(button) = &mut self.close_button {
             let button_base = button.get_base();
             button_base.x = self.base.x + self.base.w - CLOSE_BUTTON_SIZE - PADDING;
@@ -100,6 +102,20 @@ impl Window {
         component_base.y += self.base.y + HEADER_HEIGHT;
 
         self.components.add(component)
+    }
+    pub fn update_size(&mut self) {
+        let first = self.components.0.first_mut().unwrap();
+        let component_base = first.get_base();
+        let old_base = self.base.clone();
+        self.base = Window::new_base(&self.title, self.close_button.is_some());
+        self.base.x = old_base.x;
+        self.base.y = old_base.y;
+        self.base.h = self.base.h.max(component_base.h + HEADER_HEIGHT);
+        self.base.w = self.base.w.max(component_base.w);
+        if let Some(button) = &mut self.close_button {
+            let button_base = button.get_base();
+            button_base.x = self.base.x + self.base.w - CLOSE_BUTTON_SIZE - PADDING;
+        }
     }
     pub fn should_draw(&self) -> bool {
         if let Some(visible) = &self.visible {
@@ -166,7 +182,7 @@ impl Component for Window {
         if event.handled {
             return;
         }
-        let ComponentBase { x, y, w, h } = self.base.borrow_mut();
+        let ComponentBase { x, y, .. } = self.base.borrow_mut();
         match event.r#type {
             EventType::CursorMove(pos) => {
                 if self.dragging {

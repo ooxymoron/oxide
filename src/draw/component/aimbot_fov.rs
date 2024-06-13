@@ -11,7 +11,7 @@ use crate::{
 
 use super::{Component, ComponentBase};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AimbotFov {
     base: ComponentBase,
 }

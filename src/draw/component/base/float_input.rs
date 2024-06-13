@@ -10,7 +10,7 @@ use crate::{
 
 use super::text_input::TextInput;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FloatInput {
     text_input: TextInput,
     text_val: Arcm<String>,
@@ -22,7 +22,7 @@ impl FloatInput {
     pub fn new(
         x: isize,
         y: isize,
-        label: &'static str,
+        label: Option<String>,
         val: Arcm<f32>,
         validator: Option<fn(f32) -> bool>,
     ) -> FloatInput {

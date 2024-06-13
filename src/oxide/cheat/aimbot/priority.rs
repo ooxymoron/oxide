@@ -61,9 +61,6 @@ impl Aimbot {
         Some(-angle as isize)
     }
     pub fn ent_priority(&self, ent: &mut Entity) -> OxideResult<Option<isize>> {
-        if !ent.should_attack() {
-            return Ok(None);
-        }
-        return Ok(Some(1));
+        Ok(ent.priority())
     }
 }

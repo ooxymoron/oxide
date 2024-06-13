@@ -5,6 +5,7 @@ use std::{mem::transmute, ptr::null};
 use derivative::Derivative;
 use std::ffi::CString;
 
+use crate::draw::colors::FOREGROUND;
 use crate::{
     define_netvar,
     draw::colors::{BLUE, RED},
@@ -162,19 +163,17 @@ impl Entity {
     pub fn as_networkable(&self) -> &mut Networkable {
         unsafe { transmute(transmute::<&Self, usize>(self) + 16) }
     }
-    pub fn should_attack(&mut self) -> bool {
+    pub fn priority(&mut self) -> Option<isize> {
         let p_local = Player::get_local().unwrap();
         let team = vmt_call!(self, get_team_number);
         let local_team = vmt_call!(p_local.as_ent(), get_team_number);
         if local_team == team {
-            return false;
+            return None;
         }
         if let Ok(player) = self.as_player() {
-            if !player.should_attack() {
-                return false;
-            }
+            return player.priority();
         }
-        true
+        Some(0)
     }
     pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
         let name = CString::new(name).unwrap();
@@ -293,8 +292,9 @@ impl Entity {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone,Copy, PartialEq, Eq)]
 pub enum Team {
+    None = 1,
     Red = 2,
     Blue = 3,
 }
@@ -302,6 +302,7 @@ pub enum Team {
 impl Team {
     pub fn color(&self) -> usize {
         match self {
+            Team::None => FOREGROUND,
             Team::Red => RED,
             Team::Blue => BLUE,
         }

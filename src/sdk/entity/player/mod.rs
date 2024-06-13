@@ -13,7 +13,7 @@ use crate::{
     math::{angles::Angles, remap_clamped, vector3::Vector3},
     netvars::HasNetvars,
     o,
-    oxide::player_resource_manager::PlayerResourceData,
+    oxide::{cheat::player_list::PlayerList, player_resource_manager::PlayerResourceData},
     vmt_call,
 };
 
@@ -120,12 +120,24 @@ impl Player {
     pub fn time(&self) -> f32 {
         o!().global_vars.interval_per_tick * *self.get_tick_base() as f32
     }
-    pub fn should_attack(&self) -> bool {
+    pub fn priority(&self) -> Option<isize> {
         let info = self.info().unwrap();
-        if [].contains(&info.guid.as_str()) {
-            return false;
+        let player_list = o!().cheats.get::<PlayerList>();
+        let players = player_list.players.lock().unwrap();
+        let player_list_info = players.get(&info.user_id).unwrap();
+        let prio = player_list_info.prio.lock().unwrap();
+        if *prio < 0 {
+            return None;
         }
-        true
+        Some(prio.clone())
+    }
+    pub fn get_tags(&self) -> Option<Vec<String>> {
+        let info = self.info().unwrap();
+        o!().player_db.get_player_tags(&info.guid)
+    }
+    pub fn set_tags(&self, tags: Vec<String>) {
+        let info = self.info().unwrap();
+        o!().player_db.set_player_tags(&info.guid, &tags);
     }
 }
 

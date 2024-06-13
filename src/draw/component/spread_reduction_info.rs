@@ -23,7 +23,7 @@ pub struct SpreadReductionInfoWindow {
     visible_window: VisibleWindow,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SpreadReductionInfo {
     base: ComponentBase,
 }

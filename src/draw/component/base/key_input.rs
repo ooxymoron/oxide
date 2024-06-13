@@ -34,7 +34,7 @@ impl Display for KeyInputValue {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct KeyInput {
     base: ComponentBase,
     label: &'static str,

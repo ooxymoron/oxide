@@ -13,7 +13,7 @@ use crate::{
     util::{arcm::Arcm, point_in_bounds},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Button {
     base: ComponentBase,
     val: Arcm<bool>,

@@ -49,28 +49,28 @@ impl VisualsWindow {
         third_person_settings.add(FloatInput::new(
             0,
             0,
-            "x offset",
+            Some("x offset".to_string()),
             s!().visual.tp_offset_x.clone(),
             None,
         ));
         third_person_settings.add(FloatInput::new(
             0,
             0,
-            "y offset",
+            Some("y offset".to_string()),
             s!().visual.tp_offset_y.clone(),
             None,
         ));
         third_person_settings.add(FloatInput::new(
             0,
             0,
-            "z offset",
+            Some("z offset".to_string()),
             s!().visual.tp_offset_z.clone(),
             None,
         ));
         container.add(third_person_settings);
 
         let mut fov_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
-        fov_settings.add(FloatInput::new(0, 0, "fov", s!().visual.fov.clone(), None));
+        fov_settings.add(FloatInput::new(0, 0, Some("fov".to_string()), s!().visual.fov.clone(), None));
         container.add(fov_settings);
 
         let mut esp_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);

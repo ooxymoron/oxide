@@ -1,6 +1,6 @@
 use crate::{
     define_hook, get_cheat,
-    oxide::{cheat::visual::Visuals, entity_cache::EntityCache},
+    oxide::{cheat::{player_list::PlayerList, visual::Visuals}, entity_cache::EntityCache},
     sdk::interfaces::base_client::{BaseClient, FrameStage},
 };
 
@@ -11,6 +11,7 @@ fn hook(client: &BaseClient, stage: FrameStage, org: FrameStageNotifyHook::RawFn
                 Ok(cache) => {
                     o!().player_resource_manager.update(&cache);
                     o!().last_entity_cache = Some(cache);
+                    o!().cheats.get::<PlayerList>().update();
                 }
                 Err(_) => {
                     o!().last_entity_cache = None;
