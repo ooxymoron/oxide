@@ -161,24 +161,21 @@ impl<const T: usize> Component for Table<T> {
     fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
         self.componesate_components();
         let mut handle_first = Vec::new();
+        let mut handle_second = Vec::new();
         for row in self.data.values_mut() {
             for col in row {
                 if matches!(col.get_draw_order(), crate::draw::component::DrawOrder::Top) {
                     handle_first.push(col);
                     continue;
                 }
+                handle_second.push(col);
             }
         }
         for component in handle_first {
             component.handle_event(event);
         }
-        for row in self.data.values_mut() {
-            for col in row {
-                if matches!(col.get_draw_order(), crate::draw::component::DrawOrder::Top) {
-                    continue;
-                }
-                col.handle_event(event);
-            }
+        for component in handle_second {
+            component.handle_event(event);
         }
 
         self.uncomponesate_components();

@@ -40,14 +40,15 @@ impl FloatInput {
 
 impl Component for FloatInput {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
-        let mut float_val = self.float_val.lock().unwrap();
-        let text_val = self.text_val.lock().unwrap();
-        if let Ok(val) = text_val.parse() {
-            if *float_val != val && (self.validator)(val) {
-                *float_val = val;
+        if self.text_input.focussed{
+            let mut float_val = self.float_val.lock().unwrap();
+            let text_val = self.text_val.lock().unwrap();
+            if let Ok(val) = text_val.parse() {
+                if *float_val != val && (self.validator)(val) {
+                    *float_val = val;
+                }
             }
         }
-        drop(text_val);
         self.text_input.draw(frame)?;
         Ok(())
     }

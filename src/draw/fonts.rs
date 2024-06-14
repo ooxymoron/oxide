@@ -171,7 +171,8 @@ impl Fonts {
                 let height = bitmap.rows as usize;
 
                 if bitmap.buffer.is_null() {
-                    bitmaps.push((Vec::new(), size.height() as usize, 0, 0));
+                    let w = size.height() as usize;
+                    bitmaps.push((Vec::new(), w, 0, w, 0, 0));
                     continue;
                 }
                 let buffer = std::slice::from_raw_parts(bitmap.buffer, width * height);
@@ -184,12 +185,21 @@ impl Fonts {
                             (buffer[row * width + coll] as f32 * (alpha as f32 / 255f32)) as u8;
                     }
                 }
-                let top_offset = (face.read().glyph.read().metrics.horiBearingY >> 6) as usize;
-                dbg!(letter, face.read().glyph.read().metrics);
-                bitmaps.push((vec_bitmap, width, height, top_offset));
+                let bearing_y = (face.read().glyph.read().metrics.horiBearingY >> 6) as usize;
+                let bearing_x = (face.read().glyph.read().metrics.horiBearingX >> 6) as usize;
+                let advance = (face.read().glyph.read().metrics.horiAdvance >> 6) as usize;
+                bitmaps.push((
+                    vec_bitmap,
+                    width,
+                    height,
+                    advance,
+                    bearing_y,
+                    bearing_x,
+                ));
             }
 
-            let width = bitmaps.iter().fold(0, |acc, x| acc + x.1);
+            let width = bitmaps.iter().fold(0, |acc, x| acc + x.3);
+            let y_origin_offset = bitmaps.iter().fold(0, |acc, x| acc.max(x.4));
             let height = (face.read().max_advance_height >> 6) as usize;
 
             let mut rgba_bitmap = vec![0u8; (width * height as usize) * 4];
@@ -199,16 +209,16 @@ impl Fonts {
                 let mut x_offset = 0;
                 for bitmap in &bitmaps {
                     if row_i >= bitmap.2 {
-                        x_offset += bitmap.1;
+                        x_offset += bitmap.3;
                         continue;
                     }
                     for cell_i in 0..bitmap.1 {
-                        dbg!(height, bitmap.2, bitmap.3, height, row_i);
-                        let i = ((row_i + bitmap.2 - bitmap.3) * width + cell_i + x_offset) * 4;
+                        let i =
+                            ((row_i + y_origin_offset - bitmap.4) * width + cell_i + x_offset + bitmap.5) * 4;
                         (rgba_bitmap[i], rgba_bitmap[i + 1], rgba_bitmap[i + 2]) = color;
                         rgba_bitmap[i + 3] = bitmap.0[row_i][cell_i]
                     }
-                    x_offset += bitmap.1
+                    x_offset += bitmap.3;
                 }
             }
 
@@ -225,11 +235,10 @@ impl Fonts {
             );
 
             SDL_SetSurfaceBlendMode(surface, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-            let slot = face.read().glyph.read();
             let texture = SDL_CreateTextureFromSurface(d!().renderer, surface);
             let mut rect = SDL_Rect {
-                x: x as i32 + slot.bitmap_left,
-                y: y as i32 - slot.bitmap_top,
+                x: x as i32,
+                y: y as i32 + y_origin_offset as i32 ,
                 w: width as i32,
                 h: height as i32,
             };
@@ -240,8 +249,8 @@ impl Fonts {
                     texture,
                     width: width as i32,
                     rows: height as i32,
-                    top: slot.bitmap_top,
-                    left: slot.bitmap_left,
+                    top: y_origin_offset as i32 ,
+                    left: 0,
                 },
             );
             SDL_FreeSurface(surface);

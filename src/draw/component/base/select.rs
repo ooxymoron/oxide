@@ -18,30 +18,25 @@ pub struct Select {
     base: ComponentBase,
     #[allow(unused)]
     options: Vec<String>,
-    selected: Arcm<(bool,Vec<String>)>,
+    selected: Arcm<(bool, Vec<String>)>,
     multiple: bool,
     backgournd: bool,
     dropdown: bool,
+    display_text: String,
+    should_update: bool,
 }
 
 impl Select {
-    pub fn new(options: Vec<String>, selected: Arcm<(bool,Vec<String>)>, multiple: bool) -> Select {
-        let mut w = PAD * 4;
-        if multiple {
-            let selected = selected.lock().unwrap();
-            let selected_text = selected.1.join(", ");
-            w = d!().fonts.get_text_size(&selected_text, FontSize::Medium).0 + 4 * PAD;
-        }
-        for option in &options {
-            let size = d!().fonts.get_text_size(option, FontSize::Medium);
-            w = w.max(size.0 + PAD * 4)
-        }
-
-        Select {
+    pub fn new(
+        options: Vec<String>,
+        selected: Arcm<(bool, Vec<String>)>,
+        multiple: bool,
+    ) -> Select {
+        let mut select = Select {
             base: ComponentBase {
                 x: 0,
                 y: 0,
-                w,
+                w: 0,
                 h: FontSize::Medium.height() + 2 * PAD,
             },
             options,
@@ -49,7 +44,10 @@ impl Select {
             multiple,
             backgournd: true,
             dropdown: false,
-        }
+            display_text: String::new(),
+            should_update: true,
+        };
+        select
     }
     fn draw_dropdown(&mut self, frame: &mut crate::draw::frame::Frame) {
         let selected = self.selected.lock().unwrap();
@@ -85,7 +83,7 @@ impl Select {
             }
         }
     }
-    fn update_size(&mut self) {
+    fn update(&mut self) {
         self.get_base().w = PAD * 4;
         for option in self.options.clone() {
             let size = d!().fonts.get_text_size(&option, FontSize::Medium);
@@ -100,8 +98,10 @@ impl Select {
                 .w
                 .max(d!().fonts.get_text_size(&selected_text, FontSize::Medium).0 + 4 * PAD);
         }
-    }
 
+        let selected = self.selected.lock().unwrap();
+        self.display_text = selected.1.join(", ");
+    }
 }
 
 impl Component for Select {
@@ -109,15 +109,17 @@ impl Component for Select {
         self.base.borrow_mut()
     }
     fn draw(&mut self, frame: &mut crate::draw::frame::Frame) -> crate::error::OxideResult<()> {
+        if self.should_update {
+            self.update();
+            self.should_update = false;
+        }
         let ComponentBase { x, y, w, h } = self.base;
         if self.backgournd {
-            frame.outlined_rect(x, y, w, h, FOREGROUND, 255);
+            frame.outlined_rect(x, y, w, h + 1, FOREGROUND, 255);
         }
-        let selected = self.selected.lock().unwrap();
-        let selected_text = selected.1.join(", ");
         let y = y + (h + FontSize::Medium.height()) / 2;
         frame.text(
-            &selected_text,
+            &self.display_text,
             x + PAD,
             y,
             FontSize::Medium,
@@ -136,20 +138,22 @@ impl Component for Select {
             FOREGROUND,
             255,
         );
-        drop(selected);
         if self.dropdown {
             self.draw_dropdown(frame)
         }
-        self.update_size();
         Ok(())
     }
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown(1) => {
+                if event.handled && !self.dropdown {
+                    return;
+                }
                 if point_in_bounds(d!().cursor.0, d!().cursor.1, &self.base) {
                     self.dropdown = !self.dropdown;
                     event.handled = true;
-                    return
+                    self.should_update = true;
+                    return;
                 }
                 if self.dropdown {
                     let mut base = self.base.clone();
@@ -166,10 +170,16 @@ impl Component for Select {
                                 selected.1.push(option.clone());
                             }
                             event.handled = true;
-                            return
+                            drop(selected);
+                            self.should_update = true;
+                            return;
                         }
                         base.y += size;
                     }
+                    self.dropdown = !self.dropdown;
+                    event.handled = true;
+                    self.should_update = true;
+                    return;
                 }
             }
             _ => {}
@@ -180,6 +190,5 @@ impl Component for Select {
             return DrawOrder::Top;
         }
         DrawOrder::Value(0)
-        
     }
 }

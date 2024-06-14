@@ -23,7 +23,7 @@ pub struct TextInput {
     label: Option<String>,
     input_w: isize,
     val: Arcm<String>,
-    focussed: bool,
+    pub focussed: bool,
     pub background: bool
 }
 
