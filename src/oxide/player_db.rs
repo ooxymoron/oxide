@@ -52,26 +52,26 @@ impl PlayerDb {
                 ('oxide'),
                 ('monkeybot'),
 
-                ('pooper'),
-;
+                ('pooper');
 
 
-             INSERT INTO player(name, guid) VALUES('anthony','[U:1:1286352511]');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1286352511]','pooper');
+             INSERT INTO player(name, guid) VALUES
+             ('anthony','[U:1:1286352511]'),
+             ('retard tom guy','[U:1:1418751454]'),
+             ('oxy','[U:1:195860616]'),
+             ('[U:1:1286352511]','pooper');
 
-             INSERT INTO player(name, guid) VALUES('retard tom guy','[U:1:1418751454]');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','closet');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','faggot');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','furry');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','skid');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','paster');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','bot');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','pedo');
-
-             INSERT INTO player(name, guid) VALUES('oxy','[U:1:195860616]');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:195860616]','oxide');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:195860616]','cheater');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:195860616]','rage cheater');
+             INSERT INTO player_tag(player, tag) VALUES
+             ('[U:1:1418751454]','closet'),
+             ('[U:1:1418751454]','faggot'),
+             ('[U:1:1418751454]','furry'),
+             ('[U:1:1418751454]','skid'),
+             ('[U:1:1418751454]','paster'),
+             ('[U:1:1418751454]','bot'),
+             ('[U:1:1418751454]','pedo'),
+             ('[U:1:195860616]','oxide'),
+             ('[U:1:195860616]','cheater'),
+             ('[U:1:195860616]','rage cheater');
             ";
             conn.execute(query).unwrap();
         }

@@ -1,7 +1,7 @@
 use std::{collections::HashMap, intrinsics::breakpoint};
 
 use crate::{
-    log, o, oxide::player_resource_manager::PlayerResourceData, sdk::entity::{player::Player, Team}, util::arcm::Arcm
+    o, oxide::player_resource_manager::PlayerResourceData, sdk::entity::{player::Player, Team}, util::arcm::Arcm
 };
 
 use super::Cheat;
@@ -100,11 +100,7 @@ impl PlayerList {
         }
     }
     pub fn update(&mut self) {
-        let mut players = self.players.lock();
-        if players.is_err() {
-            unsafe { breakpoint() };
-        }
-        let mut players = players.unwrap();
+        let mut players = self.players.lock().unwrap();
 
         let resources = o!().player_resource_manager.all();
         let valid_ids = resources.iter().map(|x| x.user_id).collect::<Vec<_>>();
