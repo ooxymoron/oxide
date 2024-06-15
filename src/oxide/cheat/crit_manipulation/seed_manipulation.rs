@@ -1,4 +1,4 @@
-use crate::{o, sdk::entity::weapon::Weapon, vmt_call};
+use crate::{get_cheat, interface, o, sdk::entity::weapon::Weapon, vmt_call};
 
 use super::{CritManipulation, CMD_SCAN_LIMIT, WEAPON_RANDOM_RANGE};
 
@@ -14,7 +14,7 @@ impl CritManipulation {
         let owner_index = vmt_call!(owner.as_ent(), get_index);
         let mut index_seed_mask = (weapon_index << 8) | owner_index;
         if weapon.get_info().melee_weapon {
-            index_seed_mask = index_seed_mask << 8
+            index_seed_mask <<= 8;
         }
 
         let crit_chance = self.calc_crit_chance(weapon) * WEAPON_RANDOM_RANGE as f32;
@@ -28,5 +28,14 @@ impl CritManipulation {
             }
         }
         None
+    }
+    pub fn respoof_seed(&mut self, weapon: &mut Weapon) -> bool{
+        if let Some(seed) = self.last_spoofed_cmd_seed && (interface!(prediction).first_time_predicted || !interface!(prediction).in_prediction){ 
+            *o!().prediction_seed = seed;
+            weapon.current_seed = 0;
+            get_cheat!(CritManipulation).last_spoofed_cmd_seed = None;
+            return true;
+        }
+        return false;
     }
 }

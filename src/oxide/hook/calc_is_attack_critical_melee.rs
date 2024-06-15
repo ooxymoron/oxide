@@ -3,13 +3,13 @@ use crate::{
     sdk::entity::weapon::Weapon,
 };
 
-pub const NAME: &str = "CalcIsAttackCritical";
+pub const NAME: &str = "CalcIsAttackCriticalMelee";
 
-pub type CalcIsAttackCritical = cfn!(bool, &mut Weapon);
+pub type CalcIsAttackCriticalMelee = cfn!(bool, &mut Weapon);
 
 pub extern "C" fn hook(weapon: &mut Weapon) -> bool {
     if !get_cheat!(CritManipulation).respoof_seed(weapon) {
-        return false
+        return false;
     }
-    call_original!(NAME, CalcIsAttackCritical, weapon)
+    call_original!(NAME, CalcIsAttackCriticalMelee, weapon)
 }

@@ -54,6 +54,7 @@ pub mod validate_user_cmd;
 pub mod write_user_cmd;
 pub mod write_user_cmd_delta_to_buffer;
 pub mod calc_is_attack_critical;
+pub mod calc_is_attack_critical_melee;
 
 pub trait Hook: std::fmt::Debug {
     fn restore(&mut self);
@@ -180,6 +181,11 @@ impl Hooks {
             calc_is_attack_critical,
             CLIENT,
             "55 48 89 E5 41 57 41 56 41 55 41 54 49 89 FC 53 48 83 EC 28 E8 ? ? ? ? 48 85 C0 0F 84 ? ? ? ? 48 8D 15"
+        );
+        InitDetourHook!(
+            calc_is_attack_critical_melee,
+            CLIENT,
+            "55 48 89 E5 41 57 41 56 41 55 41 54 49 89 FC 53 48 83 EC 18 E8 ? ? ? ? 48 85 C0 74 ? 48 89 C3 48 8B 00 48 89 DF FF 90 ? ? ? ? 84 C0"
         );
 
 

@@ -84,7 +84,7 @@ impl Component for SpreadReductionInfo {
 
 impl SpreadReductionInfoWindow {
     pub fn new() -> SpreadReductionInfoWindow {
-        let mut window = Window::new("SPREAD REDUCTION".to_string(), None);
+        let mut window = Window::new("SEED PREDICTION".to_string(), None);
         let spectator_list = SpreadReductionInfo::new();
 
         window.get_base().x = 10;
@@ -97,7 +97,7 @@ impl SpreadReductionInfoWindow {
         }
     }
     fn should_draw(&self) -> bool {
-        if !setting!(aimbot, spread_reduction) {
+        if !setting!(spread_reduction, seed_prediction) {
             return false;
         }
         if Player::get_local().is_err() {

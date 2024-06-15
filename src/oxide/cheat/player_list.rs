@@ -1,7 +1,10 @@
-use std::{collections::HashMap, intrinsics::breakpoint};
+use std::collections::HashMap;
 
 use crate::{
-    o, oxide::player_resource_manager::PlayerResourceData, sdk::entity::{player::Player, Team}, util::arcm::Arcm
+    o,
+    oxide::player_resource_manager::PlayerResourceData,
+    sdk::entity::{player::Player, Team},
+    util::arcm::Arcm,
 };
 
 use super::Cheat;
@@ -62,7 +65,6 @@ impl PlayerListInfoInner {
             } else {
                 "".to_string()
             }
-
     }
 }
 

@@ -4,6 +4,7 @@ use std::{fs::File, io::Write};
 use sdl2_sys::SDL_Scancode;
 use serde::{Deserialize, Serialize};
 
+use crate::oxide::cheat::spread_reduction::SpreadReduction;
 use crate::{
     draw::component::base::key_input::KeyInputValue,
     error::OxideResult,
@@ -15,6 +16,8 @@ pub struct Settings {
     pub aimbot: AimbotSettings,
     pub visual: VisualSettings,
     pub movement: MovementSettings,
+    pub spread_reduction: SpreadReductionSettings,
+    pub crit_manipulation: CritSettings,
 }
 
 impl Settings {
@@ -23,6 +26,8 @@ impl Settings {
             aimbot: AimbotSettings::new(),
             visual: VisualSettings::new(),
             movement: MovementSettings::new(),
+            spread_reduction: SpreadReductionSettings::new(),
+            crit_manipulation: CritSettings::new(),
         }
     }
     pub fn load() -> OxideResult<Self> {
@@ -71,10 +76,50 @@ pub struct AimbotSettings {
     pub auto_scope: Arcm<bool>,
     pub auto_unscope: Arcm<bool>,
     pub auto_rev: Arcm<bool>,
-    pub spread_reduction: Arcm<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpreadReductionSettings {
+    pub seed_prediction: Arcm<bool>,
     pub tapfire: Arcm<bool>,
     pub tapfire_only_minigun: Arcm<bool>,
-    pub crit_key: Arcm<KeyInputValue>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CritSettings {
+    pub key: Arcm<KeyInputValue>,
+    pub auto_cycle_rapid_fire: Arcm<bool>,
+}
+
+impl CritSettings {
+    pub fn new() -> CritSettings {
+        CritSettings {
+            key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
+                SDL_Scancode::SDL_SCANCODE_RIGHT,
+            ))),
+            auto_cycle_rapid_fire: Arcm::new(false)
+        }
+    }
+}
+
+impl SpreadReduction {
+    pub fn new() -> SpreadReductionSettings {
+        SpreadReductionSettings {
+            seed_prediction: Arcm::new(false),
+            tapfire: Arcm::new(false),
+            tapfire_only_minigun: Arcm::new(false),
+        }
+    }
+}
+
+impl SpreadReductionSettings {
+    pub fn new() -> SpreadReductionSettings {
+        SpreadReductionSettings {
+            seed_prediction: Arcm::new(false),
+            tapfire: Arcm::new(false),
+            tapfire_only_minigun: Arcm::new(false),
+        }
+    }
 }
 
 impl AimbotSettings {
@@ -101,12 +146,6 @@ impl AimbotSettings {
             auto_scope: Arcm::new(false),
             auto_unscope: Arcm::new(false),
             auto_rev: Arcm::new(false),
-            spread_reduction: Arcm::new(false),
-            tapfire: Arcm::new(false),
-            tapfire_only_minigun: Arcm::new(false),
-            crit_key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
-                SDL_Scancode::SDL_SCANCODE_RIGHT,
-            ))),
         }
     }
 }

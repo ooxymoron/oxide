@@ -196,9 +196,24 @@ impl CritManipulation {
             return
         }
         self.update_state(weapon);
+
+        let blanks_till_crit = self.blanks_till_crit(weapon);
+        let info = &weapon.get_info().weapon_data[weapon.get_mode()];
+        if !cmd.buttons.get(ButtonFlags::InAttack) 
+            && blanks_till_crit.is_some() 
+            && self.crit_key_pressed 
+            && setting!(crit_manipulation,auto_cycle_rapid_fire) 
+            && info.use_rapid_fire_crits
+            && weapon.get_next_check().is_none()
+            && weapon.get_crit_time().is_none()
+        {
+            cmd.buttons.set(ButtonFlags::InAttack, true)
+        }
+
         if !cmd.buttons.get(ButtonFlags::InAttack) || !p_local.can_attack() {
             return;
         }
+
         let damage_till_crit = self.damage_till_crit(weapon);
         let crits = weapon.crits();
         let crit = if damage_till_crit.is_some()
@@ -206,6 +221,7 @@ impl CritManipulation {
             || !self.crit_key_pressed
             || weapon.get_next_check().is_some()
             || weapon.get_crit_time().is_some()
+            || blanks_till_crit.is_some()
         {
             false
         } else {
@@ -234,7 +250,7 @@ impl CritManipulation {
 
 impl Cheat for CritManipulation {
     fn handle_event(&mut self, event: &mut Event) {
-        let crit_key = setting!(aimbot, crit_key);
+        let crit_key = setting!(crit_manipulation, key);
         if event.is_key_down(&crit_key) {
             self.crit_key_pressed = true
         }

@@ -6,7 +6,7 @@ use crate::{
     d,
     draw::{
         colors::*,
-        component::{player_list_window::PlayerListWindow, spectator_list::SpectatorListWindow},
+        component::{crit_manipulation_window::CritManipulationWindow, player_list_window::PlayerListWindow, spectator_list::SpectatorListWindow, spread_reduction_window::SpreadReductionWindow},
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
@@ -67,6 +67,8 @@ impl Overlay {
         }
 
         add_window!("AIMBOT", AimbotWindow);
+        add_window!("SPREAD REDUCTION", SpreadReductionWindow);
+        add_window!("CRIT MANIPULATION", CritManipulationWindow);
         add_window!("VISUALS", VisualsWindow);
         add_window!("MOVEMENT", MovementWindow);
         add_window!("PLAYER LIST", PlayerListWindow);

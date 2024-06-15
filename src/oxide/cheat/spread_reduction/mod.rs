@@ -31,7 +31,7 @@ impl SpreadReduction {
         }
     }
     pub fn should_run(&self) -> bool {
-        setting!(aimbot, spread_reduction) && Player::get_local().is_ok()
+        setting!(spread_reduction, seed_prediction) && Player::get_local().is_ok()
     }
 }
 
@@ -80,13 +80,13 @@ impl SpreadReduction {
         let hit_cone = self.get_hit_cone(target, cmd);
         let weapon_id = vmt_call!(gun.as_weapon(), get_weapon_id);
         if !matches!(self.state, State::SYNCED { .. }) || !self.should_run() {
-            if setting!(aimbot, tapfire)
-                && ((setting!(aimbot, tapfire_only_minigun)
+            if setting!(spread_reduction, tapfire)
+                && ((setting!(spread_reduction, tapfire_only_minigun)
                     && matches!(
                         weapon_id,
                         crate::sdk::entity::weapon::ids::WeaponId::Minigun
                     ))
-                    || !setting!(aimbot, tapfire_only_minigun))
+                    || !setting!(spread_reduction, tapfire_only_minigun))
             {
                 cmd.buttons.set(
                     ButtonFlags::InAttack,

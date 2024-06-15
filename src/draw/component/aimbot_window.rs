@@ -23,7 +23,7 @@ impl AimbotWindow {
     pub fn new(visible: Arcm<bool>) -> AimbotWindow {
         let mut window = Window::new("AIMBOT".to_owned(), Some(visible));
 
-        let mut container = LinearLayout::new( LinearLayoutOrientation::VERTICAL, 16, 10);
+        let mut container = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 16, 10);
 
         let mut main_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
         main_settings.add(Checkbox::new("enable", s!().aimbot.enabled.clone(), 0, 0));
@@ -49,8 +49,7 @@ impl AimbotWindow {
         main_settings.add(KeyInput::new(0, 0, "aimbot key", s!().aimbot.key.clone()));
         container.add(main_settings);
 
-        let mut multipoint_settings =
-            LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
+        let mut multipoint_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
         multipoint_settings.add(Checkbox::new(
             "multipoint",
             s!().aimbot.multipoint.clone(),
@@ -141,31 +140,6 @@ impl AimbotWindow {
             0,
         ));
         container.add(misc_settings);
-
-        let mut spread_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
-        spread_settings.add(Checkbox::new(
-            "spread reduction",
-            s!().aimbot.spread_reduction.clone(),
-            0,
-            0,
-        ));
-        spread_settings.add(Checkbox::new("tapfire", s!().aimbot.tapfire.clone(), 0, 0));
-        spread_settings.add(Checkbox::new(
-            "tapfire only minigun",
-            s!().aimbot.tapfire_only_minigun.clone(),
-            0,
-            0,
-        ));
-        container.add(spread_settings);
-
-        let mut crit_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
-        crit_settings.add(KeyInput::new(
-            0,
-            0,
-            "crit key",
-            s!().aimbot.crit_key.clone(),
-        ));
-        container.add(crit_settings);
 
         window.add(container);
 
