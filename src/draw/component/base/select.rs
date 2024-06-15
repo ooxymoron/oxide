@@ -32,7 +32,7 @@ impl Select {
         selected: Arcm<(bool, Vec<String>)>,
         multiple: bool,
     ) -> Select {
-        let mut select = Select {
+         Select {
             base: ComponentBase {
                 x: 0,
                 y: 0,
@@ -46,8 +46,7 @@ impl Select {
             dropdown: false,
             display_text: String::new(),
             should_update: true,
-        };
-        select
+        }
     }
     fn draw_dropdown(&mut self, frame: &mut crate::draw::frame::Frame) {
         let selected = self.selected.lock().unwrap();

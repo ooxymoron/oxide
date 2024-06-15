@@ -57,7 +57,7 @@ impl PlayerDb {
 
 
              INSERT INTO player(name, guid) VALUES('anthony','[U:1:1286352511]');
-             INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','pooper');
+             INSERT INTO player_tag(player, tag) VALUES('[U:1:1286352511]','pooper');
 
              INSERT INTO player(name, guid) VALUES('retard tom guy','[U:1:1418751454]');
              INSERT INTO player_tag(player, tag) VALUES('[U:1:1418751454]','closet');
@@ -84,16 +84,14 @@ impl PlayerDb {
         .unwrap();
         PlayerDb { conn }
     }
+    const ADD_PLAYER_QUERY: &'static str = "INSERT INTO player(name, guid) VALUES(:name,:guid);";
     pub fn add_player_if_doesnt_exist(&self, guid: &str, name: &str) -> bool {
         let exists = self.does_player_exist(guid);
         if !exists {
             log!("adding player to db ({},{})", name, guid);
-            self.conn
-                .execute(format!(
-                    "INSERT INTO player(name, guid) VALUES('{}','{}');",
-                    name, guid
-                ))
-                .unwrap();
+            let mut stmt = self.conn.prepare(Self::ADD_PLAYER_QUERY).unwrap();
+            stmt.bind(&[(":name", name), (":guid", guid)][..]).unwrap();
+            stmt.next().unwrap();
         }
         !exists
     }
