@@ -16,7 +16,7 @@ use super::{frame::PaintFrame, Paint};
 
 impl Paint {
     pub fn draw_hitboxes(&mut self, frame: &PaintFrame) -> OxideResult<()> {
-        if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual, hitboxes) {
+        if !vmt_call!(interface!(base_engine), is_in_game) || !*setting!(visual, hitboxes) {
             return Ok(());
         }
         let Some(cache) = o!().last_entity_cache.as_ref() else {return Ok(())};

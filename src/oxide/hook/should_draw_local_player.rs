@@ -10,7 +10,7 @@ fn hook(
     org: ShouldDrawLocalPlayerHook::RawFn,
 ) -> bool {
     if let Ok(plocal) = Player::get_local() {
-        if setting!(visual, third_person) && plocal.get_condition().get(ConditionFlags::Zoomed) {
+        if *setting!(visual, third_person) && plocal.get_condition().get(ConditionFlags::Zoomed) {
             return true;
         }
     }

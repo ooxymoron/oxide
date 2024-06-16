@@ -81,7 +81,7 @@ impl Visuals {
         Ok(())
     }
     pub fn remove_disguises(&self) -> OxideResult<()> {
-        if !setting!(visual, remove_disguises) {
+        if !*setting!(visual, remove_disguises) {
             return Ok(());
         }
         let p_local = Player::get_local().unwrap();
@@ -121,19 +121,19 @@ impl Visuals {
         }
         if !p_local.get_condition().get(ConditionFlags::Zoomed)
             || (p_local.get_condition().get(ConditionFlags::Zoomed)
-                && setting!(visual, remove_zoom))
+                && *setting!(visual, remove_zoom))
         {
-            view_setup.fov = setting!(visual, fov);
+            view_setup.fov = *setting!(visual, fov);
         };
         let force_taunt_cam = p_local.get_force_taunt_cam();
         let zoomed = p_local.get_condition().get(ConditionFlags::Zoomed);
-        if setting!(visual, third_person) && (zoomed && setting!(visual, remove_zoom) || !zoomed) {
+        if *setting!(visual, third_person) && (zoomed && *setting!(visual, remove_zoom) || !zoomed) {
             let dirs = vmt_call!(p_local.as_ent(), get_abs_angles).to_vectors();
             *force_taunt_cam = true;
             let offset = Vector3::new(
-                setting!(visual, tp_offset_x),
-                setting!(visual, tp_offset_y),
-                setting!(visual, tp_offset_z),
+                *setting!(visual, tp_offset_x),
+                *setting!(visual, tp_offset_y),
+                *setting!(visual, tp_offset_z),
             );
             view_setup.origin +=
                 dirs.forward * offset.x + dirs.right * offset.y + dirs.up * offset.z;
@@ -144,8 +144,8 @@ impl Visuals {
 }
 impl Cheat for Visuals {
     fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
-        let tp_key = setting!(visual, tp_key);
-        let tp_offset_key = setting!(visual, tp_offset_key);
+        let tp_key = *setting!(visual, tp_key);
+        let tp_offset_key = *setting!(visual, tp_offset_key);
         match event.r#type {
             EventType::MouseButtonDown(button) => {
                 if KeyInputValue::Mouse(button) == tp_key {

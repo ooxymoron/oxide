@@ -8,7 +8,7 @@ pub type LoadWhitelist = cfn!(*const u8, *const u8);
 
 pub extern "C" fn hook(table: *const u8) -> *const u8 {
 
-    if setting!(visual, pure_bypass) {
+    if *setting!(visual, pure_bypass) {
         return null();
     }
     call_original!(NAME, LoadWhitelist, table)

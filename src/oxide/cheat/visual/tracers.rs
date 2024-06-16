@@ -25,11 +25,11 @@ impl Visuals {
         let color = WHITE;
         let alpha = 20;
         let time = 0.5;
-        if setting!(visual, impacts) {
+        if *setting!(visual, impacts) {
             interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
             interface!(debug_overlay).triangle(&src, 4.0, color, alpha, time);
         }
-        if setting!(visual, tracers) {
+        if *setting!(visual, tracers) {
             interface!(debug_overlay).line(
                 &trace.startpos,
                 &trace.endpos.clone(),
@@ -40,7 +40,7 @@ impl Visuals {
         }
     }
     pub fn draw_bullet_tracer(&self, info: &FireBulletsInfo, weapon: *mut Weapon) {
-        if (!setting!(visual, tracers) && !setting!(visual, impacts)) || weapon.is_null() {
+        if (!*setting!(visual, tracers) && !*setting!(visual, impacts)) || weapon.is_null() {
             return;
         }
         let weapon = unsafe { transmute::<_, &mut Weapon>(weapon) };
@@ -72,10 +72,10 @@ impl Visuals {
                 _ => {}
             }
         }
-        if setting!(visual, impacts) {
+        if *setting!(visual, impacts) {
             interface!(debug_overlay).rect(&trace.endpos, 4.0, color, alpha, time);
         }
-        if setting!(visual, tracers) {
+        if *setting!(visual, tracers) {
             interface!(debug_overlay).line(
                 &trace.startpos,
                 &trace.endpos.clone(),

@@ -68,6 +68,9 @@ impl Aimbot {
         if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number) {
             return Ok(None);
         }
+        if !*ent.as_pipe().unwrap().get_touched() {
+            return Ok(None);
+        }
         if matches!(
             ent.as_pipe()?.get_type(),
             PipeType::RemoteDetonate | PipeType::RemoteDetonatePractice

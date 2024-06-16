@@ -42,7 +42,7 @@ macro_rules! setting {
         #[allow(unused_unsafe)]
         unsafe {
              
-            *$crate::s!().$($path.)+lock().unwrap()
+            $crate::s!().$($path.)+lock().unwrap()
         }
     };
 }

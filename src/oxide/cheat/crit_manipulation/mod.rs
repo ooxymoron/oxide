@@ -197,12 +197,17 @@ impl CritManipulation {
         }
         self.update_state(weapon);
 
+        if  !p_local.can_attack() {
+            return;
+        }
         let blanks_till_crit = self.blanks_till_crit(weapon);
         let info = &weapon.get_info().weapon_data[weapon.get_mode()];
-        if !cmd.buttons.get(ButtonFlags::InAttack) 
+
+        if  
+               !cmd.buttons.get(ButtonFlags::InAttack) 
             && blanks_till_crit.is_some() 
             && self.crit_key_pressed 
-            && setting!(crit_manipulation,auto_cycle_rapid_fire) 
+            && *setting!(crit_manipulation,auto_cycle_rapid_fire) 
             && info.use_rapid_fire_crits
             && weapon.get_next_check().is_none()
             && weapon.get_crit_time().is_none()
@@ -210,7 +215,7 @@ impl CritManipulation {
             cmd.buttons.set(ButtonFlags::InAttack, true)
         }
 
-        if !cmd.buttons.get(ButtonFlags::InAttack) || !p_local.can_attack() {
+        if !cmd.buttons.get(ButtonFlags::InAttack)  {
             return;
         }
 

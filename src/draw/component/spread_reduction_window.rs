@@ -38,6 +38,12 @@ impl SpreadReductionWindow {
             0,
         ));
         container.add(Checkbox::new(
+            "tapfire on manual shots",
+            s!().spread_reduction.tapfire_on_manual_shots.clone(),
+            0,
+            0,
+        ));
+        container.add(Checkbox::new(
             "tapfire only minigun",
             s!().spread_reduction.tapfire_only_minigun.clone(),
             0,

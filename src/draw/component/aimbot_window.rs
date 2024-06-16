@@ -6,11 +6,15 @@ use crate::{
     },
     error::OxideResult,
     s,
+    sdk::entity::hitbox::PlayerHitboxId,
     util::arcm::Arcm,
 };
 
 use super::{
-    base::{checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, window::Window},
+    base::{
+        checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, select::Select,
+        window::Window,
+    },
     Component, ComponentBase,
 };
 
@@ -39,6 +43,12 @@ impl AimbotWindow {
             Some("aimbot fov".to_string()),
             s!().aimbot.fov.clone(),
             None,
+        ));
+        main_settings.add(Select::new(
+            PlayerHitboxId::all(),
+            Arcm::new((true, s!().aimbot.hitboxes.clone())),
+            true,
+            Some("hitboxes".to_string()),
         ));
         main_settings.add(Checkbox::new(
             "always_on",

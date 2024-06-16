@@ -72,7 +72,7 @@ impl PlayerListWindow {
             prio.text_input.background = false;
             let tags = player_tags
                 .map(|player_tags| {
-                    Box::new(Select::new(tags.clone(), player_tags.clone(), true))
+                    Box::new(Select::new(tags.clone(), player_tags.clone(), true, None))
                         as Box<dyn Component>
                 })
                 .unwrap_or(

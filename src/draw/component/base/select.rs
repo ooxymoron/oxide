@@ -1,4 +1,4 @@
-use std::borrow::BorrowMut;
+use std::{borrow::BorrowMut, fmt::Debug};
 
 use crate::{
     d,
@@ -14,29 +14,31 @@ use crate::{
 const PAD: isize = 6;
 
 #[derive(Debug, Clone)]
-pub struct Select {
+pub struct Select<T: Debug + Eq + Clone> {
     base: ComponentBase,
     #[allow(unused)]
-    options: Vec<String>,
-    selected: Arcm<(bool, Vec<String>)>,
+    options: Vec<T>,
+    selected: Arcm<(bool, Arcm<Vec<T>>)>,
     multiple: bool,
     backgournd: bool,
     dropdown: bool,
     display_text: String,
     should_update: bool,
+    title_text: Option<String>,
 }
 
-impl Select {
+impl<T: Debug + Eq + Clone> Select<T> {
     pub fn new(
-        options: Vec<String>,
-        selected: Arcm<(bool, Vec<String>)>,
+        options: Vec<T>,
+        selected: Arcm<(bool, Arcm<Vec<T>>)>,
         multiple: bool,
-    ) -> Select {
-         Select {
+        title_text: Option<String>,
+    ) -> Select<T> {
+        Select {
             base: ComponentBase {
                 x: 0,
                 y: 0,
-                w: 0,
+                w: PAD * 4,
                 h: FontSize::Medium.height() + 2 * PAD,
             },
             options,
@@ -44,8 +46,9 @@ impl Select {
             multiple,
             backgournd: true,
             dropdown: false,
-            display_text: String::new(),
+            display_text: title_text.clone().unwrap_or(String::new()),
             should_update: true,
+            title_text,
         }
     }
     fn draw_dropdown(&mut self, frame: &mut crate::draw::frame::Frame) {
@@ -58,7 +61,7 @@ impl Select {
         for option in &self.options {
             y += FontSize::Medium.height() + PAD;
             frame.text(
-                option,
+                &format!("{:?}", option),
                 x + PAD,
                 y,
                 FontSize::Medium,
@@ -68,7 +71,7 @@ impl Select {
                 255,
             );
             frame.line(x, y + PAD, x + w - 1, y + PAD, FOREGROUND, 255);
-            if selected.1.contains(option) {
+            if selected.1.lock().unwrap().contains(option) {
                 frame.text(
                     "",
                     x + w - 3 * PAD,
@@ -84,26 +87,45 @@ impl Select {
     }
     fn update(&mut self) {
         self.get_base().w = PAD * 4;
-        for option in self.options.clone() {
-            let size = d!().fonts.get_text_size(&option, FontSize::Medium);
-            self.get_base().w = self.get_base().w.max(size.0 + PAD * 4)
+        if self.dropdown {
+            for option in self.options.clone() {
+                let size = d!()
+                    .fonts
+                    .get_text_size(&format!("{:?}", option), FontSize::Medium);
+                self.get_base().w = self.get_base().w.max(size.0 + PAD * 4)
+            }
         }
+        if self.title_text.is_some() {
+            self.get_base().w = self.get_base().w.max(
+                d!().fonts
+                    .get_text_size(&self.display_text, FontSize::Medium)
+                    .0
+                    + 4 * PAD,
+            );
+            return;
+        }
+        let selected = self.selected.clone();
+        let selected = selected.lock().unwrap();
+        let selected_text = selected
+            .1
+            .lock()
+            .unwrap()
+            .iter()
+            .map(|option| format!("{:?}", option))
+            .collect::<Vec<String>>()
+            .join(", ");
         if self.multiple {
-            let selected = self.selected.clone();
-            let selected = selected.lock().unwrap();
-            let selected_text = selected.1.join(", ");
             self.get_base().w = self
                 .get_base()
                 .w
                 .max(d!().fonts.get_text_size(&selected_text, FontSize::Medium).0 + 4 * PAD);
         }
 
-        let selected = self.selected.lock().unwrap();
-        self.display_text = selected.1.join(", ");
+        self.display_text = selected_text;
     }
 }
 
-impl Component for Select {
+impl<T: Debug + Eq + Clone> Component for Select<T> {
     fn get_base(&mut self) -> &mut ComponentBase {
         self.base.borrow_mut()
     }
@@ -163,10 +185,10 @@ impl Component for Select {
                         if point_in_bounds(d!().cursor.0, d!().cursor.1, &base) {
                             let mut selected = self.selected.lock().unwrap();
                             selected.0 = true;
-                            if selected.1.contains(option) {
-                                selected.1.retain(|x| x != option);
+                            if selected.1.lock().unwrap().contains(option) {
+                                selected.1.lock().unwrap().retain(|x| x != option);
                             } else {
-                                selected.1.push(option.clone());
+                                selected.1.lock().unwrap().push(option.clone());
                             }
                             event.handled = true;
                             drop(selected);

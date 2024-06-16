@@ -56,7 +56,7 @@ impl Component for CirtManipulationInfo {
         let (value, color) = if let Some(crit_time) = crit_time {
             (*crit_time, GREEN)
         } else if let Some(next_check) = next_check {
-            (*next_check, YELLOW)
+            (*next_check / 1.1, YELLOW)
         } else {
             (0.0, WHITE)
         };

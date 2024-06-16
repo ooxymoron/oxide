@@ -6,7 +6,7 @@ use crate::{
 
 fn hook(client_move: &mut ClientMode, org: ShouldDrawViewModelHook ::RawFn) -> bool {
     if let Ok(plocal) = Player::get_local() {
-        if setting!(visual,remove_zoom) && plocal.get_condition().get(ConditionFlags::Zoomed) {
+        if *setting!(visual,remove_zoom) && plocal.get_condition().get(ConditionFlags::Zoomed) {
             return true
         }
     }

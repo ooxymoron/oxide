@@ -28,7 +28,7 @@ pub struct PlayerListInfo {
 pub enum PlayerListInfoInner {
     Real {
         guid: String,
-        tags: Option<Arcm<(bool, Vec<String>)>>,
+        tags: Option<Arcm<(bool, Arcm::<Vec<String>>)>>,
     },
     Bot {},
 }
@@ -52,7 +52,7 @@ impl PlayerListInfoInner {
         let tags = o!()
             .player_db
             .get_player_tags(&guid)
-            .map(|x| Arcm::new((true, x)));
+            .map(|x| Arcm::new((true, Arcm::new(x))));
         PlayerListInfoInner::Real { guid, tags }
     }
     pub fn update(&mut self, resource: &PlayerResourceData) -> bool {
@@ -123,7 +123,7 @@ impl PlayerList {
                 {
                     let mut tags = tags.lock().unwrap();
                     if tags.0 {
-                        o!().player_db.set_player_tags(guid, &tags.1)
+                        o!().player_db.set_player_tags(guid, &tags.1.lock().unwrap())
                     }
                     tags.0 = false
                 }

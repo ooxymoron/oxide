@@ -40,6 +40,7 @@ impl<'player> Aimbot {
         }
 
         let hitboxes = player.as_ent().get_hitboxes().unwrap();
+        let target_hitboxes = setting!(aimbot, hitboxes);
         hitboxes
             .values()
             .map(|hitbox| match PlayerHitboxId::from(hitbox.id) {
@@ -61,6 +62,7 @@ impl<'player> Aimbot {
                 | PlayerHitboxId::RightKnee => (1, hitbox),
                 _ => (0, hitbox),
             })
+            .filter(|(_, hitbox)| target_hitboxes.contains(&PlayerHitboxId::from(hitbox.id)))
             .collect()
     }
     pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {
@@ -81,10 +83,10 @@ impl<'player> Aimbot {
             .into_iter()
             .all(|flag| !conditions.get(flag))
         {
-            if !setting!(aimbot, target_invisible) {
+            if !*setting!(aimbot, target_invisible) {
                 ignore_flags.push(ConditionFlags::Cloaked)
             }
-            if !setting!(aimbot, target_disguised) {
+            if !*setting!(aimbot, target_disguised) {
                 ignore_flags.push(ConditionFlags::Disguised)
             }
         }
@@ -126,7 +128,7 @@ impl<'player> Aimbot {
             let hp = vmt_call!(player, get_health) as f32;
             if matches!(hitbox_order_prio, HitboxPriority::PrioHead) {
                 if let Ok(gun) = weapon.as_gun() {
-                    if setting!(aimbot, wait_for_charge) {
+                    if *setting!(aimbot, wait_for_charge) {
                         if hp > gun.get_damage(true) {
                             continue;
                         }
@@ -134,7 +136,7 @@ impl<'player> Aimbot {
                             hitbox_order_prio = HitboxPriority::HeadOnly;
                         }
                     }
-                    if gun.get_damage(false) >= hp && setting!(aimbot, baim_if_lethal) {
+                    if gun.get_damage(false) >= hp && *setting!(aimbot, baim_if_lethal) {
                         hitbox_order_prio = HitboxPriority::BodyOnly;
                     }
                 }

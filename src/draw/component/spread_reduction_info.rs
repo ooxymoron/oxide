@@ -97,7 +97,7 @@ impl SpreadReductionInfoWindow {
         }
     }
     fn should_draw(&self) -> bool {
-        if !setting!(spread_reduction, seed_prediction) {
+        if !*setting!(spread_reduction, seed_prediction) {
             return false;
         }
         if Player::get_local().is_err() {

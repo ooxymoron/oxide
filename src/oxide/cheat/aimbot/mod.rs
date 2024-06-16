@@ -52,10 +52,10 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
 
-        let mut scaled_hitbox = hitbox.scaled(setting!(aimbot, hitbox_scale));
+        let mut scaled_hitbox = hitbox.scaled(*setting!(aimbot, hitbox_scale));
 
         let mut points = vec![scaled_hitbox.center()?];
-        if setting!(aimbot, multipoint) {
+        if *setting!(aimbot, multipoint) {
             let mut corners = scaled_hitbox.corners()?.to_vec();
 
             corners.sort_by(|corner1, corner2| {
@@ -89,7 +89,7 @@ impl Aimbot {
     pub fn find_targets(&self) -> OxideResult<Option<Target>> {
         let mut target = self.find_player()?;
 
-        if setting!(aimbot, target_sentries) {
+        if *setting!(aimbot, target_sentries) {
             if let Some(sentry) = self.find_sentry()? {
                 if let Some(target) = &mut target {
                     if sentry.prio > target.prio {
@@ -101,7 +101,7 @@ impl Aimbot {
             }
         }
 
-        if setting!(aimbot, target_stickies) && target.is_none() {
+        if *setting!(aimbot, target_stickies) && target.is_none() {
             target = self.find_sticky()?;
         }
         Ok(target)
@@ -109,7 +109,7 @@ impl Aimbot {
 
     pub fn should_run(&self) -> bool {
         let Ok(p_local) = Player::get_local() else {return false};
-        if !setting!(aimbot, enabled) || (!self.shoot_key_pressed && !setting!(aimbot, always_on)) {
+        if !*setting!(aimbot, enabled) || (!self.shoot_key_pressed && !*setting!(aimbot, always_on)) {
             return false;
         }
 
@@ -128,7 +128,7 @@ impl Aimbot {
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         if weapon.as_gun().is_ok() {
-            target = if !setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
+            target = if !*setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
                 self.find_targets()?
             } else {
                 None
@@ -139,7 +139,7 @@ impl Aimbot {
                 let diff = target.point - my_eyes;
 
                 let angle = diff.angle();
-                if setting!(aimbot, autoshoot) {
+                if *setting!(aimbot, autoshoot) {
                     if self.shoot_weapon(cmd, Some(target)) {
                         cmd.viewangles = angle;
                     }
@@ -160,12 +160,12 @@ impl Aimbot {
 
         if found.is_none() {
             if weapon.is_sniper_rifle()
-                && setting!(aimbot, auto_unscope)
+                && *setting!(aimbot, auto_unscope)
                 && p_local.get_condition().get(ConditionFlags::Zoomed)
             {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
             }
-            if setting!(aimbot, auto_rev) && weapon.is_minigun() {
+            if *setting!(aimbot, auto_rev) && weapon.is_minigun() {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
                 return false;
             }
@@ -174,7 +174,7 @@ impl Aimbot {
 
         if weapon.is_sniper_rifle() {
             let classic = matches!(id, WeaponId::SniperrifleClassic);
-            if setting!(aimbot, auto_scope) {
+            if *setting!(aimbot, auto_scope) {
                 if !p_local.get_condition().get(ConditionFlags::Zoomed) && !classic {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;
@@ -209,7 +209,7 @@ impl Aimbot {
 
 impl Cheat for Aimbot {
     fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
-        let aimbot_key = setting!(aimbot, key);
+        let aimbot_key = *setting!(aimbot, key);
         match aimbot_key {
             KeyInputValue::Keyboard(aimbot_key) => match event.r#type {
                 EventType::KeyDown(key) => {

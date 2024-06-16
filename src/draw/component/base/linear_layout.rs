@@ -1,6 +1,6 @@
 use std::borrow::BorrowMut;
 
-use crate::draw::component::{Component, ComponentBase, Components};
+use crate::draw::component::{Component, ComponentBase, Components, DrawOrder};
 
 #[derive(Debug, Clone, Copy)]
 pub enum LinearLayoutOrientation {
@@ -121,5 +121,11 @@ impl Component for LinearLayout {
         self.compensate_components();
         self.components.handle_event(event);
         self.uncompensate_component();
+    }
+    fn get_draw_order(&self) -> DrawOrder {
+        self.components.0.iter().fold(
+            DrawOrder::Value(0),
+            |acc, x| if matches!(x.get_draw_order(), DrawOrder::Top) { x.get_draw_order() } else { acc },
+        )
     }
 }

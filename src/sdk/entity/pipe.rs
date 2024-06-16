@@ -32,6 +32,7 @@ impl HasNetvars for PipeBomb {
 }
 impl PipeBomb {
     define_netvar!(get_type, ["m_iType"], PipeType);
+    define_netvar!(get_touched, ["m_bTouched"], bool);
 }
 
 //CTFGrenadePipebombProjectile{

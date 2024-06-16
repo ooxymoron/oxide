@@ -38,7 +38,7 @@ const CONDITIONS: [ConditionFlags; 19] = [
 
 impl Paint {
     pub fn esp(&mut self, frame: &PaintFrame) -> OxideResult<()> {
-        if !vmt_call!(interface!(base_engine), is_in_game) || !setting!(visual, esp) {
+        if !vmt_call!(interface!(base_engine), is_in_game) || !*setting!(visual, esp) {
             return Ok(());
         }
         let Some(cache) = o!().last_entity_cache.as_ref() else {return Ok(())};
@@ -53,7 +53,7 @@ impl Paint {
             if ent as *const _ == p_local.as_ent() as *const _ || !vmt_call!(ent, is_alive) {
                 continue;
             }
-            if !setting!(visual, esp_friendlies)
+            if !*setting!(visual, esp_friendlies)
                 && vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
             {
                 continue;
@@ -75,14 +75,14 @@ impl Paint {
             let name = info.name;
             self.paint_esp_box(frame, ent, true, true, Some(&name), conditions);
         }
-        if setting!(visual, esp_sentreis) {
+        if *setting!(visual, esp_sentreis) {
             for id in cache.get_class_ids(ClassId::CObjectSentrygun) {
                 let Some(ent) = Entity::get_ent(id) else{
                     continue;
                 };
                 let obj = ent.as_object()?;
                 if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
-                    && !setting!(visual, esp_friendlies)
+                    && !*setting!(visual, esp_friendlies)
                     || *obj.get_carried()
                 {
                     continue;
@@ -96,13 +96,13 @@ impl Paint {
             }
         }
 
-        if setting!(visual, esp_projectiles) {
+        if *setting!(visual, esp_projectiles) {
             for id in cache.get_class_ids(ClassId::CTFProjectileRocket) {
                 let Some(ent) = Entity::get_ent(id) else{
                     continue;
                 };
                 if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
-                    && !setting!(visual, esp_friendlies)
+                    && !*setting!(visual, esp_friendlies)
                 {
                     continue;
                 }
@@ -113,7 +113,7 @@ impl Paint {
                     continue;
                 };
                 if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
-                    && !setting!(visual, esp_friendlies)
+                    && !*setting!(visual, esp_friendlies)
                 {
                     continue;
                 }

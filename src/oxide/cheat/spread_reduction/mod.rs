@@ -31,12 +31,12 @@ impl SpreadReduction {
         }
     }
     pub fn should_run(&self) -> bool {
-        setting!(spread_reduction, seed_prediction) && Player::get_local().is_ok()
+        *setting!(spread_reduction, seed_prediction) && Player::get_local().is_ok()
     }
 }
 
 impl SpreadReduction {
-    pub fn get_hit_cone(&mut self, target: Option<Target>, cmd: &UserCmd) -> f32 {
+    pub fn get_hit_cone(&mut self, target: &Option<Target>, cmd: &UserCmd) -> f32 {
         let p_local = Player::get_local().unwrap();
         let src = vmt_call!(p_local.as_ent(), eye_position);
         let dist = if let Some(target) = target {
@@ -77,16 +77,17 @@ impl SpreadReduction {
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
         let Ok(gun) = weapon.as_gun() else { return };
         let spread_cone = vmt_call!(gun, get_projectile_spread);
-        let hit_cone = self.get_hit_cone(target, cmd);
+        let hit_cone = self.get_hit_cone(&target, cmd);
         let weapon_id = vmt_call!(gun.as_weapon(), get_weapon_id);
         if !matches!(self.state, State::SYNCED { .. }) || !self.should_run() {
-            if setting!(spread_reduction, tapfire)
-                && ((setting!(spread_reduction, tapfire_only_minigun)
+            if *setting!(spread_reduction, tapfire)
+                && (target.is_some() || *setting!(spread_reduction, tapfire_on_manual_shots))
+                && ((*setting!(spread_reduction, tapfire_only_minigun)
                     && matches!(
                         weapon_id,
                         crate::sdk::entity::weapon::ids::WeaponId::Minigun
                     ))
-                    || !setting!(spread_reduction, tapfire_only_minigun))
+                    || !*setting!(spread_reduction, tapfire_only_minigun))
             {
                 cmd.buttons.set(
                     ButtonFlags::InAttack,

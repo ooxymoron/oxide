@@ -1,5 +1,7 @@
 use std::mem::transmute;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     error::OxideResult,
     math::{angles::RotationVectors, get_corners, vector3::Vector3},
@@ -63,7 +65,7 @@ impl HitboxWrapper {
 }
 
 #[repr(u32)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum PlayerHitboxId {
     Head,
     Pelvis,

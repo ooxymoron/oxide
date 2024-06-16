@@ -29,7 +29,7 @@ impl AimbotFov {
         }
     }
     fn should_draw(&self) -> bool {
-        if !setting!(aimbot, enabled) || !setting!(aimbot, draw_fov) {
+        if !*setting!(aimbot, enabled) || !*setting!(aimbot, draw_fov) {
             return false;
         }
         let Ok(p_local) = Player::get_local() else {
@@ -38,7 +38,7 @@ impl AimbotFov {
         if !vmt_call!(p_local.as_ent(), is_alive) {
             return false;
         }
-        if o!().fov <= setting!(aimbot, fov) {
+        if o!().fov <= *setting!(aimbot, fov) {
             return false;
         }
         true
@@ -54,7 +54,7 @@ impl Component for AimbotFov {
             return Ok(());
         }
         let size = d!().window_size;
-        let aimbot_fov = setting!(aimbot, fov);
+        let aimbot_fov = *setting!(aimbot, fov);
         let fov = o!().fov;
 
         let screen_fov = size.0 as f32 / size.1 as f32 / (4f32 / 3f32);

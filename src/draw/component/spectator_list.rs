@@ -75,7 +75,7 @@ impl SpectatorListWindow {
         }
     }
     fn should_draw(&self) -> bool {
-        if !setting!(visual, spectator_list) {
+        if !*setting!(visual, spectator_list) {
             return false;
         }
         if Player::get_local().is_err() {

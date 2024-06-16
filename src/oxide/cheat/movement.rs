@@ -60,7 +60,7 @@ impl Movement {
         Ok(())
     }
     pub fn momentum_compensation(&mut self, cmd: &mut UserCmd) {
-        if !setting!(movement, momentum_compensation) {
+        if !*setting!(movement, momentum_compensation) {
             return;
         }
         let p_local = Player::get_local().unwrap();
@@ -86,7 +86,7 @@ impl Movement {
         }
     }
     pub fn no_push(&mut self) {
-        if setting!(movement, no_push) {
+        if *setting!(movement, no_push) {
             let cvar = get_cvar("tf_avoidteammates_pushaway").unwrap();
             vmt_call!(cvar, set_int_value, 0);
         }
@@ -108,7 +108,7 @@ impl Movement {
         let on_ground = p_local.get_flags().get(Flag::ONGROUND);
         let jumping = cmd.buttons.get(ButtonFlags::InJump);
 
-        if !setting!(movement, bhop) {
+        if !*setting!(movement, bhop) {
             return Ok(());
         }
 
@@ -122,7 +122,7 @@ impl Movement {
             || cmd.buttons.get(ButtonFlags::InMoveright)
             || cmd.buttons.get(ButtonFlags::InBack))
             || p_local.get_flags().get(Flag::ONGROUND)
-            || !setting!(movement, autostrafe)
+            || !*setting!(movement, autostrafe)
         {
             return Ok(());
         }

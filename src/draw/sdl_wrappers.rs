@@ -66,7 +66,7 @@ impl Frame {
             let x = (r as f32 * rad.cos()) as isize;
             let y = (r as f32 * rad.sin()) as isize;
             if let Some((last_x, last_y)) = last_pos{
-                if angle % 2 == 0 || setting!(aimbot,fov) < 10.0 {
+                if angle % 2 == 0 || *setting!(aimbot,fov) < 10.0 {
                     self.line(
                         x + root_x,
                         y + root_y,

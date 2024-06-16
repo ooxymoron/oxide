@@ -54,7 +54,7 @@ impl Aimbot {
             / (target_forward.len() * my_forward.len()))
         .acos());
 
-        if angle > setting!(aimbot, fov) {
+        if angle > *setting!(aimbot, fov) {
             return None;
         }
 

@@ -103,21 +103,28 @@ impl Fonts {
         let face = *self.faces.get(&size).unwrap();
 
         let mut w = 0;
-        let mut h_min = 0;
-        let mut h_max = 0;
+        let mut h_top = 0;
+        let mut h_bottom = 0;
 
         for letter in text.chars() {
             unsafe {
                 FT_Load_Char(face, letter as u64, FT_LOAD_RENDER);
 
                 let glyph = (*face).glyph.read_volatile();
-                w += (glyph.metrics.horiAdvance >> 6) as isize;
 
-                h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
-                h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
+                if glyph.bitmap.buffer.is_null() {
+                    w += size.height();
+                    continue;
+                }
+
+                w += (glyph.metrics.horiAdvance >> 6) as isize;
+                let bearing_y = (glyph.metrics.horiBearingY >> 6) as isize;
+                let height = (glyph.metrics.height >> 6) as isize;
+                h_top = h_top.max(bearing_y);
+                h_bottom = h_top.max(height - bearing_y);
             }
         }
-        (w, h_min, h_max)
+        (w, h_top, h_bottom)
     }
     pub fn get_glyph(&self, size: FontSize, char: char) -> FT_GlyphSlotRec {
         let face = *self.faces.get(&size).unwrap();
@@ -188,14 +195,7 @@ impl Fonts {
                 let bearing_y = (face.read().glyph.read().metrics.horiBearingY >> 6) as usize;
                 let bearing_x = (face.read().glyph.read().metrics.horiBearingX >> 6) as usize;
                 let advance = (face.read().glyph.read().metrics.horiAdvance >> 6) as usize;
-                bitmaps.push((
-                    vec_bitmap,
-                    width,
-                    height,
-                    advance,
-                    bearing_y,
-                    bearing_x,
-                ));
+                bitmaps.push((vec_bitmap, width, height, advance, bearing_y, bearing_x));
             }
 
             let width = bitmaps.iter().fold(0, |acc, x| acc + x.3);
@@ -213,8 +213,11 @@ impl Fonts {
                         continue;
                     }
                     for cell_i in 0..bitmap.1 {
-                        let i =
-                            ((row_i + y_origin_offset - bitmap.4) * width + cell_i + x_offset + bitmap.5) * 4;
+                        let i = ((row_i + y_origin_offset - bitmap.4) * width
+                            + cell_i
+                            + x_offset
+                            + bitmap.5)
+                            * 4;
                         (rgba_bitmap[i], rgba_bitmap[i + 1], rgba_bitmap[i + 2]) = color;
                         rgba_bitmap[i + 3] = bitmap.0[row_i][cell_i]
                     }
@@ -238,7 +241,7 @@ impl Fonts {
             let texture = SDL_CreateTextureFromSurface(d!().renderer, surface);
             let mut rect = SDL_Rect {
                 x: x as i32,
-                y: y as i32 + y_origin_offset as i32 ,
+                y: y as i32 + y_origin_offset as i32,
                 w: width as i32,
                 h: height as i32,
             };
@@ -249,7 +252,7 @@ impl Fonts {
                     texture,
                     width: width as i32,
                     rows: height as i32,
-                    top: y_origin_offset as i32 ,
+                    top: y_origin_offset as i32,
                     left: 0,
                 },
             );

@@ -4,7 +4,7 @@ use std::{fs::File, io::Write};
 use sdl2_sys::SDL_Scancode;
 use serde::{Deserialize, Serialize};
 
-use crate::oxide::cheat::spread_reduction::SpreadReduction;
+use crate::sdk::entity::hitbox::PlayerHitboxId;
 use crate::{
     draw::component::base::key_input::KeyInputValue,
     error::OxideResult,
@@ -60,6 +60,7 @@ pub struct AimbotSettings {
     pub enabled: Arcm<bool>,
     pub draw_fov: Arcm<bool>,
     pub fov: Arcm<f32>,
+    pub hitboxes: Arcm<Vec<PlayerHitboxId>>,
     pub always_on: Arcm<bool>,
     pub key: Arcm<KeyInputValue>,
     pub multipoint: Arcm<bool>,
@@ -82,6 +83,7 @@ pub struct AimbotSettings {
 pub struct SpreadReductionSettings {
     pub seed_prediction: Arcm<bool>,
     pub tapfire: Arcm<bool>,
+    pub tapfire_on_manual_shots: Arcm<bool>,
     pub tapfire_only_minigun: Arcm<bool>,
 }
 
@@ -97,17 +99,7 @@ impl CritSettings {
             key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
                 SDL_Scancode::SDL_SCANCODE_RIGHT,
             ))),
-            auto_cycle_rapid_fire: Arcm::new(false)
-        }
-    }
-}
-
-impl SpreadReduction {
-    pub fn new() -> SpreadReductionSettings {
-        SpreadReductionSettings {
-            seed_prediction: Arcm::new(false),
-            tapfire: Arcm::new(false),
-            tapfire_only_minigun: Arcm::new(false),
+            auto_cycle_rapid_fire: Arcm::new(false),
         }
     }
 }
@@ -117,6 +109,7 @@ impl SpreadReductionSettings {
         SpreadReductionSettings {
             seed_prediction: Arcm::new(false),
             tapfire: Arcm::new(false),
+            tapfire_on_manual_shots: Arcm::new(false),
             tapfire_only_minigun: Arcm::new(false),
         }
     }
@@ -128,6 +121,7 @@ impl AimbotSettings {
             enabled: Arcm::new(false),
             draw_fov: Arcm::new(false),
             fov: Arcm::new(30.0),
+            hitboxes: Arcm::new(PlayerHitboxId::all()),
             always_on: Arcm::new(false),
             key: Arcm::new(KeyInputValue::Keyboard(Scancode::new(
                 SDL_Scancode::SDL_SCANCODE_LSHIFT,

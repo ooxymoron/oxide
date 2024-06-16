@@ -47,11 +47,11 @@ fn hook(
     let mut spread_reduction = get_cheat!(SpreadReduction);
     spread_reduction.create_move(cmd, target);
 
-    if setting!(aimbot, silent) {
+    if *setting!(aimbot, silent) {
         remove_punch(cmd);
     }
     movement.create_move_after(cmd, &org_cmd);
-    !setting!(aimbot, silent)
+    !*setting!(aimbot, silent)
 }
 
 define_hook!(

@@ -14,10 +14,10 @@ impl Weapon {
         let owner = self.get_owner().resolve().unwrap().as_player().unwrap();
         let now = o!().global_vars.interval_per_tick * *owner.get_tick_base() as f32;
         if self.get_info().weapon_data[self.get_mode()].use_rapid_fire_crits {
-            if now < *self.get_last_crit_check_time() + 1.0 {
-                return Some(*self.get_last_crit_check_time() + 1.0 - now);
-            } else if now < *self.get_last_rapid_fire_crit_check_time() + 1.0 {
-                return Some(*self.get_last_rapid_fire_crit_check_time() + 1.0 - now);
+            if now < *self.get_last_crit_check_time() + 1.1 {
+                return Some(*self.get_last_crit_check_time() + 1.1 - now);
+            } else if now < *self.get_last_rapid_fire_crit_check_time() + 1.1 {
+                return Some(*self.get_last_rapid_fire_crit_check_time() + 1.1 - now);
             };
             return None;
         }

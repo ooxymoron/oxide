@@ -11,7 +11,7 @@ fn hook(panel: &Panel, vpanel: VPanel, force_paint: bool, allow_force: bool, org
     let mut draw = true;
     match panel_name.to_str() {
         Ok("HudScope") => {
-            draw = !setting!(visual, remove_scope)
+            draw = !*setting!(visual, remove_scope)
         }
         _ => (),
     }
