@@ -12,8 +12,8 @@ use crate::{
 
 use super::{
     base::{
-        checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, select::Select,
-        window::Window,
+        checkbox::Checkbox, float_input::FloatInput, int_input::IntInput, key_input::KeyInput,
+        select::Select, window::Window,
     },
     Component, ComponentBase,
 };
@@ -44,11 +44,25 @@ impl AimbotWindow {
             s!().aimbot.fov.clone(),
             None,
         ));
+        main_settings.add(IntInput::new(
+            0,
+            0,
+            Some("max targets".to_string()),
+            s!().aimbot.max_targets.clone(),
+            None,
+        ));
         main_settings.add(Select::new(
             PlayerHitboxId::all(),
             Arcm::new((true, s!().aimbot.hitboxes.clone())),
             true,
             Some("hitboxes".to_string()),
+        ));
+        main_settings.add(FloatInput::new(
+            0,
+            0,
+            Some("target persistance duration".to_string()),
+            s!().aimbot.target_persistance_duration.clone(),
+            None,
         ));
         main_settings.add(Checkbox::new(
             "always_on",

@@ -1,4 +1,4 @@
-use std::usize;
+use std::{time::Instant, usize};
 
 use crate::{
     draw::{component::base::key_input::KeyInputValue, event::EventType},
@@ -24,19 +24,20 @@ use self::priority::Priority;
 
 use super::Cheat;
 
+pub mod object;
 pub mod player;
 pub mod priority;
-pub mod sentry;
 pub mod sticky;
 
 #[derive(Debug, Clone)]
 pub struct Aimbot {
     pub shoot_key_pressed: bool,
+    pub last_target: Option<(Target, Instant)>,
 }
 #[derive(Debug, Clone)]
 pub struct Target {
     pub point: Vector3,
-    pub ent: &'static Entity,
+    pub ent: i32,
     pub hitbox_id: usize,
     pub prio: Priority,
 }
@@ -45,7 +46,17 @@ impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
+            last_target: None,
         }
+    }
+
+    pub fn trace_point(&self, point: Vector3, hitbox: &HitboxWrapper) -> bool {
+        let p_local = Player::get_local().unwrap();
+        let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
+        let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
+
+        trace.entity == hitbox.owner
+            && (hitbox.id != PlayerHitboxId::Head as usize && trace.hitbox_id == hitbox.id)
     }
 
     pub fn point_scan(&self, hitbox: &HitboxWrapper) -> OxideResult<Option<(Vector3, isize)>> {
@@ -74,11 +85,7 @@ impl Aimbot {
             let Some(prio) = self.point_priority(point.clone()) else {
                 continue;
             };
-            let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
-
-            if trace.entity != hitbox.owner
-                || (hitbox.id == PlayerHitboxId::Head as usize && trace.hitbox_id != hitbox.id)
-            {
+            if !self.trace_point(point, hitbox) {
                 continue;
             }
             return Ok(Some((point, prio)));
@@ -86,30 +93,36 @@ impl Aimbot {
         Ok(None)
     }
 
-    pub fn find_targets(&self) -> OxideResult<Option<Target>> {
-        let mut target = self.find_player()?;
-
-        if *setting!(aimbot, target_sentries) {
-            if let Some(sentry) = self.find_sentry()? {
-                if let Some(target) = &mut target {
-                    if sentry.prio > target.prio {
-                        *target = sentry;
+    pub fn find_targets(&mut self) -> OxideResult<Option<Target>> {
+        let mut target: Option<Target> = None;
+        if let Some(last_target) = &self.last_target {
+            if Instant::now().duration_since(last_target.1).as_secs_f32()
+                <= *setting!(aimbot, target_persistance_duration)
+            {
+                if let Some(ent) = Entity::get_ent(last_target.0.ent) {
+                    if ent.as_player().is_ok() {
+                        self.scan_player_hitboxes(last_target.0.ent, &mut target)?;
+                    } else if ent.as_object().is_ok() {
+                        self.scan_object_hitboxes(last_target.0.ent, &mut target)?;
+                    } else if ent.as_pipe().is_ok() {
+                        self.scan_sticky_hitboxes(last_target.0.ent, &mut target)?;
                     }
-                } else {
-                    target = Some(sentry);
-                };
+                }
             }
         }
-
-        if *setting!(aimbot, target_stickies) && target.is_none() {
-            target = self.find_sticky()?;
+        if target.is_none() {
+            self.find_valid_player_target(&mut target)?;
+            self.find_object(&mut target)?;
+            self.find_sticky(&mut target)?;
+            self.last_target = target.clone().map(|x| (x, Instant::now()));
         }
         Ok(target)
     }
 
     pub fn should_run(&self) -> bool {
         let Ok(p_local) = Player::get_local() else {return false};
-        if !*setting!(aimbot, enabled) || (!self.shoot_key_pressed && !*setting!(aimbot, always_on)) {
+        if !*setting!(aimbot, enabled) || (!self.shoot_key_pressed && !*setting!(aimbot, always_on))
+        {
             return false;
         }
 
@@ -121,34 +134,35 @@ impl Aimbot {
     }
 
     pub fn create_move(&mut self, cmd: &mut UserCmd) -> OxideResult<Option<Target>> {
-        let mut target = None;
         if !self.should_run() {
-            return Ok(target);
+            self.last_target = None;
+            return Ok(None);
         }
         let p_local = Player::get_local().unwrap();
         let weapon = vmt_call!(p_local.as_ent(), get_weapon);
-        if weapon.as_gun().is_ok() {
-            target = if !*setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
-                self.find_targets()?
-            } else {
-                None
-            };
+        if weapon.as_gun().is_err() {
+            self.last_target = None;
+            return Ok(None);
+        }
+        let mut target = None;
+        if !*setting!(aimbot, fire_only_when_able) || p_local.can_attack() {
+            target = self.find_targets()?;
+        }
 
-            if let Some(target) = &target {
-                let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
-                let diff = target.point - my_eyes;
+        if let Some(target) = &target {
+            let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
+            let diff = target.point - my_eyes;
 
-                let angle = diff.angle();
-                if *setting!(aimbot, autoshoot) {
-                    if self.shoot_weapon(cmd, Some(target)) {
-                        cmd.viewangles = angle;
-                    }
-                } else {
+            let angle = diff.angle();
+            if *setting!(aimbot, autoshoot) {
+                if self.shoot_weapon(cmd, Some(target)) {
                     cmd.viewangles = angle;
                 }
             } else {
-                self.shoot_weapon(cmd, None);
+                cmd.viewangles = angle;
             }
+        } else {
+            self.shoot_weapon(cmd, None);
         }
 
         Ok(target)

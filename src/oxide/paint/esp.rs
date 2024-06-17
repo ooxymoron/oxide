@@ -133,7 +133,6 @@ impl Paint {
         text_top: Option<&str>,
         text_right: Vec<String>,
     ) {
-        let team = vmt_call!(ent, get_team_number);
         let collidable = vmt_call!(ent, get_collideable);
         let min = *vmt_call!(collidable, obb_mins);
         let max = *vmt_call!(collidable, obb_maxs);
@@ -173,7 +172,7 @@ impl Paint {
         
 
         if r#box{
-            let (r, g, b) = hex_to_rgb!(team.color());
+            let (r, g, b) = hex_to_rgb!(ent.color());
             vmt_call!(interface!(surface), set_color, r, g, b, 50);
             vmt_call!(
                 interface!(surface),

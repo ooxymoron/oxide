@@ -5,7 +5,9 @@ use std::{mem::transmute, ptr::null};
 use derivative::Derivative;
 use std::ffi::CString;
 
-use crate::draw::colors::FOREGROUND;
+use crate::draw::colors::{FOREGROUND, YELLOW};
+use crate::get_cheat;
+use crate::oxide::cheat::aimbot::Aimbot;
 use crate::{
     define_netvar,
     draw::colors::{BLUE, RED},
@@ -289,10 +291,19 @@ impl Entity {
         //TODO: check if extends weaon
         return Ok(unsafe { transmute(self) });
     }
+    pub fn color(&self) -> usize {
+        let team = vmt_call!(self, get_team_number);
+        if let Some(last_target) =  &get_cheat!(Aimbot).last_target {
+            if last_target.0.ent == vmt_call!(self, get_index) {
+                return YELLOW;
+            }
+        }
+        team.color()
+    }
 }
 
 #[repr(C)]
-#[derive(Debug, Clone,Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Team {
     None = 1,
     Red = 2,
@@ -314,7 +325,7 @@ impl From<i32> for Team {
         unsafe { transmute(value) }
     }
 }
-impl  Team {
+impl Team {
     pub fn as_i32(self) -> i32 {
         unsafe { transmute(self) }
     }
