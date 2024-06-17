@@ -100,19 +100,16 @@ impl<'player> Aimbot {
     ) -> OxideResult<()> {
         let Some(player) = Entity::get_ent(id) else {return Ok(())};
         if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {
-            dbg!("dormant or dead");
             return Ok(());
         }
         let p_local = Player::get_local().unwrap();
         let weapon = p_local.weapon();
 
         let Some(player_prioroty) = self.player_prioroty(player.as_player()?)? else {
-                dbg!(1);
                 return Ok(());
             };
         if let Some(best_target) = &best_target {
             if best_target.prio.ent > player_prioroty {
-                dbg!(best_target);
                 return Ok(());
             }
         }
@@ -128,7 +125,6 @@ impl<'player> Aimbot {
             if let Ok(gun) = weapon.as_gun() {
                 if *setting!(aimbot, wait_for_charge) {
                     if hp > gun.get_damage(true) {
-                        dbg!(best_target);
                         return Ok(());
                     }
                     if hp > gun.get_damage(false) {
