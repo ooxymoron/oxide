@@ -29,38 +29,34 @@ impl<'player> Aimbot {
         player: &'player Player,
         prio: HitboxPriority,
     ) -> Vec<(isize, &'player HitboxWrapper)> {
-        if matches!(prio, HitboxPriority::HeadOnly) {
-            return vec![(
-                3,
-                player
-                    .as_ent()
-                    .get_hitbox(PlayerHitboxId::Head.into())
-                    .unwrap(),
-            )];
-        }
-
         let hitboxes = player.as_ent().get_hitboxes().unwrap();
         let target_hitboxes = setting!(aimbot, hitboxes);
         hitboxes
             .values()
-            .map(|hitbox| match PlayerHitboxId::from(hitbox.id) {
-                PlayerHitboxId::Head => {
-                    if matches!(prio, HitboxPriority::PrioHead) {
-                        (3, hitbox)
-                    } else {
-                        (1, hitbox)
-                    }
+            .filter_map(|hitbox| {
+                let hitbox_id = PlayerHitboxId::from(hitbox.id);
+                if matches!(prio, HitboxPriority::HeadOnly)
+                    && !matches!(hitbox_id, PlayerHitboxId::Head)
+                {
+                    return None;
+                };
+                match hitbox_id {
+                    PlayerHitboxId::Head => match prio {
+                        HitboxPriority::HeadOnly | HitboxPriority::PrioHead => Some((3, hitbox)),
+                        HitboxPriority::BodyOnly => None,
+                        HitboxPriority::All => Some((1, hitbox)),
+                    },
+                    PlayerHitboxId::Pelvis
+                    | PlayerHitboxId::Spine0
+                    | PlayerHitboxId::Spine1
+                    | PlayerHitboxId::Spine2
+                    | PlayerHitboxId::Spine3 => Some((2, hitbox)),
+                    PlayerHitboxId::LeftHip
+                    | PlayerHitboxId::RightHip
+                    | PlayerHitboxId::LeftKnee
+                    | PlayerHitboxId::RightKnee => Some((1, hitbox)),
+                    _ => Some((0, hitbox)),
                 }
-                PlayerHitboxId::Pelvis
-                | PlayerHitboxId::Spine0
-                | PlayerHitboxId::Spine1
-                | PlayerHitboxId::Spine2
-                | PlayerHitboxId::Spine3 => (2, hitbox),
-                PlayerHitboxId::LeftHip
-                | PlayerHitboxId::RightHip
-                | PlayerHitboxId::LeftKnee
-                | PlayerHitboxId::RightKnee => (1, hitbox),
-                _ => (0, hitbox),
             })
             .filter(|(_, hitbox)| target_hitboxes.contains(&PlayerHitboxId::from(hitbox.id)))
             .collect()
@@ -102,10 +98,6 @@ impl<'player> Aimbot {
 
         let p_local = Player::get_local().unwrap();
         let weapon = p_local.weapon();
-        let mut hitbox_order_prio = HitboxPriority::All;
-        if weapon.can_headshot() {
-            hitbox_order_prio = HitboxPriority::PrioHead;
-        }
         for id in o!()
             .last_entity_cache
             .as_ref()
@@ -125,7 +117,14 @@ impl<'player> Aimbot {
                     continue;
                 }
             }
+
             let hp = vmt_call!(player, get_health) as f32;
+
+            let mut hitbox_order_prio = if weapon.can_headshot() {
+                HitboxPriority::PrioHead
+            } else {
+                HitboxPriority::All
+            };
             if matches!(hitbox_order_prio, HitboxPriority::PrioHead) {
                 if let Ok(gun) = weapon.as_gun() {
                     if *setting!(aimbot, wait_for_charge) {
