@@ -1,15 +1,19 @@
 use std::{mem::transmute, usize};
 
 use crate::{
-    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED, WHITE}, interface, math::angles::Angles, sdk::{
+    draw::colors::{GREEN, LIGHT_BLUE, LIGHT_RED, WHITE},
+    interface,
+    math::angles::Angles,
+    sdk::{
         entity::{player::Player, weapon::Weapon},
         fire_bullets_info::FireBulletsInfo,
         interfaces::{
-            engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+            engine_trace::{trace, TraceFilter, CONTENTS_GRATE, MASK_SHOT},
             entity::{hitbox::PlayerHitboxId, Entity},
         },
         networkable::ClassId,
-    }, setting, vmt_call
+    },
+    setting, vmt_call,
 };
 
 use super::Visuals;
@@ -21,7 +25,8 @@ impl Visuals {
         let range = weapon.get_info().weapon_data[weapon.get_mode()].range;
         let dir = angles.to_vectors().forward * range;
         let src = vmt_call!(p_local.as_ent(), eye_position);
-        let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
+        let filter = TraceFilter::new(p_local.as_ent());
+        let trace = trace(&src, &(src + dir), MASK_SHOT | CONTENTS_GRATE, &filter);
         let color = WHITE;
         let alpha = 20;
         let time = 0.5;
@@ -43,10 +48,12 @@ impl Visuals {
         if (!*setting!(visual, tracers) && !*setting!(visual, impacts)) || weapon.is_null() {
             return;
         }
+        let p_local = Player::get_local().unwrap();
         let weapon = unsafe { transmute::<_, &mut Weapon>(weapon) };
         let Ok(plocal) = Player::get_local() else { return };
         let end = info.src + info.dir_shooting * info.distance;
-        let trace = trace(info.src, end, MASK_SHOT | CONTENTS_GRATE);
+        let filter = TraceFilter::new(p_local.as_ent());
+        let trace = trace(&info.src, &end, MASK_SHOT | CONTENTS_GRATE, &filter);
         let mut time = 0.5;
         let mut color = LIGHT_BLUE;
         let mut alpha = 10;
@@ -64,7 +71,8 @@ impl Visuals {
                         time = 2.0;
                         color = LIGHT_RED;
                         alpha = 30;
-                        if trace.hitbox_id == PlayerHitboxId::Head as usize&& weapon.can_headshot() {
+                        if trace.hitbox_id == PlayerHitboxId::Head as usize && weapon.can_headshot()
+                        {
                             color = GREEN;
                         }
                     }

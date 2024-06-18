@@ -31,6 +31,12 @@ impl TriggerbotWindow {
             0,
             0,
         ));
+        container.add(Checkbox::new(
+            "avoid self damage",
+            s!().triggerbot.avoid_self_damage.clone(),
+            0,
+            0,
+        ));
 
         window.add(container);
 

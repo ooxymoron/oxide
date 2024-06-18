@@ -24,6 +24,7 @@ pub struct VisualSettings {
     pub pure_bypass: Arcm<bool>,
     pub tracers: Arcm<bool>,
     pub impacts: Arcm<bool>,
+    pub explosives: Arcm<bool>,
 }
 
 impl VisualSettings {
@@ -52,6 +53,7 @@ impl VisualSettings {
             pure_bypass: Arcm::new(false),
             tracers: Arcm::new(false),
             impacts: Arcm::new(false),
+            explosives: Arcm::new(false),
         }
     }
 }

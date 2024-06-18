@@ -41,11 +41,18 @@ impl PipeBomb {
                 .read()
         }) as f32
     }
-    pub fn get_radius(&self) -> f32 {
-        //TODO: not perfect
+    pub fn get_radius(&self) -> Option<f32> {
         let creation_time = self.get_creation_time();
-        let now = o!().global_vars.now();
-        146. * remap_clamped(creation_time - now, 0.8, 2.8, 0.85, 1.)
+        let lifetime = creation_time - o!().global_vars.now();
+        if lifetime < 0.8 {
+            return None;
+        }
+        if *self.get_touched() {
+            return Some(180.)
+            //return Some(*self.get_base_radius())
+        }
+        //Some(*self.get_base_radius() * remap_clamped(lifetime, 0.8, 2.8, 0.85, 1.))
+        Some(180. * remap_clamped(lifetime, 0.8, 2.8, 0.85, 1.))
     }
 }
 
@@ -55,12 +62,14 @@ impl PipeBomb {
     define_netvar!(get_touched, ["m_bTouched"], bool);
     define_netvar!(
         get_owner,
-        [
-            "baseclass",
-            "baseclass",
-            "m_hThrower"
-        ],
+        ["baseclass", "baseclass", "m_hThrower"],
         EntHandle
+    );
+    define_netvar!(get_launcher, ["m_hThrower"], EntHandle);
+    define_netvar!(
+        get_base_radius,
+        ["baseclass", "baseclass", "m_DmgRadius"],
+        f32
     );
 }
 

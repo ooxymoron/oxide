@@ -12,7 +12,7 @@ use crate::{
             Entity,
         },
         interfaces::{
-            engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+            engine_trace::{trace, TraceFilter, CONTENTS_GRATE, MASK_SHOT},
             entity::hitbox::{HitboxWrapper, PlayerHitboxId},
         },
         user_cmd::{ButtonFlags, UserCmd},
@@ -53,7 +53,8 @@ impl Aimbot {
     pub fn trace_point(&self, point: Vector3, hitbox: &HitboxWrapper) -> bool {
         let p_local = Player::get_local().unwrap();
         let my_eyes = vmt_call!(p_local.as_ent(), eye_position);
-        let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
+        let filter = TraceFilter::new(p_local.as_ent());
+        let trace = trace(&my_eyes, &point, MASK_SHOT | CONTENTS_GRATE, &filter);
 
         trace.entity == hitbox.owner
             && (hitbox.id != PlayerHitboxId::Head as usize || trace.hitbox_id == hitbox.id)
@@ -255,6 +256,7 @@ impl Cheat for Aimbot {
                 }
                 _ => (),
             },
+            KeyInputValue::None => {}
         }
     }
 }

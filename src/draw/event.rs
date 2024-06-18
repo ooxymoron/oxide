@@ -68,6 +68,7 @@ impl Event {
                 }
                 _ => (),
             },
+            KeyInputValue::None => {}
         }
         false
     }
@@ -89,6 +90,7 @@ impl Event {
                 }
                 _ => (),
             },
+            KeyInputValue::None => {}
         }
         false
     }

@@ -1,5 +1,6 @@
-use std::{borrow::BorrowMut, fmt::Display};
+use sdl2_sys::SDL_Scancode;
 use serde::{Deserialize, Serialize};
+use std::{borrow::BorrowMut, fmt::Display};
 
 use crate::{
     d,
@@ -20,7 +21,15 @@ const SIZE: isize = FontSize::Medium as isize + 4;
 pub enum KeyInputValue {
     Keyboard(Scancode),
     Mouse(u8),
+    None,
 }
+
+impl Default for KeyInputValue {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
 impl Display for KeyInputValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -29,6 +38,7 @@ impl Display for KeyInputValue {
             match self {
                 KeyInputValue::Keyboard(scancode) => sdl_scancode_name_to_string(scancode.0),
                 KeyInputValue::Mouse(x) => format!("MOUSE{}", x),
+                KeyInputValue::None => String::new(),
             },
         )
     }
@@ -105,8 +115,7 @@ impl Component for KeyInput {
                         self.focussed = false;
                         event.handled = true;
                     }
-                }
-                else{
+                } else {
                     if !self.focussed {
                         return;
                     }
@@ -119,7 +128,11 @@ impl Component for KeyInput {
                 if !self.focussed {
                     return;
                 }
-                *self.val.lock().unwrap() = KeyInputValue::Keyboard(Scancode::new(key));
+                *self.val.lock().unwrap() = if key == SDL_Scancode::SDL_SCANCODE_ESCAPE {
+                    KeyInputValue::None
+                } else {
+                    KeyInputValue::Keyboard(Scancode::new(key))
+                };
                 event.handled = true;
                 self.focussed = false;
             }

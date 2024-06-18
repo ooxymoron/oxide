@@ -6,11 +6,7 @@ use std::{
 
 use crate::{cfn, interface, math::vector3::Vector3, vmt_call};
 
-use super::{
-    entity::{player::Player, Entity},
-    networkable::ClassId,
-    WithVmt,
-};
+use super::{entity::Entity, networkable::ClassId, WithVmt};
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
@@ -53,8 +49,8 @@ pub struct Ray {
 }
 
 impl Ray {
-    fn new(start: Vector3, end: Vector3) -> Self {
-        let delta = end - start.clone();
+    fn new(start: &Vector3, end: &Vector3) -> Self {
+        let delta = *end - *start;
         Ray {
             start: start.clone().into(),
             delta: delta.clone().into(),
@@ -69,15 +65,15 @@ impl Ray {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTTraceFilter {
-    should_hit_entity: cfn!(bool, *const TraceFilter, *const Entity, i32),
-    get_trace_type: cfn!(TraceType, *const TraceFilter),
+    should_hit_entity: cfn!(bool, &TraceFilter, &Entity, i32),
+    get_trace_type: cfn!(TraceType, &TraceFilter),
 }
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct TraceFilter<'a> {
     vmt: *const VMTTraceFilter,
-    p_local: &'a Player,
+    ent: &'a Entity,
 }
 
 pub enum TraceType {
@@ -87,15 +83,11 @@ pub enum TraceType {
     EverythingFilterProps,
 }
 
-extern "C" fn should_hit_entity(
-    trace_filter: *const TraceFilter,
-    ent: *const Entity,
-    _: i32,
-) -> bool {
-    if ent as *const _ == unsafe { trace_filter.read().p_local } as *const Player as *const _ {
+extern "C" fn should_hit_entity(trace_filter: &TraceFilter, ent: &Entity, _: i32) -> bool {
+    if ent == trace_filter.ent {
         return false;
     }
-    let networkable = unsafe { (*ent).as_networkable() };
+    let networkable = ent.as_networkable();
     let class = networkable.get_client_class();
     match class.class_id {
         ClassId::CFuncRespawnRoomVisualizer => return false,
@@ -104,12 +96,12 @@ extern "C" fn should_hit_entity(
     return true;
 }
 
-extern "C" fn get_trace_type(_: *const TraceFilter) -> TraceType {
+extern "C" fn get_trace_type(_: &TraceFilter) -> TraceType {
     TraceType::Everything
 }
 
 impl TraceFilter<'_> {
-    pub fn new(p_local: &Player) -> TraceFilter {
+    pub fn new(ent: &Entity) -> TraceFilter {
         unsafe {
             let alloc = alloc(Layout::new::<VMTTraceFilter>());
             let ptr = alloc as *mut VMTTraceFilter;
@@ -117,7 +109,7 @@ impl TraceFilter<'_> {
                 should_hit_entity,
                 get_trace_type,
             };
-            TraceFilter { vmt: ptr, p_local }
+            TraceFilter { vmt: ptr, ent }
         }
     }
 }
@@ -166,12 +158,10 @@ pub struct VMTEngineTrace {
     pub trace_ray: cfn!(i32, *const EngineTrace, &Ray, u32, &TraceFilter, &mut Trace),
 }
 
-pub fn trace(start: Vector3, end: Vector3, mask: u32) -> Trace {
-    let p_local = Player::get_local().unwrap();
+pub fn trace(start: &Vector3, end: &Vector3, mask: u32, filter: &TraceFilter) -> Trace {
     let trace_engine = interface!(engine_trace);
 
-    let ray = Ray::new(start, end);
-    let filter = TraceFilter::new(p_local);
+    let ray = Ray::new(&start, &end);
     let mut trace = unsafe { MaybeUninit::zeroed().assume_init() };
 
     vmt_call!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);

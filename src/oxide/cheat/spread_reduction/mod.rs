@@ -3,7 +3,7 @@ use crate::{
     o,
     sdk::{
         entity::{player::Player, weapon::Gun},
-        interfaces::engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+        interfaces::engine_trace::{trace, TraceFilter, CONTENTS_GRATE, MASK_SHOT},
         user_cmd::{ButtonFlags, UserCmd},
     },
     setting, vmt_call,
@@ -43,7 +43,8 @@ impl SpreadReduction {
             (target.point - src).len()
         } else {
             let dir = cmd.viewangles.to_vectors().forward * 1000000.0;
-            let trace = trace(src, src + dir, MASK_SHOT | CONTENTS_GRATE);
+            let filter = TraceFilter::new(p_local.as_ent());
+            let trace = trace(&src, &(src + dir), MASK_SHOT | CONTENTS_GRATE, &filter);
             let dist = (trace.endpos - trace.startpos).len();
             dist
         };

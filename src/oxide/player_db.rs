@@ -59,7 +59,7 @@ impl PlayerDb {
              ('anthony','[U:1:1286352511]'),
              ('retard tom guy','[U:1:1418751454]'),
              ('oxy','[U:1:195860616]'),
-             ('[U:1:1286352511]','pooper');
+             ('pooper','[U:1:1286352511]');
 
              INSERT INTO player_tag(player, tag) VALUES
              ('[U:1:1418751454]','closet'),
@@ -72,6 +72,7 @@ impl PlayerDb {
              ('[U:1:195860616]','oxide'),
              ('[U:1:195860616]','cheater'),
              ('[U:1:195860616]','rage cheater');
+             ('[U:1:1286352511]','pooper');
             ";
             conn.execute(query).unwrap();
         }

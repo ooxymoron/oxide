@@ -21,11 +21,11 @@ impl<T> Arcm<T> {
     }
 }
 
-impl<'de ,T: Deserialize<'de>> Deserialize<'de> for Arcm<T> {
+impl<'de ,T: Deserialize<'de> + Default> Deserialize<'de> for Arcm<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> {
-        Ok(Arcm::new(T::deserialize(deserializer)?))
+        Ok(Arcm::new(T::deserialize(deserializer).unwrap_or_default()))
 
     }
 }
