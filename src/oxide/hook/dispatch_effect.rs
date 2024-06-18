@@ -12,13 +12,12 @@ pub const NAME: &str = "DispatchEffect";
 pub type DispatchEffect = cfn!(bool, *const c_char, &EffectData);
 
 pub extern "C" fn dispatch_effect(name: *const c_char, effect: &EffectData) -> bool {
-    //FIXME: GETTING ENT HANDLE IS BROKEN
     let effect_name = c_str_to_str!(name);
     match effect_name {
         "Impact" => {
             let mut color = LIGHT_BLUE;
             let mut duration = 0.5;
-            if let Some(ent) = effect.entity.resolve() {
+            if let Ok(ent) = effect.entity.resolve() {
                 match ent.as_networkable().get_client_class().class_id {
                     ClassId::CTFPlayer
                     | ClassId::CObjectSentrygun

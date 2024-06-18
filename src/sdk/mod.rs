@@ -1,4 +1,4 @@
-use crate::{cfn, impl_has_vmt};
+use crate::{cfn, error::OxideResult, impl_has_vmt};
 use std::{fmt::Debug, mem::transmute};
 
 pub use derivative::Derivative;
@@ -35,7 +35,7 @@ const ENT_ENTRY_MASK: i32 = 0xfff;
 pub struct EntHandle(i32);
 
 impl EntHandle {
-    pub fn resolve(self) -> Option<&'static mut Entity> {
+    pub fn resolve(self) -> OxideResult<&'static mut Entity> {
         Entity::get_ent_from_handle(self)
     }
 }

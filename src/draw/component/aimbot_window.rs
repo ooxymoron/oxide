@@ -12,7 +12,7 @@ use crate::{
 
 use super::{
     base::{
-        checkbox::Checkbox, float_input::FloatInput, int_input::IntInput, key_input::KeyInput,
+        checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput,
         select::Select, window::Window,
     },
     Component, ComponentBase,

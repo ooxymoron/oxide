@@ -9,6 +9,7 @@ use self::aimbot::AimbotSettings;
 use self::crit_manipulation::CritSettings;
 use self::movement::MovementSettings;
 use self::spread_reduction::SpreadReductionSettings;
+use self::triggerbot::TriggerSettings;
 use self::visual::VisualSettings;
 
 pub mod aimbot;
@@ -16,6 +17,7 @@ pub mod crit_manipulation;
 pub mod movement;
 pub mod spread_reduction;
 pub mod visual;
+pub mod triggerbot;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -24,6 +26,7 @@ pub struct Settings {
     pub movement: MovementSettings,
     pub spread_reduction: SpreadReductionSettings,
     pub crit_manipulation: CritSettings,
+    pub triggerbot: TriggerSettings,
 }
 
 impl Settings {
@@ -34,6 +37,7 @@ impl Settings {
             movement: MovementSettings::new(),
             spread_reduction: SpreadReductionSettings::new(),
             crit_manipulation: CritSettings::new(),
+            triggerbot: TriggerSettings::new(),
         }
     }
     pub fn load() -> OxideResult<Self> {

@@ -102,12 +102,10 @@ impl<'player> Aimbot {
         if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {
             return Ok(());
         }
-        let p_local = Player::get_local().unwrap();
-        let weapon = p_local.weapon();
 
         let Some(player_prioroty) = self.player_prioroty(player.as_player()?)? else {
-                return Ok(());
-            };
+            return Ok(());
+        };
         if let Some(best_target) = &best_target {
             if best_target.prio.ent > player_prioroty {
                 return Ok(());
@@ -115,6 +113,8 @@ impl<'player> Aimbot {
         }
 
         let hp = vmt_call!(player, get_health) as f32;
+        let p_local = Player::get_local().unwrap();
+        let weapon = p_local.weapon();
 
         let mut hitbox_order_prio = if weapon.can_headshot() {
             HitboxPriority::PrioHead

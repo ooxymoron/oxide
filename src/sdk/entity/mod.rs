@@ -249,16 +249,16 @@ impl Entity {
         }
         unsafe { Some(&mut *ent) }
     }
-    pub fn get_ent_from_handle(handle: EntHandle) -> Option<&'static mut Entity> {
+    pub fn get_ent_from_handle(handle: EntHandle) -> OxideResult<&'static mut Entity> {
         let ent = vmt_call!(
             interface!(entity_list),
             get_client_entity,
             handle.0 & ENT_ENTRY_MASK
         );
         if ent.is_null() {
-            return None;
+            return Err(OxideError::new("cante resolve entity"));
         }
-        unsafe { Some(&mut *ent) }
+        unsafe { Ok(&mut *ent) }
     }
     pub fn as_player(&mut self) -> OxideResult<&'static mut Player> {
         if !matches!(
@@ -293,7 +293,7 @@ impl Entity {
     }
     pub fn color(&self) -> usize {
         let team = vmt_call!(self, get_team_number);
-        if let Some(last_target) =  &get_cheat!(Aimbot).last_target {
+        if let Some(last_target) = &get_cheat!(Aimbot).last_target {
             if last_target.0.ent == vmt_call!(self, get_index) {
                 return YELLOW;
             }

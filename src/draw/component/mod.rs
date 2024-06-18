@@ -16,6 +16,7 @@ pub mod crit_manipulation_info;
 pub mod player_list_window;
 pub mod crit_manipulation_window;
 pub mod spread_reduction_window;
+pub mod triggerbot_window;
 
 #[derive(Debug,Clone)]
 pub enum DrawOrder {

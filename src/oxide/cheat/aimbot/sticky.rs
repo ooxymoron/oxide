@@ -17,15 +17,9 @@ impl Aimbot {
         best_target: &mut Option<Target>,
     ) -> OxideResult<()> {
         let Some(mut pipe) = Entity::get_ent(id) else {return Ok(());};
-        if vmt_call!(pipe.as_networkable(), is_dormant) {
-            return Ok(());
-        }
-        if !matches!(*pipe.as_pipe()?.get_type(), PipeType::RemoteDetonate) {
-            return Ok(());
-        }
         let Some(ent_prio) = self.sticky_priority(&mut pipe)? else {
-                return Ok(());
-                };
+            return Ok(());
+        };
         if let Some(best_target) = &best_target {
             if best_target.prio.ent > ent_prio {
                 return Ok(());
@@ -71,19 +65,19 @@ impl Aimbot {
         Ok(())
     }
     pub fn sticky_priority(&self, ent: &mut Entity) -> OxideResult<Option<isize>> {
-        let p_local = &*Player::get_local().unwrap();
+        if vmt_call!(ent.as_networkable(), is_dormant) {
+            return Ok(None);
+        }
+        if !matches!(*ent.as_pipe()?.get_type(), PipeType::RemoteDetonate) {
+            return Ok(None);
+        }
+        let p_local = Player::get_local().unwrap();
         if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number) {
             return Ok(None);
         }
         if !*ent.as_pipe().unwrap().get_touched() {
             return Ok(None);
         }
-        if matches!(
-            ent.as_pipe()?.get_type(),
-            PipeType::RemoteDetonate | PipeType::RemoteDetonatePractice
-        ) {
-            return Ok(Some(0));
-        }
-        return Ok(None);
+        return Ok(Some(0));
     }
 }

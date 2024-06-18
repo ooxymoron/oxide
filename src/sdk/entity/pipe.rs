@@ -1,6 +1,8 @@
+use std::mem::transmute;
+
 use derivative::Derivative;
 
-use crate::{define_netvar, netvars::HasNetvars};
+use crate::{define_netvar, math::remap_clamped, netvars::HasNetvars, o, sdk::EntHandle};
 
 #[derive(Debug, Clone, Copy)]
 pub enum PipeType {
@@ -30,9 +32,36 @@ impl HasNetvars for PipeBomb {
         "CTFGrenadePipebombProjectile"
     }
 }
+
+impl PipeBomb {
+    pub fn get_creation_time(&self) -> f32 {
+        let netvar = self.get_netvar(["m_iType"]).unwrap();
+        (unsafe {
+            transmute::<_, *const i32>((self as *const _ as *const u8).byte_add(netvar.offset + 4))
+                .read()
+        }) as f32
+    }
+    pub fn get_radius(&self) -> f32 {
+        //TODO: not perfect
+        let creation_time = self.get_creation_time();
+        let now = o!().global_vars.now();
+        146. * remap_clamped(creation_time - now, 0.8, 2.8, 0.85, 1.)
+    }
+}
+
 impl PipeBomb {
     define_netvar!(get_type, ["m_iType"], PipeType);
+
     define_netvar!(get_touched, ["m_bTouched"], bool);
+    define_netvar!(
+        get_owner,
+        [
+            "baseclass",
+            "baseclass",
+            "m_hThrower"
+        ],
+        EntHandle
+    );
 }
 
 //CTFGrenadePipebombProjectile{

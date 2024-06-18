@@ -12,7 +12,7 @@ use super::{ids::WeaponId, HasNetvars, Weapon};
 impl Weapon {
     pub fn get_next_check(&self) -> Option<f32> {
         let owner = self.get_owner().resolve().unwrap().as_player().unwrap();
-        let now = o!().global_vars.interval_per_tick * *owner.get_tick_base() as f32;
+        let now = owner.time();
         if self.get_info().weapon_data[self.get_mode()].use_rapid_fire_crits {
             if now < *self.get_last_crit_check_time() + 1.1 {
                 return Some(*self.get_last_crit_check_time() + 1.1 - now);
