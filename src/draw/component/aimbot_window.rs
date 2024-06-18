@@ -44,13 +44,6 @@ impl AimbotWindow {
             s!().aimbot.fov.clone(),
             None,
         ));
-        main_settings.add(IntInput::new(
-            0,
-            0,
-            Some("max targets".to_string()),
-            s!().aimbot.max_targets.clone(),
-            None,
-        ));
         main_settings.add(Select::new(
             PlayerHitboxId::all(),
             Arcm::new((true, s!().aimbot.hitboxes.clone())),
