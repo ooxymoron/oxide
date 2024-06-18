@@ -84,15 +84,63 @@ impl Paint {
                 if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
                     && !*setting!(visual, esp_friendlies)
                     || *obj.get_carried()
+                    || *obj.get_placing()
                 {
                     continue;
                 }
-                let text = if *obj.get_mini() {
+                let mut text = if *obj.get_mini() {
                     vec!["MINI".to_owned()]
                 } else {
                     vec![format!("LEVEL: {:?}", obj.get_level())]
                 };
+                if let Ok(builder) = obj.get_builder().resolve() {
+                    let name = builder.as_player()?.info()?.name;
+                    text.push(format!("BUILDER: {}", name));
+                };
+
                 self.paint_esp_box(frame, ent, true, true, Some("sentry"), text);
+            }
+        }
+        if *setting!(visual, esp_buildings) {
+            for id in cache.get_class_ids(ClassId::CObjectDispenser) {
+                let Some(ent) = Entity::get_ent(id) else{
+                    continue;
+                };
+                let obj = ent.as_object()?;
+                if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
+                    && !*setting!(visual, esp_friendlies)
+                    || *obj.get_carried()
+                    || *obj.get_placing()
+                {
+                    continue;
+                }
+                let mut text = vec![format!("LEVEL: {:?}", obj.get_level())];
+                if let Ok(builder) = obj.get_builder().resolve() {
+                    let name = builder.as_player()?.info()?.name;
+                    text.push(format!("BUILDER: {}", name));
+                };
+
+                self.paint_esp_box(frame, ent, true, true, Some("dispenser"), text);
+            }
+            for id in cache.get_class_ids(ClassId::CObjectTeleporter) {
+                let Some(ent) = Entity::get_ent(id) else{
+                    continue;
+                };
+                let obj = ent.as_object()?;
+                if vmt_call!(ent, get_team_number) == vmt_call!(p_local.as_ent(), get_team_number)
+                    && !*setting!(visual, esp_friendlies)
+                    || *obj.get_carried()
+                    || *obj.get_placing()
+                {
+                    continue;
+                }
+                let mut text = vec![format!("LEVEL: {:?}", obj.get_level())];
+                if let Ok(builder) = obj.get_builder().resolve() {
+                    let name = builder.as_player()?.info()?.name;
+                    text.push(format!("BUILDER: {}", name));
+                };
+
+                self.paint_esp_box(frame, ent, true, true, Some("teleporter"), text);
             }
         }
 
@@ -169,9 +217,8 @@ impl Paint {
         let maxx = maxx.unwrap();
         let miny = miny.unwrap();
         let maxy = maxy.unwrap();
-        
 
-        if r#box{
+        if r#box {
             let (r, g, b) = hex_to_rgb!(ent.color());
             vmt_call!(interface!(surface), set_color, r, g, b, 50);
             vmt_call!(

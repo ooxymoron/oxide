@@ -104,7 +104,7 @@ impl Aimbot {
                     if ent.as_player().is_ok() {
                         self.scan_player_hitboxes(last_target.0.ent, &mut target)?;
                     } else if ent.as_object().is_ok() {
-                        self.scan_object_hitboxes(last_target.0.ent, &mut target)?;
+                        self.scan_sentry_hitboxes(last_target.0.ent, &mut target)?;
                     } else if ent.as_pipe().is_ok() {
                         self.scan_sticky_hitboxes(last_target.0.ent, &mut target)?;
                     }

@@ -2,7 +2,7 @@ use crate::{
     error::OxideResult,
     o,
     sdk::{
-        entity::{hitbox::PlayerHitboxId, pipe::PipeType, player::Player, Entity},
+        entity::{pipe::PipeType, player::Player, Entity},
         networkable::ClassId,
     },
     setting, vmt_call,
@@ -25,7 +25,7 @@ impl Aimbot {
                 return Ok(());
             }
         }
-        let hitbox = pipe.get_hitbox(PlayerHitboxId::Head as usize)?;
+        let hitbox = pipe.get_hitbox(0)?;
 
         let Some((point,point_prio)) = self.point_scan(&hitbox)? else {
                 return Ok(());

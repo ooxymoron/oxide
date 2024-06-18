@@ -2,7 +2,7 @@ use std::mem::transmute;
 
 use derivative::Derivative;
 
-use crate::{define_netvar, error::OxideResult, netvars::HasNetvars};
+use crate::{define_netvar, error::OxideResult, netvars::HasNetvars, sdk::EntHandle};
 
 use super::entity::hitbox::PlayerHitboxId;
 
@@ -25,6 +25,12 @@ pub struct Object {
 impl Object {
     pub fn as_sentry(&mut self) -> OxideResult<&'static mut Sentry> {
         return Ok(unsafe { transmute(self) });
+    }
+    pub fn priority(&mut self) -> Option<isize> {
+        if self.as_sentry().is_ok() {
+            return Some(0);
+        }
+        Some(-1)
     }
 }
 
@@ -70,6 +76,7 @@ impl Object {
     define_netvar!(get_mini, ["m_bMiniBuilding"], bool);
     define_netvar!(get_carried, ["m_bCarried"], bool);
     define_netvar!(get_placing, ["m_bPlacing"], bool);
+    define_netvar!(get_builder, ["m_hBuilder"], EntHandle);
 }
 
 //CBaseObject{
@@ -84,7 +91,6 @@ impl Object {
 //CBaseObject m_iUpgradeLevel
 //CBaseObject m_bDisposableBuilding
 //CBaseObject m_hBuilder
-//CBaseObject m_vecBuildMaxs
 //CBaseObject m_vecBuildMins
 //CBaseObject m_iHighestUpgradeLevel
 //CBaseObject m_iDesiredBuildRotations

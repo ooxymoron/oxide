@@ -1,9 +1,8 @@
 use std::cmp::Ordering;
 
 use crate::{
-    error::OxideResult,
     math::{rtd, vector3::Vector3},
-    sdk::entity::{player::Player, Entity},
+    sdk::entity::player::Player,
     setting, vmt_call,
 };
 
@@ -59,8 +58,5 @@ impl Aimbot {
         }
 
         Some(-angle as isize)
-    }
-    pub fn ent_priority(&self, ent: &mut Entity) -> OxideResult<Option<isize>> {
-        Ok(ent.priority())
     }
 }

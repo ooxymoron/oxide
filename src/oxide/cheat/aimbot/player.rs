@@ -64,7 +64,7 @@ impl<'player> Aimbot {
             .collect()
     }
     pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {
-        if self.ent_priority(player.as_ent())?.is_none() {
+        if player.as_ent().priority().is_none() {
             return Ok(None);
         }
         let mut ignore_flags = vec![ConditionFlags::Ubercharged, ConditionFlags::Bonked];

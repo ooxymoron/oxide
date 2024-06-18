@@ -175,6 +175,9 @@ impl Entity {
         if let Ok(player) = self.as_player() {
             return player.priority();
         }
+        if let Ok(object) = self.as_object() {
+            return object.priority();
+        }
         Some(0)
     }
     pub fn get_float_attrib(&self, name: &str) -> Option<f32> {
@@ -281,7 +284,7 @@ impl Entity {
     pub fn as_object(&mut self) -> OxideResult<&'static mut Object> {
         if !matches!(
             self.as_networkable().get_client_class().class_id,
-            ClassId::CObjectSentrygun
+            ClassId::CObjectSentrygun | ClassId::CObjectTeleporter | ClassId::CObjectDispenser
         ) {
             return Err(OxideError::new("not a object"));
         };

@@ -88,6 +88,12 @@ impl VisualsWindow {
             0,
         ));
         esp_settings.add(Checkbox::new(
+            "buildings",
+            s!().visual.esp_buildings.clone(),
+            0,
+            0,
+        ));
+        esp_settings.add(Checkbox::new(
             "projectiles",
             s!().visual.esp_projectiles.clone(),
             0,

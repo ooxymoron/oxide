@@ -12,8 +12,8 @@ use crate::{
 
 use super::{
     base::{
-        checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput,
-        select::Select, window::Window,
+        checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, select::Select,
+        window::Window,
     },
     Component, ComponentBase,
 };
@@ -102,6 +102,12 @@ impl AimbotWindow {
         target_settings.add(Checkbox::new(
             "target sentries",
             s!().aimbot.target_sentries.clone(),
+            0,
+            0,
+        ));
+        target_settings.add(Checkbox::new(
+            "target buildings",
+            s!().aimbot.target_buildings.clone(),
             0,
             0,
         ));
