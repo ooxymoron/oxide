@@ -56,7 +56,7 @@ impl Aimbot {
         let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT | CONTENTS_GRATE);
 
         trace.entity == hitbox.owner
-            && (hitbox.id != PlayerHitboxId::Head as usize && trace.hitbox_id == hitbox.id)
+            && (hitbox.id != PlayerHitboxId::Head as usize || trace.hitbox_id == hitbox.id)
     }
 
     pub fn point_scan(&self, hitbox: &HitboxWrapper) -> OxideResult<Option<(Vector3, isize)>> {

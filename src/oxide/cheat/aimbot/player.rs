@@ -35,11 +35,14 @@ impl<'player> Aimbot {
             .values()
             .filter_map(|hitbox| {
                 let hitbox_id = PlayerHitboxId::from(hitbox.id);
+                if !target_hitboxes.contains(&PlayerHitboxId::from(hitbox_id)) {
+                    return None;
+                }
                 if matches!(prio, HitboxPriority::HeadOnly)
                     && !matches!(hitbox_id, PlayerHitboxId::Head)
                 {
                     return None;
-                };
+                }
                 match hitbox_id {
                     PlayerHitboxId::Head => match prio {
                         HitboxPriority::HeadOnly | HitboxPriority::PrioHead => Some((3, hitbox)),
@@ -58,7 +61,6 @@ impl<'player> Aimbot {
                     _ => Some((0, hitbox)),
                 }
             })
-            .filter(|(_, hitbox)| target_hitboxes.contains(&PlayerHitboxId::from(hitbox.id)))
             .collect()
     }
     pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {
