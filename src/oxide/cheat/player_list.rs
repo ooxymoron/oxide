@@ -145,15 +145,12 @@ impl PlayerList {
                 {
                     let mut tags = tags.lock().unwrap();
                     if tags.0 {
-                        dbg!("updateing tags");
                         o!().player_db
                             .set_player_tags(guid, &tags.1.lock().unwrap());
                     }
                     tags.0 = false;
                     let mut prio = prio.lock().unwrap();
                     if prio.0 {
-                        dbg!("updateing prio");
-
                         o!().player_db
                             .set_player_prio(guid, *prio.1.lock().unwrap());
                     }

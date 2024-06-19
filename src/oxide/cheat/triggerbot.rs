@@ -40,9 +40,6 @@ impl Triggerbot {
             .get_class_ids(ClassId::CTFGrenadePipebombProjectile)
         {
             let Some(ent) = Entity::get_ent(id) else {return Ok(false);};
-            if vmt_call!(ent.as_networkable(), is_dormant) {
-                continue;
-            }
             if !matches!(*ent.as_pipe()?.get_type(), PipeType::RemoteDetonate) {
                 continue;
             }

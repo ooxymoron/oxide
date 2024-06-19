@@ -147,7 +147,6 @@ impl PlayerDb {
         if !self.does_player_exist(guid) {
             return None;
         }
-        dbg!(guid);
         let prio = self
             .conn
             .prepare(Self::GET_PLAYER_PRIO_QUERY)
@@ -159,7 +158,6 @@ impl PlayerDb {
             .unwrap()
             .unwrap()
             .read::<i64, _>("prio") as isize;
-        dbg!(prio);
         Some(prio)
     }
 

@@ -17,6 +17,7 @@ use super::interfaces::Interfaces;
 pub mod esp;
 pub mod hitbox;
 pub mod frame;
+pub mod explosives;
 
 #[derive(Debug)]
 pub struct Paint {
@@ -80,6 +81,7 @@ impl Paint {
         self.draw_hitboxes(&frame)?;
         self.esp(&frame)?;
         self.draw_debug();
+        self.explosives(&frame)?;
         Ok(())
     }
     pub fn draw_debug(&mut self) {

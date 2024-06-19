@@ -2,7 +2,13 @@ use std::mem::transmute;
 
 use derivative::Derivative;
 
-use crate::{define_netvar, math::remap_clamped, netvars::HasNetvars, o, sdk::EntHandle};
+use crate::{
+    define_netvar, define_netvar_offset,
+    math::remap_clamped,
+    netvars::HasNetvars,
+    o,
+    sdk::{interfaces::cvar::get_cvar_const, EntHandle},
+};
 
 #[derive(Debug, Clone, Copy)]
 pub enum PipeType {
@@ -34,29 +40,48 @@ impl HasNetvars for PipeBomb {
 }
 
 impl PipeBomb {
-    pub fn get_creation_time(&self) -> f32 {
-        let netvar = self.get_netvar(["m_iType"]).unwrap();
-        (unsafe {
-            transmute::<_, *const i32>((self as *const _ as *const u8).byte_add(netvar.offset + 4))
-                .read()
-        }) as f32
-    }
     pub fn get_radius(&self) -> Option<f32> {
-        let creation_time = self.get_creation_time();
-        let lifetime = creation_time - o!().global_vars.now();
-        if lifetime < 0.8 {
-            return None;
+        let creation_time = *self.get_creation_time();
+        let lifetime = o!().global_vars.now() - creation_time;
+        let mut radius = *self.get_base_radius();
+        if let Some(launcher_radius) = self
+            .get_launcher()
+            .resolve()
+            .unwrap()
+            .get_float_attrib("mult_explosion_radius")
+        {
+            radius *= launcher_radius;
         }
         if *self.get_touched() {
-            return Some(180.)
-            //return Some(*self.get_base_radius())
+            return Some(radius);
         }
-        //Some(*self.get_base_radius() * remap_clamped(lifetime, 0.8, 2.8, 0.85, 1.))
-        Some(180. * remap_clamped(lifetime, 0.8, 2.8, 0.85, 1.))
+        let mut arm_time = get_cvar_const("tf_grenadelauncher_livetime".to_string())
+            .unwrap()
+            .float_value;
+        if let Some(launcher_arm_time) = self
+            .get_launcher()
+            .resolve()
+            .unwrap()
+            .get_float_attrib("sticky_arm_time")
+        {
+            arm_time += launcher_arm_time;
+        }
+        if lifetime < arm_time {
+            return None;
+        }
+        let ramp_time = get_cvar_const("tf_sticky_radius_ramp_time".to_string())
+            .unwrap()
+            .float_value;
+        let airdet_radius = get_cvar_const("tf_sticky_airdet_radius".to_string())
+            .unwrap()
+            .float_value;
+        Some(radius * remap_clamped(lifetime, arm_time, arm_time + ramp_time, airdet_radius, 1.))
     }
 }
 
 impl PipeBomb {
+    define_netvar_offset!(get_creation_time, ["m_iType"], 4, f32);
+    define_netvar_offset!(get_full_damage, ["m_iType"], 16, f32);
     define_netvar!(get_type, ["m_iType"], PipeType);
 
     define_netvar!(get_touched, ["m_bTouched"], bool);
@@ -65,12 +90,16 @@ impl PipeBomb {
         ["baseclass", "baseclass", "m_hThrower"],
         EntHandle
     );
-    define_netvar!(get_launcher, ["m_hThrower"], EntHandle);
-    define_netvar!(
-        get_base_radius,
-        ["baseclass", "baseclass", "m_DmgRadius"],
-        f32
-    );
+    define_netvar!(get_thrower, ["m_hThrower"], EntHandle);
+    define_netvar!(get_launcher, ["m_hLauncher"], EntHandle);
+    //define_netvar!(
+    //    get_base_radius,
+    //    ["baseclass", "baseclass", "m_DmgRadius"],
+    //    f32
+    //);
+    pub fn get_base_radius(&self) -> &f32{
+        &170.
+    }
 }
 
 //CTFGrenadePipebombProjectile{

@@ -48,7 +48,6 @@ impl Component for IntInput {
                 if *int_val != new_val && (self.validator)(new_val) {
                     *int_val = new_val;
                     drop(int_val);
-                    dbg!("setting to true");
                     val.0 = true;
 
                 }

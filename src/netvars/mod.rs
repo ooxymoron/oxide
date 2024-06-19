@@ -72,7 +72,6 @@ pub trait HasNetvars {
     }
 }
 
-//PERF: SLOW SLOW SLOW get the offset on init and resuse it
 #[macro_export]
 macro_rules! define_netvar {
     ($name: ident, $path: expr, $type: ty) => {
@@ -80,6 +79,17 @@ macro_rules! define_netvar {
             use std::mem::transmute;
             let netvar = self.get_netvar($path).unwrap();
             unsafe { transmute((self as *const _ as *const u8).byte_add(netvar.offset)) }
+        }
+    };
+}
+#[macro_export]
+macro_rules! define_netvar_offset {
+    ($name: ident, $path: expr, $offset: expr, $type: ty) => {
+        pub fn $name(&self) -> &mut $type {
+            let netvar = self.get_netvar($path).unwrap();
+            unsafe {
+                transmute::<_, &mut $type>((self as *const _ as *const u8).byte_add(netvar.offset + $offset))
+            }
         }
     };
 }

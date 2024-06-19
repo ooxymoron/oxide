@@ -152,6 +152,7 @@ impl VisualsWindow {
         let mut tracer_settings = LinearLayout::new(LinearLayoutOrientation::VERTICAL, 8, 0);
         tracer_settings.add(Checkbox::new("tracers", s!().visual.tracers.clone(), 0, 0));
         tracer_settings.add(Checkbox::new("impacts", s!().visual.impacts.clone(), 0, 0));
+        tracer_settings.add(Checkbox::new("explosives", s!().visual.explosives.clone(), 0, 0));
         container.add(tracer_settings);
         window.add(container);
         VisualsWindow { window }
