@@ -282,10 +282,12 @@ impl Entity {
         return Ok(unsafe { transmute(self) });
     }
     pub fn as_object(&mut self) -> OxideResult<&'static mut Object> {
-        if !matches!(
-            self.as_networkable().get_client_class().class_id,
-            ClassId::CObjectSentrygun | ClassId::CObjectTeleporter | ClassId::CObjectDispenser
-        ) {
+        if !self
+            .as_networkable()
+            .get_client_class()
+            .get_ingeritance_chain()
+            .contains(&"CBaseObject".to_string()) {
+            
             return Err(OxideError::new("not a object"));
         };
         return Ok(unsafe { transmute(self) });

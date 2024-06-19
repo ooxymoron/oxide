@@ -1,0 +1,344 @@
+use std::mem::transmute;
+
+use derivative::Derivative;
+
+use crate::{
+    define_netvar,
+    sdk::user_cmd::{ButtonFlags, UserCmd},
+    vmt_call,
+};
+
+use super::{ids::WeaponId, HasNetvars, Weapon};
+
+#[repr(C)]
+#[derive(Derivative, Clone)]
+#[derivative(Debug)]
+pub struct PipeBombLauncher {}
+
+impl PipeBombLauncher {
+    pub fn as_weapon(&mut self) -> &'static mut Weapon {
+        return unsafe { transmute(self) };
+    }
+    pub fn is_attacking(&mut self, cmd: &UserCmd) -> bool {
+        !cmd.buttons.get(ButtonFlags::InAttack) && *self.get_begin_charge_time() != 0.
+    }
+}
+
+impl HasNetvars for PipeBombLauncher {
+    fn get_class_name() -> &'static str {
+        "CTFPipebombLauncher"
+    }
+}
+
+impl PipeBombLauncher {
+    define_netvar!(
+        get_begin_charge_time,
+        ["PipebombLauncherLocalData", "m_flChargeBeginTime"],
+        f32
+    );
+}
+
+//CTFPipebombLauncher{
+//CTFPipebombLauncher baseclass baseclass LocalActiveTFWeaponData m_flLastFireTime
+//CTFPipebombLauncher baseclass baseclass LocalActiveTFWeaponData m_flLastCritCheckTime
+//CTFPipebombLauncher baseclass baseclass LocalActiveTFWeaponData m_flEffectBarRegenTime
+//CTFPipebombLauncher baseclass baseclass LocalActiveTFWeaponData m_flObservedCritChance
+//CTFPipebombLauncher baseclass baseclass LocalActiveTFWeaponData m_flReloadPriorNextFire
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_iClip1
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_iClip2
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_iSecondaryAmmoType
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_bFlipViewModel
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_nCustomViewmodelModelIndex
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_nViewModelIndex
+//CTFPipebombLauncher baseclass baseclass baseclass LocalWeaponData m_iPrimaryAmmoType
+//CTFPipebombLauncher baseclass baseclass baseclass LocalActiveWeaponData m_flTimeWeaponIdle
+//CTFPipebombLauncher baseclass baseclass baseclass LocalActiveWeaponData m_flNextSecondaryAttack
+//CTFPipebombLauncher baseclass baseclass baseclass LocalActiveWeaponData m_nNextThinkTick
+//CTFPipebombLauncher baseclass baseclass baseclass LocalActiveWeaponData m_flNextPrimaryAttack
+//CTFPipebombLauncher baseclass baseclass baseclass m_iState
+//CTFPipebombLauncher baseclass baseclass baseclass m_hOwner
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_bValidatedAttachedEntity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iItemIDLow
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iTeamNumber
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iItemDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 013 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 013 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 013 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 013 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 014 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 014 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 014 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 014 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 008 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 008 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 008 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 008 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 006 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 006 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 006 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 006 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 010 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 010 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 010 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 010 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 016 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 016 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 016 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 016 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 007 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 007 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 007 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 007 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 017 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 017 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 017 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 017 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 015 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 015 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 015 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 015 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 011 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 011 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 011 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 011 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 003 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 003 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 003 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 003 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 002 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 002 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 002 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 002 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 001 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 001 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 001 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 001 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 005 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 005 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 005 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 005 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 012 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 012 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 012 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 012 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 000 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 000 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 000 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 000 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 009 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 009 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 009 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 009 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes lengthproxy lengthprop20
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 019 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 019 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 019 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 019 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 018 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 018 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 018 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 018 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 004 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 004 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 004 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_AttributeList m_Attributes 004 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iAccountID
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iEntityQuality
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 004 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 004 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 004 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 004 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 003 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 003 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 003 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 003 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 008 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 008 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 008 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 008 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 010 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 010 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 010 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 010 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 012 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 012 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 012 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 012 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 014 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 014 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 014 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 014 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 005 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 005 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 005 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 005 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 011 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 011 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 011 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 011 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 000 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 000 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 000 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 000 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 017 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 017 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 017 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 017 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 016 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 016 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 016 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 016 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 007 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 007 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 007 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 007 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 009 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 009 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 009 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 009 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 006 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 006 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 006 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 006 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 013 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 013 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 013 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 013 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 018 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 018 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 018 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 018 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 019 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 019 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 019 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 019 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 001 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 001 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 001 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 001 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 015 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 015 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 015 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 015 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes lengthproxy lengthprop20
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 002 m_nRefundableCurrency
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 002 m_iRawValue32
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 002 m_flValue
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_NetworkedDynamicAttributesForDemos m_Attributes 002 m_iAttributeDefinitionIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iItemIDHigh
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_bInitialized
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_iEntityLevel
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_Item m_bOnlyIterateItemViewAttributes
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_ProviderType
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_iReapplyProvisionParity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass m_AttributeManager m_hOuter
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nResetEventsParity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nNewSequenceParity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flFadeScale
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nBody
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flModelScale
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass movecollide
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nRenderFX
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nModelIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_bSimulatedEveryTick
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_iTextureFrameIndex
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nModelIndexOverrides 001
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nModelIndexOverrides 002
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nModelIndexOverrides 000
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nModelIndexOverrides 003
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_angRotation
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_bAlternateSorting
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_hEffectEntity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass movetype
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_iTeamNum
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_nRenderMode
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_flShadowCastDistance
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_bAnimatedEveryTick
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass predictable_id m_PredictableID
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass predictable_id m_bIsPlayerSimulated
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass AnimTimeMustBeFirst m_flAnimTime
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_fEffects
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_hOwnerEntity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_clrRender
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecSpecifiedSurroundingMins
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecMins
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecMaxsPreScaled
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecMaxs
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_usSolidFlags
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecMinsPreScaled
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_nSolidType
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecSpecifiedSurroundingMinsPreScaled
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_nSurroundType
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecSpecifiedSurroundingMaxs
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_vecSpecifiedSurroundingMaxsPreScaled
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_bUniformTriggerBloat
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_Collision m_triggerBloat
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_ubInterpolationFrame
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass moveparent
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_CollisionGroup
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_flSimulationTime
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_flElasticity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_iParentAttachment
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass baseclass m_vecOrigin
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flModelWidthScale
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass serveranimdata m_flCycle
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flEncodedController 003
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flEncodedController 001
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flEncodedController 000
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flEncodedController 002
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_bClientSideAnimation
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nSkin
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_fadeMinDist
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 013
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 003
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 002
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 022
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 023
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 019
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 016
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 021
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 012
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 018
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 001
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 015
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 000
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 009
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 014
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 017
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 020
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 004
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 008
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 007
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 006
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 010
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 005
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPoseParameter 011
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_fadeMaxDist
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nSequence
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_hLightingOrigin
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_hLightingOriginRelative
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_vecForce
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nMuzzleFlashParity
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nHitboxSet
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_flPlaybackRate
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_nForceBone
+//CTFPipebombLauncher baseclass baseclass baseclass baseclass baseclass m_bClientSideFrameReset
+//CTFPipebombLauncher baseclass baseclass baseclass m_iViewModelIndex
+//CTFPipebombLauncher baseclass baseclass baseclass m_iWorldModelIndex
+//CTFPipebombLauncher baseclass baseclass m_bDisguiseWeapon
+//CTFPipebombLauncher baseclass baseclass m_nKillComboClass
+//CTFPipebombLauncher baseclass baseclass m_hExtraWearableViewModel
+//CTFPipebombLauncher baseclass baseclass m_bLowered
+//CTFPipebombLauncher baseclass baseclass m_nInspectStage
+//CTFPipebombLauncher baseclass baseclass m_iReloadMode
+//CTFPipebombLauncher baseclass baseclass m_hExtraWearable
+//CTFPipebombLauncher baseclass baseclass m_bResetParity
+//CTFPipebombLauncher baseclass baseclass m_flEnergy
+//CTFPipebombLauncher baseclass baseclass m_flInspectAnimEndTime
+//CTFPipebombLauncher baseclass baseclass m_bReloadedThroughAnimEvent
+//CTFPipebombLauncher baseclass baseclass m_nKillComboCount
+//CTFPipebombLauncher baseclass baseclass m_iConsecutiveShots
+//CTFPipebombLauncher baseclass baseclass m_bBeingRepurposedForTaunt
+//CTFPipebombLauncher PipebombLauncherLocalData m_flChargeBeginTime
+//CTFPipebombLauncher PipebombLauncherLocalData m_iPipebombCount
+//}

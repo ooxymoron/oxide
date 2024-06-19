@@ -2,7 +2,7 @@ use crate::{
     math::vector2::Vector2,
     o,
     sdk::{
-        entity::{player::Player, weapon::Gun},
+        entity::{player::Player, weapon::gun::Gun},
         interfaces::engine_trace::{trace, TraceFilter, CONTENTS_GRATE, MASK_SHOT},
         user_cmd::{ButtonFlags, UserCmd},
     },

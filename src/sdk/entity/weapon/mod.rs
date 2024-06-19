@@ -3,10 +3,7 @@ use std::{ffi::CStr, mem::transmute};
 use crate::{o, vmt_call};
 
 use self::{
-    entity::Entity,
-    ids::{ItemDefinitionInex, WeaponId},
-    info::WeaponInfo,
-    interfaces::condition::ConditionFlags,
+    entity::Entity, gun::Gun, ids::{ItemDefinitionInex, WeaponId}, info::WeaponInfo, interfaces::{condition::ConditionFlags, user_cmd::UserCmd}, melee::MeleeWeapon, pipebomblauncher::PipeBombLauncher
 };
 
 use super::*;
@@ -15,6 +12,9 @@ pub mod crit;
 pub mod ids;
 pub mod info;
 pub mod netvars;
+pub mod gun;
+pub mod melee;
+pub mod pipebomblauncher;
 
 #[repr(C)]
 #[derive(Derivative, Clone)]
@@ -50,78 +50,13 @@ pub struct Weapon {
     pub current_seed: i32,
 }
 
-#[repr(C)]
-#[derive(Derivative, Clone)]
-#[derivative(Debug)]
-pub struct VMTGun {
-    #[derivative(Debug = "ignore")]
-    _pad: [usize; 537],
-    pub get_projectile_spread: cfn!(f32, &Gun), //0x87c
-    _pad1: [usize; 5],
-    pub get_projectile_damage: cfn!(f32, &Gun), //0x87c
-                                                //0x8A4
-}
-
-#[repr(C)]
-#[derive(Derivative, Clone)]
-#[derivative(Debug)]
-pub struct Gun {
-    pub vmt: *mut VMTGun,
-}
-
-impl Gun {
-    pub fn as_weapon(&mut self) -> &'static mut Weapon {
-        return unsafe { transmute(self) };
-    }
-
-    pub fn get_damage(&mut self, crit: bool) -> f32 {
-        let mut mult = if crit { 3.0 } else { 1.0 };
-        if crit
-            && matches!(
-                self.as_weapon().get_item_definition_index(),
-                ItemDefinitionInex::SniperMTheSydneySleeper
-            )
-        {
-            mult = 1.35
-        }
-        vmt_call!(self, get_projectile_damage) * mult
-    }
-    pub fn sniper_charge(&mut self) -> f32 {
-        (vmt_call!(self, get_projectile_damage) - 50.0) / 100.0
-    }
-    pub fn get_bullets(&mut self) -> i32 {
-        let mode = self.as_weapon().get_mode();
-        let mut bullet_count =
-            self.as_weapon().get_info().weapon_data[mode as usize].bullets_per_shot;
-        if let Some(bullets_attrib) = self
-            .as_weapon()
-            .as_ent()
-            .get_float_attrib("mult_bullets_per_shot")
-        {
-            bullet_count = bullets_attrib as i32;
-        }
-        bullet_count
-    }
-}
-
-#[repr(C)]
-#[derive(Derivative, Clone)]
-#[derivative(Debug)]
-pub struct MeleWeapon {
-    #[derivative(Debug = "ignore")]
-    _pad5: [u8; 0xc2c],
-    pub smack_time: f32, /* 0xC2C */
-    #[derivative(Debug = "ignore")]
-    _pad6: [u8; 0x10],
-    pub ready_to_backstab: bool, /*0xC40*/
-}
 
 impl Weapon {
     pub fn as_ent(&self) -> &'static mut Entity {
         #[allow(mutable_transmutes)]
         return unsafe { transmute::<_, _>(self) };
     }
-    pub fn as_mele(&self) -> &'static mut MeleWeapon {
+    pub fn as_melee(&self) -> &'static mut MeleeWeapon {
         #[allow(mutable_transmutes)]
         return unsafe { transmute(self) };
     }
@@ -136,6 +71,24 @@ impl Weapon {
             return Err(OxideError::new("this weapon is not a gun"));
         };
         return Ok(unsafe { transmute(self) });
+    }
+    pub fn as_pipebomblauncher(&mut self) -> OxideResult<&'static mut PipeBombLauncher> {
+        if !self
+            .as_ent()
+            .as_networkable()
+            .get_client_class()
+            .get_ingeritance_chain()
+            .contains(&"CTFPipebombLauncher".to_string())
+        {
+            return Err(OxideError::new("this weapon is not a PipebombLauncher"));
+        };
+        return Ok(unsafe { transmute(self) });
+    }
+    pub fn is_attacking(&mut self, cmd: &UserCmd) -> bool {
+        if let Ok(pipebomblauncher) = self.as_pipebomblauncher(){
+            return pipebomblauncher.is_attacking(cmd);
+        }
+        cmd.buttons.get(user_cmd::ButtonFlags::InAttack)
     }
 }
 

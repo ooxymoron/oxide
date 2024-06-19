@@ -208,7 +208,7 @@ impl Aimbot {
         }
         match id {
             WeaponId::Knife => {
-                if weapon.as_mele().ready_to_backstab {
+                if weapon.as_melee().ready_to_backstab {
                     cmd.buttons.set(ButtonFlags::InAttack, true);
                     return true;
                 }

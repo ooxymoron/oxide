@@ -201,10 +201,10 @@ impl CritManipulation {
             return;
         }
         let blanks_till_crit = self.blanks_till_crit(weapon);
-        let info = &weapon.get_info().weapon_data[weapon.get_mode()];
+        let info = weapon.get_info().weapon_data[weapon.get_mode()].clone();
 
         if  
-               !cmd.buttons.get(ButtonFlags::InAttack) 
+               !weapon.is_attacking(cmd) 
             && blanks_till_crit.is_some() 
             && self.crit_key_pressed 
             && *setting!(crit_manipulation,auto_cycle_rapid_fire) 
@@ -215,7 +215,7 @@ impl CritManipulation {
             cmd.buttons.set(ButtonFlags::InAttack, true)
         }
 
-        if !cmd.buttons.get(ButtonFlags::InAttack)  {
+        if !weapon.is_attacking(cmd) {
             return;
         }
 
@@ -230,6 +230,7 @@ impl CritManipulation {
         {
             false
         } else {
+            log!("critting");
             true
         };
         let (cmd_num, seed) = self
@@ -244,12 +245,6 @@ impl CritManipulation {
         self.last_spoofed_cmd_seed = Some(seed);
         cmd.command_number = cmd_num;
         cmd.seed = seed;
-        log!(
-            "{} | {} / {}",
-            weapon.get_crit_bucket().clone(),
-            weapon.get_crit_seed_requests().clone(),
-            weapon.get_crit_checks(),
-        );
     }
 }
 
