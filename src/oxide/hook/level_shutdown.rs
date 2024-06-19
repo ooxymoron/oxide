@@ -9,7 +9,7 @@ fn hook(base_client: &BaseClient, org: LevelShutdownHook::RawFn) {
     get_cheat!(SpreadReduction).playerperf_send_data = None;
     get_cheat!(SpreadReduction).state = State::UNSYNCED;
     get_cheat!(CritManipulation).reset();
-    get_cheat!(PlayerList).players.lock().unwrap().clear();
+    get_cheat!(PlayerList).players.lock().unwrap().1.clear();
     (org)(base_client);
 }
 

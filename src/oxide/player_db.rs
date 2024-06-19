@@ -20,13 +20,14 @@ impl PlayerDb {
         let conn = sqlite::open(db_file).unwrap();
         let query = "
         CREATE TABLE IF NOT EXISTS player (
-            guid TEXT PK,
-            name TEXT
+            guid TEXT PK NOT NULL,
+            name TEXT NOT NULL,
+            prio INT NOT NULL DEFAULT 0
         );
-        CREATE TABLE IF NOT EXISTS tag (name TEXT PK);
+        CREATE TABLE IF NOT EXISTS tag (name TEXT PK NOT NULL);
         CREATE TABLE IF NOT EXISTS player_tag(
-            tag TEXT,
-            player TEXT,
+            tag TEXT NOT NULL,
+            player TEXT NOT NULL,
             FOREIGN KEY(player) REFERENCES player(guid),
             FOREIGN KEY(tag) REFERENCES tag(name)
         );
@@ -89,102 +90,122 @@ impl PlayerDb {
     pub fn add_player_if_doesnt_exist(&self, guid: &str, name: &str) -> bool {
         let exists = self.does_player_exist(guid);
         if !exists {
-            log!("adding player to db ({},{})", name, guid);
-            let mut stmt = self.conn.prepare(Self::ADD_PLAYER_QUERY).unwrap();
-            stmt.bind(&[(":name", name), (":guid", guid)][..]).unwrap();
-            stmt.next().unwrap();
+            self.conn
+                .prepare(Self::ADD_PLAYER_QUERY)
+                .unwrap()
+                .into_iter()
+                .bind(&[(":name", name), (":guid", guid)][..])
+                .unwrap();
         }
         !exists
     }
+    const DOES_PLAYER_EXIST_QUERY: &'static str = "SELECT * FROM player WHERE guid = :guid;";
     pub fn does_player_exist(&self, guid: &str) -> bool {
-        let mut exists = false;
-        self.conn
-            .iterate(
-                format!(
-                    "
-                    SELECT * FROM player
-                    WHERE player.guid = '{}'",
-                    guid
-                ),
-                |_| {
-                    exists = true;
-                    true
-                },
-            )
-            .unwrap();
-        exists
-    }
-    pub fn get_player_tags(&self, guid: &str) -> Option<Vec<String>> {
-        if !self.does_player_exist(guid) {
-            return None;
-        }
-        let mut tags = Vec::new();
+        let res = self
+            .conn
+            .prepare(Self::DOES_PLAYER_EXIST_QUERY)
+            .unwrap()
+            .into_iter()
+            .bind((":guid", guid))
+            .unwrap()
+            .next()
+            .is_some();
 
-        self.conn
-            .iterate(
-                format!(
-                    "
+        res
+    }
+    const GET_PLAYER_TAGS_QUERY: &'static str = "
                     SELECT tag.name 
                     FROM player 	
                     INNER JOIN player_tag 
                         on player.guid = player_tag.player 
                     INNER JOIN tag 
                         ON tag.name = player_tag.tag
-                    WHERE player.guid = '{}'
-                    ",
-                    guid
-                ),
-                |pairs| {
-                    for &(_, value) in pairs {
-                        tags.push(value.unwrap().to_string());
-                    }
-                    true
-                },
-            )
-            .unwrap();
+                    WHERE player.guid = :guid;
+";
+    pub fn get_player_tags(&self, guid: &str) -> Option<Vec<String>> {
+        if !self.does_player_exist(guid) {
+            return None;
+        }
+        let mut tags = Vec::new();
+
+        for row in self
+            .conn
+            .prepare(Self::GET_PLAYER_TAGS_QUERY)
+            .unwrap()
+            .into_iter()
+            .bind((":guid", guid))
+            .unwrap()
+            .map(|x| x.unwrap())
+        {
+            tags.push(row.read::<&str, _>("name").to_string());
+        }
+
         Some(tags)
     }
-    pub fn set_player_tags(&self, guid: &str, tags: &Vec<String>) {
-        if tags.is_empty() {
-            return;
+    const GET_PLAYER_PRIO_QUERY: &'static str = "SELECT prio FROM player WHERE guid = :guid;";
+    pub fn get_player_prio(&self, guid: &str) -> Option<isize> {
+        if !self.does_player_exist(guid) {
+            return None;
         }
-        self.conn
-            .execute(format!(
-                "
-                    DELETE FROM 
-                    player_tag 
-                    WHERE player = '{}';
-
-                    INSERT INTO 
-                    player_tag(player,tag)
-                    VALUES
-                    {};
-                    ",
-                guid,
-                tags.into_iter()
-                    .map(|tag| format!("('{}','{}')", guid, tag))
-                    .collect::<Vec<_>>()
-                    .join(",")
-            ))
-            .unwrap();
+        dbg!(guid);
+        let prio = self
+            .conn
+            .prepare(Self::GET_PLAYER_PRIO_QUERY)
+            .unwrap()
+            .into_iter()
+            .bind((":guid", guid))
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap()
+            .read::<i64, _>("prio") as isize;
+        dbg!(prio);
+        Some(prio)
     }
+
+    const DELETE_PLAYER_TAGS_QUERY: &'static str = "DELETE FROM player WHERE player.guid = :guid;";
+    const INSERT_PLAYER_TAG_QUERY: &'static str =
+        "INSERT INTO player_tag(player,tag) VALUES (:player,:tag);";
+    pub fn set_player_tags(&self, guid: &str, tags: &Vec<String>) {
+        self.conn
+            .prepare(Self::DELETE_PLAYER_TAGS_QUERY)
+            .unwrap()
+            .into_iter()
+            .bind((":guid", guid))
+            .unwrap();
+
+        for tag in tags {
+            self.conn
+                .prepare(Self::INSERT_PLAYER_TAG_QUERY)
+                .unwrap()
+                .into_iter()
+                .bind(&[(":player", guid), (":tag", tag)][..])
+                .unwrap();
+        }
+    }
+
+    const GET_TAGS_QUERY: &'static str = "SELECT tag.name FROM tag;";
     pub fn get_tags(&self) -> Vec<String> {
         let mut tags = Vec::new();
 
-        self.conn
-            .iterate(
-                "
-                SELECT tag.name
-                FROM tag
-                ",
-                |pairs| {
-                    for &(_, value) in pairs {
-                        tags.push(value.unwrap().to_string())
-                    }
-                    true
-                },
-            )
-            .unwrap();
+        for row in self
+            .conn
+            .prepare(Self::GET_TAGS_QUERY)
+            .unwrap()
+            .into_iter()
+            .map(|x| x.unwrap())
+        {
+            tags.push(row.read::<&str, _>("name").to_string())
+        }
         tags
+    }
+    const UPDATE_PRIO_QUERY: &'static str = "UPDATE player SET prio = :prio WHERE guid = :guid;";
+    pub fn set_player_prio(&self, guid: &str, prio: isize) {
+        self.conn
+            .prepare(Self::UPDATE_PRIO_QUERY)
+            .unwrap()
+            .into_iter()
+            .bind(&[(":prio", prio.to_string().as_str()), (":guid", guid)][..])
+            .unwrap();
     }
 }

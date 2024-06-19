@@ -124,8 +124,9 @@ impl Player {
         let info = self.info().unwrap();
         let player_list = o!().cheats.get::<PlayerList>();
         let players = player_list.players.lock().unwrap();
-        let player_list_info = players.get(&info.user_id).unwrap();
+        let player_list_info = players.1.get(&info.user_id).unwrap();
         let prio = player_list_info.prio.lock().unwrap();
+        let prio = prio.1.lock().unwrap();
         if *prio < 0 {
             return None;
         }
@@ -138,6 +139,15 @@ impl Player {
     pub fn set_tags(&self, tags: Vec<String>) {
         let info = self.info().unwrap();
         o!().player_db.set_player_tags(&info.guid, &tags);
+    }
+    pub fn get_guid(&self) -> Option<String> {
+        let info = self.info().unwrap();
+
+        if info.fakeplayer {
+            return None;
+        }
+
+        Some(info.guid)
     }
 }
 

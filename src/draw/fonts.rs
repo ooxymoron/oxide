@@ -7,7 +7,7 @@ use sdl2_sys::{
     SDL_FreeSurface, SDL_Rect, SDL_RenderCopy, SDL_SetSurfaceBlendMode, SDL_Texture,
 };
 
-use crate::{d, hex_to_rgb, log};
+use crate::{d, hex_to_rgb};
 
 pub static HACK_FONT: &[u8; 2215536] = include_bytes!("./../../assets/HackNerdFont-Regular.ttf");
 
@@ -160,7 +160,6 @@ impl Fonts {
                 SDL_RenderCopy(d!().renderer, cached.texture.clone(), null(), &mut rect);
                 return;
             }
-            log!("caching text texture {}", text);
 
             let face = self.faces.get(&size).unwrap();
 
@@ -241,7 +240,7 @@ impl Fonts {
             let texture = SDL_CreateTextureFromSurface(d!().renderer, surface);
             let mut rect = SDL_Rect {
                 x: x as i32,
-                y: y as i32 + y_origin_offset as i32,
+                y: y as i32 - y_origin_offset as i32,
                 w: width as i32,
                 h: height as i32,
             };

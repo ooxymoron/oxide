@@ -42,7 +42,7 @@ impl PlayerListWindow {
             unsafe { transmute(self.window.components.0.first_mut().unwrap()) };
 
         table.data.retain(|id, _| {
-            let Some(player) = players.get_mut(id) else { return false};
+            let Some(player) = players.1.get_mut(id) else { return false};
             if player.changed {
                 player.changed = false;
                 return false;
@@ -51,7 +51,7 @@ impl PlayerListWindow {
         });
         let tags = o!().player_db.get_tags();
 
-        for (id, player) in players.iter() {
+        for (id, player) in players.1.iter() {
             if table.data.contains_key(id) {
                 continue;
             }
@@ -90,7 +90,7 @@ impl PlayerListWindow {
             );
         }
 
-        self.last_players = Some(players.clone());
+        self.last_players = Some(players.1.clone());
         table.update_data();
         self.window.update_size();
     }

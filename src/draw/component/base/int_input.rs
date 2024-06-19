@@ -14,7 +14,7 @@ use super::text_input::TextInput;
 pub struct IntInput {
     pub text_input: TextInput,
     text_val: Arcm<String>,
-    int_val: Arcm<isize>,
+    int_val: Arcm<(bool,Arcm<isize>)>,
     validator: fn(isize) -> bool,
 }
 
@@ -23,10 +23,10 @@ impl IntInput {
         x: isize,
         y: isize,
         label: Option<String>,
-        val: Arcm<isize>,
+        val: Arcm<(bool,Arcm<isize>)>,
         validator: Option<fn(isize) -> bool>,
     ) -> IntInput {
-        let text_val = Arcm::new(val.lock().unwrap().to_string());
+        let text_val = Arcm::new(val.lock().unwrap().1.lock().unwrap().to_string());
         let validator = validator.unwrap_or(|_| true);
 
         IntInput {
@@ -41,11 +41,16 @@ impl IntInput {
 impl Component for IntInput {
     fn draw(&mut self, frame: &mut Frame) -> OxideResult<()> {
         if self.text_input.focussed {
-            let mut float_val = self.int_val.lock().unwrap();
+            let mut val = self.int_val.lock().unwrap();
+            let mut int_val = val.1.lock().unwrap();
             let text_val = self.text_val.lock().unwrap();
-            if let Ok(val) = text_val.parse() {
-                if *float_val != val && (self.validator)(val) {
-                    *float_val = val;
+            if let Ok(new_val) = text_val.parse() {
+                if *int_val != new_val && (self.validator)(new_val) {
+                    *int_val = new_val;
+                    drop(int_val);
+                    dbg!("setting to true");
+                    val.0 = true;
+
                 }
             }
         }

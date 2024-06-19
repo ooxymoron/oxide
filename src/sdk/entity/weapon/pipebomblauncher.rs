@@ -5,10 +5,9 @@ use derivative::Derivative;
 use crate::{
     define_netvar,
     sdk::user_cmd::{ButtonFlags, UserCmd},
-    vmt_call,
 };
 
-use super::{ids::WeaponId, HasNetvars, Weapon};
+use super::{HasNetvars, Weapon};
 
 #[repr(C)]
 #[derive(Derivative, Clone)]
