@@ -286,8 +286,8 @@ impl Entity {
             .as_networkable()
             .get_client_class()
             .get_ingeritance_chain()
-            .contains(&"CBaseObject".to_string()) {
-            
+            .contains(&"CBaseObject".to_string())
+        {
             return Err(OxideError::new("not a object"));
         };
         return Ok(unsafe { transmute(self) });

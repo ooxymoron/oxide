@@ -41,6 +41,7 @@ impl PlayerListInfoInner {
             .player_db
             .get_player_tags(&guid)
             .map(|x| Arcm::new((true, Arcm::new(x))));
+        dbg!(&tags);
         PlayerListInfoInner::Real {
             guid: guid.to_string(),
             tags,
@@ -91,6 +92,13 @@ impl PlayerListInfo {
         } else {
             None
         };
+        if let Some(guid) = &guid {
+            if !resource.name.is_empty() && resource.name != "unconnected" {
+                o!().player_db
+                    .add_player_if_doesnt_exist(&guid, &resource.name);
+            }
+        }
+
         if (!self.connected && resource.connected)
             || self.name != resource.name
             || self.team != resource.team

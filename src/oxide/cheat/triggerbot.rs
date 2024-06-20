@@ -2,15 +2,14 @@ use std::ptr::addr_of;
 
 use crate::{
     error::OxideResult,
-    get_cheat, o,
-    oxide::cheat::aimbot::Aimbot,
+    o,
     sdk::{
         entity::{
             pipe::PipeType,
             player::{player_class::PlayerClass, Player},
         },
         interfaces::{
-            engine_trace::{trace, TraceFilter, MASK_SHOT},
+            engine_trace::{trace, TraceFilter, MASK_SHOT, MASK_SHOT_HULL},
             entity::Entity,
         },
         networkable::ClassId,
@@ -63,7 +62,7 @@ impl Triggerbot {
                     <= sticky.as_pipe()?.get_radius().unwrap()
                 {
                     let filter = TraceFilter::new(p_local.as_ent());
-                    let trace = trace(player_pos, sticky.get_origin(), MASK_SHOT, &filter);
+                    let trace = trace(player_pos, sticky.get_origin(), MASK_SHOT_HULL, &filter);
                     if trace.entity == addr_of!(**sticky) {
                         return Ok(false);
                     }
@@ -77,26 +76,78 @@ impl Triggerbot {
             .unwrap()
             .get_class_ids(ClassId::CTFPlayer)
         {
-            let Some(player) = Entity::get_ent(id) else {continue;};
-            if vmt_call!(player.as_networkable(), is_dormant) || !vmt_call!(player, is_alive) {
+            let Some(ent) = Entity::get_ent(id) else {continue;};
+            if ent.priority().is_none() {
                 continue;
             }
-            if get_cheat!(Aimbot)
-                .player_prioroty(player.as_player()?)?
-                .is_none()
+            if self.sticky_range_check(ent, &mut stickies)? {
+                return Ok(true);
+            }
+        }
+        if *setting!(aimbot, target_sentries) {
+            for id in o!()
+                .last_entity_cache
+                .as_ref()
+                .unwrap()
+                .get_class_ids(ClassId::CObjectSentrygun)
             {
-                continue;
+                let Some(ent) = Entity::get_ent(id) else {continue;};
+                if ent.priority().is_none() {
+                    continue;
+                }
+                if self.sticky_range_check(ent, &mut stickies)? {
+                    return Ok(true);
+                }
             }
-            for sticky in &mut stickies {
-                let player_pos = vmt_call!(player, world_space_center);
-                if (*player_pos - *sticky.get_origin()).len()
-                    <= sticky.as_pipe()?.get_radius().unwrap()
-                {
-                    let filter = TraceFilter::new(sticky);
-                    let trace = trace(sticky.get_origin(), player_pos, MASK_SHOT, &filter);
-                    if trace.entity == addr_of!(*player) {
-                        return Ok(true);
-                    }
+        }
+        if *setting!(aimbot, target_buildings) {
+            for id in o!()
+                .last_entity_cache
+                .as_ref()
+                .unwrap()
+                .get_class_ids(ClassId::CObjectTeleporter)
+            {
+                let Some(ent) = Entity::get_ent(id) else {continue;};
+                if ent.priority().is_none() {
+                    continue;
+                }
+                if self.sticky_range_check(ent, &mut stickies)? {
+                    return Ok(true);
+                }
+            }
+            for id in o!()
+                .last_entity_cache
+                .as_ref()
+                .unwrap()
+                .get_class_ids(ClassId::CObjectDispenser)
+            {
+                let Some(ent) = Entity::get_ent(id) else {continue;};
+                if ent.priority().is_none() {
+                    continue;
+                }
+                if self.sticky_range_check(ent, &mut stickies)? {
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
+    }
+    pub fn sticky_range_check(
+        &self,
+        ent: &Entity,
+        stickies: &mut Vec<&mut Entity>,
+    ) -> OxideResult<bool> {
+        if vmt_call!(ent.as_networkable(), is_dormant) || !vmt_call!(ent, is_alive) {
+            return Ok(false);
+        }
+        for sticky in stickies {
+            let player_pos = vmt_call!(ent, world_space_center);
+            if (*player_pos - *sticky.get_origin()).len() <= sticky.as_pipe()?.get_radius().unwrap()
+            {
+                let filter = TraceFilter::new(sticky);
+                let trace = trace(sticky.get_origin(), player_pos, MASK_SHOT, &filter);
+                if trace.entity == addr_of!(*ent) {
+                    return Ok(true);
                 }
             }
         }

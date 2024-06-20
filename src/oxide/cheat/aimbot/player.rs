@@ -2,7 +2,6 @@ use crate::{
     error::OxideResult,
     o,
     sdk::{
-        condition::ConditionFlags,
         entity::{
             hitbox::{HitboxWrapper, PlayerHitboxId},
             player::Player,
@@ -63,37 +62,6 @@ impl<'player> Aimbot {
             })
             .collect()
     }
-    pub fn player_prioroty(&self, player: &Player) -> OxideResult<Option<isize>> {
-        if player.as_ent().priority().is_none() {
-            return Ok(None);
-        }
-        let mut ignore_flags = vec![ConditionFlags::Ubercharged, ConditionFlags::Bonked];
-        let spy_revealing_flags = vec![
-            ConditionFlags::Jarated,
-            ConditionFlags::Milked,
-            ConditionFlags::CloakFlicker,
-            ConditionFlags::OnFire,
-            ConditionFlags::Bleeding,
-        ];
-        let conditions = player.get_condition();
-
-        if spy_revealing_flags
-            .into_iter()
-            .all(|flag| !conditions.get(flag))
-        {
-            if !*setting!(aimbot, target_invisible) {
-                ignore_flags.push(ConditionFlags::Cloaked)
-            }
-            if !*setting!(aimbot, target_disguised) {
-                ignore_flags.push(ConditionFlags::Disguised)
-            }
-        }
-
-        if ignore_flags.into_iter().any(|flag| conditions.get(flag)) {
-            return Ok(None);
-        }
-        Ok(Some(1))
-    }
 
     pub fn scan_player_hitboxes(
         &self,
@@ -105,7 +73,7 @@ impl<'player> Aimbot {
             return Ok(());
         }
 
-        let Some(player_prioroty) = self.player_prioroty(player.as_player()?)? else {
+        let Some(player_prioroty) = player.priority() else {
             return Ok(());
         };
         if let Some(best_target) = &best_target {

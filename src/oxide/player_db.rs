@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{intrinsics::breakpoint, path::Path};
 
 use derivative::Derivative;
 use sqlite::Connection;
@@ -90,12 +90,15 @@ impl PlayerDb {
     pub fn add_player_if_doesnt_exist(&self, guid: &str, name: &str) -> bool {
         let exists = self.does_player_exist(guid);
         if !exists {
+            dbg!("adding player", name, guid);
             self.conn
                 .prepare(Self::ADD_PLAYER_QUERY)
                 .unwrap()
                 .into_iter()
                 .bind(&[(":name", name), (":guid", guid)][..])
                 .unwrap();
+            dbg!(self.does_player_exist(guid));
+            unsafe { breakpoint() };
         }
         !exists
     }
@@ -114,13 +117,9 @@ impl PlayerDb {
         res
     }
     const GET_PLAYER_TAGS_QUERY: &'static str = "
-                    SELECT tag.name 
-                    FROM player 	
-                    INNER JOIN player_tag 
-                        on player.guid = player_tag.player 
-                    INNER JOIN tag 
-                        ON tag.name = player_tag.tag
-                    WHERE player.guid = :guid;
+                    SELECT tag 
+                    FROM player_tag 	
+                    WHERE player = :guid;
 ";
     pub fn get_player_tags(&self, guid: &str) -> Option<Vec<String>> {
         if !self.does_player_exist(guid) {
@@ -137,7 +136,7 @@ impl PlayerDb {
             .unwrap()
             .map(|x| x.unwrap())
         {
-            tags.push(row.read::<&str, _>("name").to_string());
+            tags.push(row.read::<&str, _>("tag").to_string());
         }
 
         Some(tags)

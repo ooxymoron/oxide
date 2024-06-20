@@ -7,14 +7,7 @@ use std::{
 use derivative::Derivative;
 
 use crate::{
-    define_netvar, define_offset,
-    error::{OxideError, OxideResult},
-    interface,
-    math::{angles::Angles, remap_clamped, vector3::Vector3},
-    netvars::HasNetvars,
-    o,
-    oxide::{cheat::player_list::PlayerList, player_resource_manager::PlayerResourceData},
-    vmt_call,
+    define_netvar, define_offset, error::{OxideError, OxideResult}, interface, math::{angles::Angles, remap_clamped, vector3::Vector3}, netvars::HasNetvars, o, oxide::{cheat::player_list::PlayerList, player_resource_manager::PlayerResourceData}, sdk::condition::ConditionFlags, setting, vmt_call
 };
 
 use self::anim_state::AnimState;
@@ -130,6 +123,33 @@ impl Player {
         if *prio < 0 {
             return None;
         }
+
+        let mut ignore_flags = vec![ConditionFlags::Ubercharged, ConditionFlags::Bonked];
+        let spy_revealing_flags = vec![
+            ConditionFlags::Jarated,
+            ConditionFlags::Milked,
+            ConditionFlags::CloakFlicker,
+            ConditionFlags::OnFire,
+            ConditionFlags::Bleeding,
+        ];
+        let conditions = self.get_condition();
+
+        if spy_revealing_flags
+            .into_iter()
+            .all(|flag| !conditions.get(flag))
+        {
+            if !*setting!(aimbot, target_invisible) {
+                ignore_flags.push(ConditionFlags::Cloaked)
+            }
+            if !*setting!(aimbot, target_disguised) {
+                ignore_flags.push(ConditionFlags::Disguised)
+            }
+        }
+
+        if ignore_flags.into_iter().any(|flag| conditions.get(flag)) {
+            return None;
+        }
+
         Some(prio.clone())
     }
     pub fn get_tags(&self) -> Option<Vec<String>> {
